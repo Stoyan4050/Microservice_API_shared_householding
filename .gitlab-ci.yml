@@ -1,5 +1,4 @@
-image: registry.fvdh.dev/gradle:6.7-jdk15
-
+image: gradle:6.7-jdk15
 stages:
   - build
   - staticAnalysis
