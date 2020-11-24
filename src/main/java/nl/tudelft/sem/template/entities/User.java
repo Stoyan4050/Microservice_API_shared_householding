@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.entities;
 
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -80,5 +81,10 @@ public class User {
                 && houseNumber == user.houseNumber
                 && username.equals(user.username)
                 && email.equals(user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, totalCredits, email, houseNumber);
     }
 }

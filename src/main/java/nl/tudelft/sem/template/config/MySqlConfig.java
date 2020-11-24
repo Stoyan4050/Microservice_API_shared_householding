@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class MySqlConfig {
 
     @Autowired
-    private Environment environment;
+    private transient Environment environment;
 
     /**
      * Generates a data source.

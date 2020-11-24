@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.entities;
 
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -54,5 +55,10 @@ public class House {
         House house = (House) o;
         return houseNumber == house.houseNumber
                 && name.equals(house.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(houseNumber, name);
     }
 }
