@@ -1,2 +1,2 @@
 include:
-authentication/.gitlab-ci.yml
+  - authentication/.gitlab-ci.yml
