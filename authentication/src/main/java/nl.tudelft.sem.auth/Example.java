@@ -1,9 +1,10 @@
 package nl.tudelft.sem.auth;
 
+@SuppressWarnings("PMD")
 public class Example {
     private String name;
 
-    public Example(String name) {
+    public Example(final String name) {
         this.name = name;
     }
 
@@ -11,7 +12,7 @@ public class Example {
         return this.name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 

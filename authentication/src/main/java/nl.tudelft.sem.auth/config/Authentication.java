@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configurers.provisioning.JdbcUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -16,20 +15,21 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 
 @Configuration
 @EnableWebSecurity
+@SuppressWarnings("PMD")
 public class Authentication extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        JdbcUserDetailsManagerConfigurer manager = auth.jdbcAuthentication().dataSource(dataSource)
+    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+        auth.jdbcAuthentication().dataSource(dataSource)
                 .usersByUsernameQuery(
                         "select username, password, enabled from users where binary username = ?"
                 );
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 
         http
                 //HTTP Basic authentication
@@ -52,7 +52,7 @@ public class Authentication extends WebSecurityConfigurerAdapter {
      * */
     @Bean
     public JdbcUserDetailsManager jdbcUserDetailsManager() {
-        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
+        final JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
         jdbcUserDetailsManager.setDataSource(dataSource);
 
         return jdbcUserDetailsManager;

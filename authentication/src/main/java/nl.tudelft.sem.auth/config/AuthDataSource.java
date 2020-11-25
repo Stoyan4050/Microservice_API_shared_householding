@@ -15,9 +15,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories
 @PropertySource("application.properties")
 @EnableTransactionManagement
+@SuppressWarnings("PMD")
 public class AuthDataSource {
 
     @Autowired
+    @SuppressWarnings("PMD")
     private Environment environment;
 
     /**
@@ -27,7 +29,7 @@ public class AuthDataSource {
      */
     @Bean
     public DataSource dataSource() {
-        DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
+        final DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName(environment.getProperty("auth.driver"));
         dataSourceBuilder.url(environment.getProperty("auth.url"));
         dataSourceBuilder.username(environment.getProperty("auth.user"));

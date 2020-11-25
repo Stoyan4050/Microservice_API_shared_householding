@@ -14,6 +14,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
+@SuppressWarnings("PMD")
 public class UserController {
 
     @Autowired
@@ -31,14 +32,14 @@ public class UserController {
      * @return A response entity depending on whether the operation was successful.
      */
     @PostMapping(value = "register", consumes = {"application/json"})
-    public ResponseEntity<?> register(@Valid @RequestBody User user, UriComponentsBuilder b) {
+    public ResponseEntity<?> register(final @Valid @RequestBody User user, final UriComponentsBuilder b) {
 
-        String username = user.getUsername();
+        final String username = user.getUsername();
         if (jdbcUserDetailsManager.userExists(username)) {
             return new ResponseEntity<>("User already exists.", HttpStatus.CONFLICT);
         }
 
-        UriComponents uri = b.path("register/{user_name}").buildAndExpand(username);
+        final UriComponents uri = b.path("register/{user_name}").buildAndExpand(username);
 
         jdbcUserDetailsManager.createUser(org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
