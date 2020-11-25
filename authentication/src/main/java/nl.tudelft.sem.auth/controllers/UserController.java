@@ -35,7 +35,7 @@ public class UserController {
 
         String username = user.getUsername();
         if (jdbcUserDetailsManager.userExists(username)) {
-            return new ResponseEntity("User already exists.", HttpStatus.CONFLICT);
+            return new ResponseEntity<>("User already exists.", HttpStatus.CONFLICT);
         }
 
         UriComponents uri = b.path("register/{user_name}").buildAndExpand(username);

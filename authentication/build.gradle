@@ -16,11 +16,8 @@ pitest {
     timestampedReports = false
 }
 
-application {
-    mainClass = 'nl.tudelft.sem.auth.Application'
-}
+mainClassName = 'nl.tudelft.sem.auth.Application'
 
-//mainClassName = 'nl.tudelft.sem.auth.Application'
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
