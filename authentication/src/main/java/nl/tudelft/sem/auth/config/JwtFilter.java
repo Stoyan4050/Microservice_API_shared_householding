@@ -41,7 +41,7 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
 
         // redirect auth/login to jwt filter
         this.setRequiresAuthenticationRequestMatcher(
-                new AntPathRequestMatcher("auth/login", "POST")
+                new AntPathRequestMatcher("/auth/login", "POST")
         );
     }
 
@@ -55,10 +55,10 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     user.getUsername(), user.getPassword(), Collections.emptyList());
-
             return authManager.authenticate(authToken);
 
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -71,7 +71,6 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
             FilterChain chain,
             Authentication auth
     ) throws IOException, ServletException {
-
         Long now = System.currentTimeMillis();
         String token = Jwts.builder()
                 .setSubject(auth.getName())
@@ -81,7 +80,6 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
                 .setExpiration(new Date(now + jwtConfig.getExpiration() * 1000))  // in milliseconds
                 .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
                 .compact();
-
         response.addHeader(jwtConfig.getHeader(), jwtConfig.getPrefix() + token);
     }
 
