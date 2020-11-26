@@ -31,8 +31,9 @@ public class UserController {
 
      * @return A response entity depending on whether the operation was successful.
      */
-    @PostMapping(value = "register", consumes = {"application/json"})
-    public ResponseEntity<?> register(final @Valid @RequestBody User user, final UriComponentsBuilder b) {
+    @PostMapping(value = "auth/register", consumes = {"application/json"})
+    public ResponseEntity<?> register(final @Valid @RequestBody User user,
+                                      final UriComponentsBuilder b) {
 
         final String username = user.getUsername();
         if (jdbcUserDetailsManager.userExists(username)) {
@@ -43,7 +44,9 @@ public class UserController {
 
         jdbcUserDetailsManager.createUser(org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
-                .password(passwordEncoder.encode(user.getPassword())).build());
+                .password(passwordEncoder.encode(user.getPassword()))
+                .roles("USER")
+                .build());
 
         return ResponseEntity.created(uri.toUri()).build();
     }

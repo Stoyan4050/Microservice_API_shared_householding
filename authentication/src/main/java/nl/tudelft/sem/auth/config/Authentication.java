@@ -1,5 +1,6 @@
 package nl.tudelft.sem.auth.config;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -20,28 +23,35 @@ public class Authentication extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtConf jwtConf;
+
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
         auth.jdbcAuthentication().dataSource(dataSource)
                 .usersByUsernameQuery(
                         "select username, password, enabled from users where binary username = ?"
-                );
+        );
     }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-
         http
-                //HTTP Basic authentication
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/register").permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .httpBasic()
-                .and()
                 .csrf().disable()
-                .formLogin().disable();
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(
+                        (req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                )
+                .and()
+                .addFilter(new JwtFilter(authenticationManager(), jwtConf))
+                .authorizeRequests()
+                .antMatchers(HttpMethod.POST, jwtConf.getUri()).permitAll()
+                .anyRequest().authenticated();
     }
 
     /**
@@ -56,6 +66,11 @@ public class Authentication extends WebSecurityConfigurerAdapter {
         jdbcUserDetailsManager.setDataSource(dataSource);
 
         return jdbcUserDetailsManager;
+    }
+
+    @Bean
+    public JwtConf jwtConfig() {
+        return new JwtConf();
     }
 
     @Bean

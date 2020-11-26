@@ -1,2 +1,2 @@
 rootProject.name = 'template'
-include 'authentication'
+include 'authentication', 'gateway', 'eureka'

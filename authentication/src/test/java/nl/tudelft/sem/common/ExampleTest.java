@@ -1,7 +1,8 @@
-package nl.tudelft.sem.auth;
+package nl.tudelft.sem.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import nl.tudelft.sem.auth.Example;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("PMD")

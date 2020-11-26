@@ -16,7 +16,7 @@ pitest {
     timestampedReports = false
 }
 
-mainClassName = 'nl.tudelft.sem.auth.Application'
+mainClassName = 'nl.tudelft.sem.eureka.Application'
 
 
 dependencies {
@@ -41,8 +41,6 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-
-    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.2'
+    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-server', version: '2.2.6.RELEASE'
 
 }
-
