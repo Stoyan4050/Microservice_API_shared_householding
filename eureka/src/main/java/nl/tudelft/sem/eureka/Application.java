@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
+// TODO more sensible names for the main classes of Eureka and Authentication
 @SpringBootApplication
 @EnableEurekaServer
 @SuppressWarnings("PMD")
