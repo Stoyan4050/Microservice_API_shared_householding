@@ -13,7 +13,7 @@ public class House {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int houseNumber;
-
+    
     private String name;
 
 
