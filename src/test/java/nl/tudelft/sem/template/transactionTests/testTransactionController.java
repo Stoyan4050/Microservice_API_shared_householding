@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.transactionTests;
+package nl.tudelft.sem.template.transactiontests;
 
 import nl.tudelft.sem.template.transactions.server.entities.Product;
 import nl.tudelft.sem.template.transactions.server.entities.Transactions;
@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("PMD")
 class TestTransactionController {
 private Product product;
 private Transactions transaction = new Transactions();
@@ -42,18 +43,20 @@ public void getProductId() {
 	
 	assertEquals(product.getProductId(), transaction.getProduct_id());
 }
+
 @Test
 public void getUsername() {
 	
 	assertEquals("Stoyan", transaction.getUsername());
 }
+
 @Test
 public void getProduct() {
 	
 	assertEquals(product.getExpired(), transaction.getProduct().getExpired());
 	assertEquals(product.getPortionsLeft(), transaction.getProduct().getPortionsLeft());
 	assertEquals(product.getProductName(), transaction.getProduct().getProductName());
-	Assert.assertEquals(product.getPrice(),transaction.getProduct().getPrice(), 0.005f);
+	Assert.assertEquals(product.getPrice(), transaction.getProduct().getPrice(), 0.005f);
 	assertEquals(product.getTotalPortions(), transaction.getProduct().getTotalPortions());
 	assertEquals(product.getUsername(), transaction.getProduct().getUsername());
 }
