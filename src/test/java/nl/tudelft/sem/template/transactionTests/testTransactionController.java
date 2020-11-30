@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class TestTransactionController {
+class TestTransactionController {
 private Product product;
 private Transactions transaction = new Transactions();
 private String username;
