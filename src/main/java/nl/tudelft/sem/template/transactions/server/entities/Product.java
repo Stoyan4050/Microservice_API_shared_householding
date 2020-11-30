@@ -1,11 +1,17 @@
 package nl.tudelft.sem.template.transactions.server.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 
 @Entity
@@ -34,6 +40,10 @@ public class Product {
 
     @Column(name = "expired")
     private int expired;
+
+    @OneToMany(mappedBy = "productFk", cascade = CascadeType.ALL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Transactions> transactionsList = new ArrayList<Transactions>();
 
     /**
      * Constructor for the Product.
@@ -96,5 +106,13 @@ public class Product {
 
     public void setPortionsLeft(int portionsLeft) {
         this.portionsLeft = portionsLeft;
+    }
+
+    public List<Transactions> getTransactionsList() {
+        return transactionsList;
+    }
+
+    public void removeTransaction(Transactions transaction) {
+        this.transactionsList.remove(transaction);
     }
 }

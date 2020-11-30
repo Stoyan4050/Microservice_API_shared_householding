@@ -15,4 +15,9 @@ public interface TransactionsRepository  extends JpaRepository<Transactions, Int
     int updateExistingTransaction(int productId, String username,
                                   int portionsConsumed, int transactionId);
 
+    @Query(value = "DELETE FROM transaction WHERE transaction_id = ?1", nativeQuery = true)
+    @Modifying
+    @Transactional
+    int deleteTransactionById(int transactionId);
+
 }

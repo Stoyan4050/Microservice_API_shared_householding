@@ -1,9 +1,14 @@
 package nl.tudelft.sem.template.transactions.server.entities;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 public class Transactions {
@@ -11,7 +16,11 @@ public class Transactions {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int transactionId;
 
-    private int productId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    @JoinColumn(name = "product_id")
+    private Product productFk;
 
     private String username;
 
@@ -28,15 +37,17 @@ public class Transactions {
         this.transactionId = transactionId;
     }
 
+    public Product getProduct() {
+        return this.productFk;
+    }
+
+    public void setProduct(Product product) {
+        this.productFk = product;
+    }
 
     public int getProduct_id() {
-        return productId;
+        return productFk.getProductId();
     }
-
-    public void setProduct_id(int productId) {
-        this.productId = productId;
-    }
-
 
     public String getUsername() {
         return username;
