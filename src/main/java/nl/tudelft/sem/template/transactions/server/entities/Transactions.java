@@ -9,32 +9,32 @@ import javax.persistence.Id;
 public class Transactions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int transaction_id;
+    private int transactionId;
 
-    private int product_id;
+    private int productId;
 
     private String username;
 
-    private int portions_consumed;
+    private int portionsConsumed;
 
     public Transactions() {
     }
 
     public int getTransaction_id() {
-        return transaction_id;
+        return transactionId;
     }
 
-    public void setTransaction_id(int transaction_id) {
-        this.transaction_id = transaction_id;
+    public void setTransaction_id(int transactionId) {
+        this.transactionId = transactionId;
     }
 
 
     public int getProduct_id() {
-        return product_id;
+        return productId;
     }
 
-    public void setProduct_id(int product_id) {
-        this.product_id = product_id;
+    public void setProduct_id(int productId) {
+        this.productId = productId;
     }
 
 
@@ -48,10 +48,10 @@ public class Transactions {
 
 
     public int getPortions_consumed() {
-        return portions_consumed;
+        return portionsConsumed;
     }
 
-    public void setPortions_consumed(int portions_consumed) {
-        this.portions_consumed = portions_consumed;
+    public void setPortions_consumed(int portionsConsumed) {
+        this.portionsConsumed = portionsConsumed;
     }
 }

@@ -1,6 +1,8 @@
 package nl.tudelft.sem.template.transactions.client.communication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.List;
 import nl.tudelft.sem.template.transactions.server.entities.Transactions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -8,13 +10,17 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.util.List;
 
 public class ServerTransactionsCommunication {
     private String baseUrl = "http://localhost:8080";
     protected WebClient webClient = WebClient.create(baseUrl);
 
+    /**
+     * Gets all transaction from the database.
+     *
+     * @return List of all transactions
+     * @throws IOException when can not read JSON
+     */
     public List<Transactions> getTransactions() throws IOException {
         String jsonString = this.webClient.get().uri("/allTransactions")
                 .retrieve()
@@ -42,11 +48,22 @@ public class ServerTransactionsCommunication {
         return transactionsJsonList;
     }
 
-    public boolean addTransaction(int product_id, String username, int portions_consumed) {
+    /**
+     * Adds new transaction.
+     *
+     * @param productId the id of a product
+     *
+     * @param username the username of the user
+     *
+     * @param portionsConsumed the number of portions consumed
+     *
+     * @return true if a new transaction was added
+     */
+    public boolean addTransaction(int productId, String username, int portionsConsumed) {
 
-        String body = "{\"product_id\":\"" + product_id
+        String body = "{\"product_id\":\"" + productId
                 + "\",\"username\":\"" + username
-                + "\",\"portions_consumed\":\"" + portions_consumed + "\"}";
+                + "\",\"portions_consumed\":\"" + portionsConsumed + "\"}";
         System.out.println(body);
         try {
             boolean bool = this.webClient.post().uri("/addNewTransaction")

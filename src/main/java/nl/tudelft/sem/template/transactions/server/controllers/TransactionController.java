@@ -1,16 +1,16 @@
 package nl.tudelft.sem.template.transactions.server.controllers;
 
+import java.util.List;
+import nl.tudelft.sem.template.transactions.server.entities.Transactions;
+import nl.tudelft.sem.template.transactions.server.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import nl.tudelft.sem.template.transactions.server.repositories.TransactionsRepository;
-import nl.tudelft.sem.template.transactions.server.entities.Transactions;
-
-import java.util.List;
 
 @Controller
 public class TransactionController {
@@ -24,7 +24,13 @@ public class TransactionController {
         return transactionsRepository.findAll();
     }
 
-    @PostMapping("/addNewTransaction") // Map ONLY POST Requests
+    /**
+     * Add new transaction.
+     *
+     * @param transaction the transaction to be added in the repository
+     * @return true if the transaction was added to the repository
+     */
+    @PostMapping("/addNewTransaction")
     public @ResponseBody
     boolean addNewTransaction(@RequestBody Transactions transaction) {
 
@@ -32,6 +38,30 @@ public class TransactionController {
             transactionsRepository.save(transaction);
             return true;
         } catch (DataIntegrityViolationException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Edits a transaction in the database.
+     *
+     * @param transaction - transaction to be updated
+     * @return true if transaction was updated
+     */
+    @RequestMapping("/editTransaction")
+    public @ResponseBody
+    boolean editHolidays(@RequestBody Transactions transaction) {
+        // @ResponseBody means the returned String is the response, not a view name
+        // @RequestParam means it is a parameter from the GET or POST request
+        try {
+            if (transactionsRepository.updateExistingTransaction(transaction.getProduct_id(),
+                    transaction.getUsername(),
+                    transaction.getPortions_consumed(),
+                    transaction.getTransaction_id()) == 1) {
+                return true;
+            }
+            return false;
+        } catch (NullPointerException e) {
             return false;
         }
     }
