@@ -6,6 +6,7 @@ import java.util.List;
 import nl.tudelft.sem.template.transactions.client.communication.ServerTransactionsCommunication;
 import nl.tudelft.sem.template.transactions.server.entities.Transactions;
 
+@SuppressWarnings("PMD")
 public class TransactionController {
     ServerTransactionsCommunication con = new ServerTransactionsCommunication();
 

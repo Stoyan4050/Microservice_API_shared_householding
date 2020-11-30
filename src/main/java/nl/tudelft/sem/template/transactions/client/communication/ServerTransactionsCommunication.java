@@ -10,9 +10,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-
+@SuppressWarnings("PMD")
 public class ServerTransactionsCommunication {
-    private String baseUrl = "http://localhost:8080";
+    private final String baseUrl = "http://localhost:8080";
     protected WebClient webClient = WebClient.create(baseUrl);
 
     /**
@@ -22,7 +22,8 @@ public class ServerTransactionsCommunication {
      * @throws IOException when can not read JSON
      */
     public List<Transactions> getTransactions() throws IOException {
-        String jsonString = this.webClient.get().uri("/allTransactions")
+        String jsonString;
+        jsonString = this.webClient.get().uri("/allTransactions")
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> {
                     System.out.println("4xx error");
@@ -34,7 +35,7 @@ public class ServerTransactionsCommunication {
                 })
                 .bodyToMono(String.class)
                 .block();
-
+    
         ObjectMapper mapper = new ObjectMapper();
         List<Transactions> transactionsJsonList = mapper
                 .readValue(jsonString, new com

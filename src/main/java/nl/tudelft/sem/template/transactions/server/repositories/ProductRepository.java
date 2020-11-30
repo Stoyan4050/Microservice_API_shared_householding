@@ -23,4 +23,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Modifying
     @Transactional
     int deleteProductById(int productId);
+
 }

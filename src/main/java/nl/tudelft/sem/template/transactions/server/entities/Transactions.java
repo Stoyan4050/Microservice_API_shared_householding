@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
+@SuppressWarnings("PMD")
 public class Transactions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

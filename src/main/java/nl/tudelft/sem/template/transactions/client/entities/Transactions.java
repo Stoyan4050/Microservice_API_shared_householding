@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.transactions.client.entities;
 
+@SuppressWarnings("PMD")
 public class Transactions {
     private int transactionId;
 

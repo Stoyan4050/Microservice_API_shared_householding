@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @EnableJpaRepositories("nl.tudelft.sem.template.transactions.server.repositories")
 
 @Controller
+@SuppressWarnings("PMD")
 public class ProductController {
 
     @Autowired

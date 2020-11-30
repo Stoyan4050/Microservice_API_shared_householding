@@ -16,6 +16,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "product")
+@SuppressWarnings("PMD")
 public class Product {
 
     @Id
