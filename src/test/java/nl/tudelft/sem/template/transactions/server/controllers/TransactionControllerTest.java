@@ -1,16 +1,18 @@
 package nl.tudelft.sem.template.transactions.server.controllers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import nl.tudelft.sem.template.transactions.server.entities.Product;
 import nl.tudelft.sem.template.transactions.server.entities.Transactions;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 @SuppressWarnings("PMD")
-class TestTransactionController {
+class TransactionControllerTest {
     private Product product;
     private final Transactions transaction = new Transactions();
 
