@@ -5,12 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
-
+@SuppressWarnings("PMD")
 class ProductTest {
-    Product product;
-    Transactions t1;
-    Transactions t2;
+    private Product product;
+    private Transactions t1;
+    private Transactions t2;
 
     @BeforeEach
     void setup() {

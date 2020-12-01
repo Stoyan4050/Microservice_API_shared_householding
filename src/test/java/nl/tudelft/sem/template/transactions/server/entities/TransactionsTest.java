@@ -4,10 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
-
+@SuppressWarnings("PMD")
 class TransactionsTest {
-    Transactions transactions;
+    private Transactions transactions;
 
     @BeforeEach
     void beforeEach() {
@@ -15,7 +14,7 @@ class TransactionsTest {
     }
 
     @Test
-    void transactions() {
+    void transactionsConstructor() {
         Assertions.assertNotNull(transactions);
     }
 
