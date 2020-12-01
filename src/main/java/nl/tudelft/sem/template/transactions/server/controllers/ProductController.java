@@ -97,7 +97,7 @@ public class ProductController {
      */
     @RequestMapping("/editProduct") // Map ONLY POST Requests
     public @ResponseBody
-    boolean editHolidays(@RequestBody Product product) {
+    boolean editProduct(@RequestBody Product product) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
         try {
