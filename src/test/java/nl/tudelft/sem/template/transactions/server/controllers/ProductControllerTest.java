@@ -12,12 +12,18 @@ class ProductControllerTest {
 
     @BeforeEach
     void setup() {
-        product = new Product("Milk", 14.0f, 12);
+        product = new Product("Milk", 14.0f, 12, "Chris");
         productController = new ProductController();
     }
 
     @Test
     void deleteProduct() {
         Assertions.assertFalse(productController.deleteProduct(-128));
+    }
+
+    @Test
+    void editProduct() {
+        productController.editProduct(product);
+        Assertions.assertEquals("Milk", this.product.getProductName());
     }
 }

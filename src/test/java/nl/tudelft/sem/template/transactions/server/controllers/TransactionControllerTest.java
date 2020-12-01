@@ -19,7 +19,7 @@ class TransactionControllerTest {
 
     @BeforeEach
     public void setup() {
-        product = new Product("bread", (float) 1.50, 10);
+        product = new Product("bread", (float) 1.50, 10, "Kristen");
         int portionsConsumed = 1;
         String username = "Stoyan";
         transaction.setPortions_consumed(portionsConsumed);

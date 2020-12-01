@@ -52,13 +52,15 @@ public class Product {
      * @param productName   - the productName
      * @param price         - the price
      * @param totalPortions - the number of total portions a product has
+     * @param username - the username of the person who bought the product
      */
-    public Product(String productName, float price, int totalPortions) {
+    public Product(String productName, float price, int totalPortions, String username) {
         this.productName = productName;
         this.price = price;
         this.totalPortions = totalPortions;
         this.portionsLeft = totalPortions;
         this.expired = 0;
+        this.username = username;
     }
 
     public Product() {
@@ -120,7 +122,7 @@ public class Product {
         this.transactionsList.remove(transaction);
     }
 
-    public void addTransaction (Transactions transaction){
+    public void addTransaction(Transactions transaction) {
         this.transactionsList.add(transaction);
     }
 }

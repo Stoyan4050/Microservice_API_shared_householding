@@ -32,14 +32,14 @@ class TransactionsTest {
 
     @Test
     void getProduct() {
-        Product product = new Product("Milk", 12.0f, 12);
+        Product product = new Product("Milk", 12.0f, 12, "Ivan");
         transactions.setProduct(product);
         Assertions.assertEquals(product, transactions.getProduct());
     }
 
     @Test
     void setProduct() {
-        Product product = new Product("Bread", 42.0f, 87);
+        Product product = new Product("Bread", 42.0f, 87, "Ivan");
         transactions.setProduct(product);
         Assertions.assertEquals(product, transactions.getProduct());
     }

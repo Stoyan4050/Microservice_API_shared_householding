@@ -40,7 +40,7 @@ public class ProductController {
                            @PathVariable (value = "total_portions") int totalPortions,
                            @PathVariable(value = "username") String username) {
 
-        Product newProduct = new Product(productName, price, totalPortions);
+        Product newProduct = new Product(productName, price, totalPortions, username);
 
         System.out.println("Product added");
         return productRepository.save(newProduct);
