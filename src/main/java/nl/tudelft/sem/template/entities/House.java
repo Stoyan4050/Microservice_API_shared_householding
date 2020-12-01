@@ -18,7 +18,7 @@ import javax.persistence.Table;
  * Class representing the House entity in the database - House table.
  */
 @Entity
-@Table(name = "house", catalog = "projects_SEM-51")
+@Table(name = "house")
 public class House implements java.io.Serializable {
 
     static final long serialVersionUID = 42L;

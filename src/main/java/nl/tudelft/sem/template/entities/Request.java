@@ -17,7 +17,7 @@ import javax.persistence.Table;
  * Class representing the Request entity in the database - Request table.
  */
 @Entity
-@Table(name = "request", catalog = "projects_SEM-51")
+@Table(name = "request")
 public class Request implements java.io.Serializable {
 
     static final long serialVersionUID = 42L;

@@ -18,7 +18,7 @@ import javax.persistence.Table;
  * Class representing the User entity in the database - User table.
  */
 @Entity
-@Table(name = "user", catalog = "projects_SEM-51")
+@Table(name = "user")
 public class User implements java.io.Serializable {
 
     static final long serialVersionUID = 42L;

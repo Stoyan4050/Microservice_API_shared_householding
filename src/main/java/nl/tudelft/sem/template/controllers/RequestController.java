@@ -28,7 +28,7 @@ public class RequestController {
      *
      * @return The List containing all requests in the database
      */
-    @GetMapping("request")
+    @GetMapping("allRequests")
     @ResponseBody
     public List<Request> getAllRequests() {
         return repository.findAll();
@@ -40,7 +40,7 @@ public class RequestController {
      * @param requestId The ID of the request to return
      * @return The request corresponding with that ID
      */
-    @GetMapping("request/{requestId}")
+    @GetMapping("getRequest/{requestId}")
     @ResponseBody
     public Optional<Request> getRequestById(@PathVariable RequestId requestId) {
         return repository.findById(requestId);
@@ -51,7 +51,7 @@ public class RequestController {
      *
      * @param newRequest The Request to add to the database
      */
-    @PutMapping("request")
+    @PutMapping("addNewRequest")
     @ResponseBody
     public void addRequest(@RequestBody Request newRequest) {
         repository.save(newRequest);
@@ -62,7 +62,7 @@ public class RequestController {
      *
      * @param requestId The ID of the request to delete from the database
      */
-    @DeleteMapping("request/{requestId}")
+    @DeleteMapping("deleteRequest/{requestId}")
     @ResponseBody
     public void removeRequest(@PathVariable RequestId requestId) {
         repository.deleteById(requestId);
