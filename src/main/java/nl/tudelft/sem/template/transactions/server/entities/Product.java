@@ -61,6 +61,9 @@ public class Product {
         this.expired = 0;
     }
 
+    public Product() {
+    }
+
     public int getProductId() {
         return productId;
     }
