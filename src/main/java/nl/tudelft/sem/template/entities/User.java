@@ -28,8 +28,6 @@ public class User implements java.io.Serializable {
     @Column(name = "username", unique = true, nullable = false, length = 30)
     private String username;
 
-    public static final long serialVersionUID = 4328746;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_nr")
     private House house;

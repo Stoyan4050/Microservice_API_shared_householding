@@ -29,8 +29,7 @@ public class Request implements java.io.Serializable {
                     column = @Column(name = "username", nullable = false, length = 25))
     })
     private RequestId id;
-
-    public static final long serialVersionUID = 4328744;
+        
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", nullable = false, insertable = false, updatable = false)

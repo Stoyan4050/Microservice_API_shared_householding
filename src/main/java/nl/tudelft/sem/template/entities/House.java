@@ -29,7 +29,6 @@ public class House implements java.io.Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int houseNr;
 
-    public static final long serialVersionUID = 4328743;
 
     @Column(name = "name", length = 25)
     private String name;
