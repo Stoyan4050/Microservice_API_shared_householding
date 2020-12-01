@@ -36,13 +36,24 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
-	testImplementation('org.junit.jupiter:junit-jupiter:5.5.2')
-	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.1.0'
-	testImplementation('org.assertj:assertj-core:3.14.0')
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	compile group: 'org.springframework.security', name: 'spring-security-config', version:'5.3.0.RELEASE'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation 'mysql:mysql-connector-java:8.0.11'
+	compile group: 'org.glassfish', name: 'javax.ejb', version: '10.0-b28'
+
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	implementation 'org.springframework:spring-webflux:5.1.8.RELEASE'
+	implementation 'junit:junit:4.12'
+	implementation 'junit:junit:4.12'
+	implementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
