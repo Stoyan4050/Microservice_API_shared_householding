@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-
+/**
+ * The controller class for House.
+ */
 @Controller
 //@RequestMapping(path="/house")
 public class HouseController {
@@ -67,7 +69,5 @@ public class HouseController {
         houseRepository.deleteById(houseNumber);
 
     }
-
-
 
 }
