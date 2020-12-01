@@ -14,17 +14,19 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
+/**
+ * Class representing the User entity in the database - User table.
+ */
 @Entity
-@Table(name = "user", catalog = "projects_SEM-51")
+@Table(name = "user")
 public class User implements java.io.Serializable {
+
+    static final long serialVersionUID = 42L;
 
     // Primary key in the database
     @Id
     @Column(name = "username", unique = true, nullable = false, length = 30)
     private String username;
-
-    public static final long serialVersionUID = 4328746;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_nr")
@@ -44,6 +46,11 @@ public class User implements java.io.Serializable {
     public User() {
     }
 
+    /**
+     * Constructor for the User class.
+     *
+     * @param username - the username of the user
+     */
     public User(String username) {
         this.username = username;
     }
@@ -118,7 +125,9 @@ public class User implements java.io.Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         User user = (User) o;
+
         return Float.compare(user.totalCredits, totalCredits) == 0
                 && Objects.equals(username, user.username)
                 && Objects.equals(house, user.house)

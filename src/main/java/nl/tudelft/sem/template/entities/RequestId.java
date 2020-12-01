@@ -12,13 +12,14 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class RequestId implements java.io.Serializable {
 
+    static final long serialVersionUID = 42L;
+
     @Column(name = "house_nr", nullable = false)
     private int houseNr;
 
     @Column(name = "username", nullable = false, length = 25)
     private String username;
 
-    public static final long serialVersionUID = 4328745;
 
     // Requirement by Spring
     public RequestId() {
@@ -61,7 +62,9 @@ public class RequestId implements java.io.Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         RequestId requestId = (RequestId) o;
+
         return houseNr == requestId.houseNr
                 && Objects.equals(username, requestId.username);
     }

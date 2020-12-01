@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests for the House entity class.
+ */
 public class HouseTest {
 
     private static House houseUnderTest;
@@ -31,14 +34,14 @@ public class HouseTest {
 
     @Test
     public void testGetHouseNr() {
-        final boolean result = houseUnderTest.getHouseNr() == 1; //??
+        final boolean result = houseUnderTest.getHouseNr() == 1;
         Assertions.assertTrue(result);
     }
 
     @Test
     public void testSetHouseNr() {
         houseUnderTest.setHouseNr(11);
-        final boolean result = houseUnderTest.getHouseNr() == 11; //??
+        final boolean result = houseUnderTest.getHouseNr() == 11;
         Assertions.assertTrue(result);
     }
 

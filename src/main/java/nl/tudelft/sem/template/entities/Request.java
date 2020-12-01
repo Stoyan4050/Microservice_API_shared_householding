@@ -13,20 +13,23 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
+/**
+ * Class representing the Request entity in the database - Request table.
+ */
 @Entity
-@Table(name = "request", catalog = "projects_SEM-51")
+@Table(name = "request")
 public class Request implements java.io.Serializable {
+
+    static final long serialVersionUID = 42L;
 
     @EmbeddedId
     @AttributeOverrides({@AttributeOverride(name = "houseNr",
-            column = @Column(name = "house_nr", nullable = false)),
+                    column = @Column(name = "house_nr", nullable = false)),
             @AttributeOverride(name = "username",
                     column = @Column(name = "username", nullable = false, length = 25))
     })
     private RequestId id;
-
-    public static final long serialVersionUID = 4328744;
+        
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", nullable = false, insertable = false, updatable = false)
@@ -117,7 +120,9 @@ public class Request implements java.io.Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+
         Request request = (Request) o;
+
         return approved == request.approved
                 && Objects.equals(id, request.id)
                 && Objects.equals(user, request.user)

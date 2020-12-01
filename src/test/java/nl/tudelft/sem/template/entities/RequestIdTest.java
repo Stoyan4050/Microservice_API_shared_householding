@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests for the RequestId composite key class.
+ */
 public class RequestIdTest {
 
     private static RequestId requestIdUnderTest;
@@ -41,7 +44,7 @@ public class RequestIdTest {
     @Test
     public void testSetHouseNr() {
         requestIdUnderTest.setHouseNr(5);
-        final boolean result = requestIdUnderTest.getHouseNr() == 5; //??
+        final boolean result = requestIdUnderTest.getHouseNr() == 5;
         Assertions.assertTrue(result);
     }
 

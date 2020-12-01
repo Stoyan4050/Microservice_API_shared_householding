@@ -14,10 +14,14 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
+/**
+ * Class representing the House entity in the database - House table.
+ */
 @Entity
-@Table(name = "house", catalog = "projects_SEM-51")
+@Table(name = "house")
 public class House implements java.io.Serializable {
+
+    static final long serialVersionUID = 42L;
 
     // Primary key in the database
     @Id
@@ -25,7 +29,6 @@ public class House implements java.io.Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int houseNr;
 
-    public static final long serialVersionUID = 4328743;
 
     @Column(name = "name", length = 25)
     private String name;
