@@ -36,7 +36,7 @@ public class ProductController {
     @PostMapping("/addProduct/{product_name}/{price}/{total_portions}/{username}")
     @ResponseBody
     public Product addProduct(@PathVariable(value = "product_name") String productName,
-                           @PathVariable (value = "price") int price,
+                           @PathVariable (value = "price") float price,
                            @PathVariable (value = "total_portions") int totalPortions,
                            @PathVariable(value = "username") String username) {
 
