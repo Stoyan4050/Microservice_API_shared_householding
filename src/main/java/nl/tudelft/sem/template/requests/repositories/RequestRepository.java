@@ -1,7 +1,7 @@
-package nl.tudelft.sem.template.repositories;
+package nl.tudelft.sem.template.requests.repositories;
 
-import nl.tudelft.sem.template.entities.Request;
-import nl.tudelft.sem.template.entities.RequestId;
+import nl.tudelft.sem.template.requests.entities.Request;
+import nl.tudelft.sem.template.requests.entities.RequestId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

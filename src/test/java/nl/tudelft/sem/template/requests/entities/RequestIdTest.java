@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.entities;
+package nl.tudelft.sem.template.requests.entities;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

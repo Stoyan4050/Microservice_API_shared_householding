@@ -1,10 +1,10 @@
-package nl.tudelft.sem.template.controllers;
+package nl.tudelft.sem.template.requests.controllers;
 
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.template.entities.Request;
-import nl.tudelft.sem.template.entities.RequestId;
-import nl.tudelft.sem.template.repositories.RequestRepository;
+import nl.tudelft.sem.template.requests.entities.Request;
+import nl.tudelft.sem.template.requests.entities.RequestId;
+import nl.tudelft.sem.template.requests.repositories.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;

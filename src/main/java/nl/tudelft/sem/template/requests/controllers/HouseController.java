@@ -1,9 +1,9 @@
-package nl.tudelft.sem.template.controllers;
+package nl.tudelft.sem.template.requests.controllers;
 
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.template.entities.House;
-import nl.tudelft.sem.template.repositories.HouseRepository;
+import nl.tudelft.sem.template.requests.entities.House;
+import nl.tudelft.sem.template.requests.repositories.HouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;

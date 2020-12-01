@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.entities;
+package nl.tudelft.sem.template.requests.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

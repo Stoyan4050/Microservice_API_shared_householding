@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.controllers;
+package nl.tudelft.sem.template.requests.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -8,11 +8,11 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.template.entities.House;
-import nl.tudelft.sem.template.entities.Request;
-import nl.tudelft.sem.template.entities.RequestId;
-import nl.tudelft.sem.template.entities.User;
-import nl.tudelft.sem.template.repositories.RequestRepository;
+import nl.tudelft.sem.template.requests.entities.House;
+import nl.tudelft.sem.template.requests.entities.Request;
+import nl.tudelft.sem.template.requests.entities.RequestId;
+import nl.tudelft.sem.template.requests.entities.User;
+import nl.tudelft.sem.template.requests.repositories.RequestRepository;
 //import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.entities;
+package nl.tudelft.sem.template.requests.entities;
 
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
