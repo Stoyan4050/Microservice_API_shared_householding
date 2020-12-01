@@ -1,15 +1,16 @@
 package nl.tudelft.sem.template.entities;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Set;
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+/**
+ * Tests for the User entity class.
+ */
 public class UserTest {
 
     @Mock
@@ -18,10 +19,9 @@ public class UserTest {
     private static User userUnderTest;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
-        when(mockHouse.equals(new Object())).thenReturn(true);
     }
 
     @BeforeEach
@@ -41,7 +41,7 @@ public class UserTest {
     public void constructorNotEqualsTest() {
 
         Assertions.assertNotEquals(userUnderTest,
-                new User("userName2", mockHouse, 0.1f, "email", Set.of(new Request())));
+                new User("userName2", mockHouse, 0.1f, "emaill", Set.of(new Request())));
     }
 
     @Test

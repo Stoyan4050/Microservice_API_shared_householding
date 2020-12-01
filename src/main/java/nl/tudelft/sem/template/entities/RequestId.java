@@ -2,13 +2,17 @@ package nl.tudelft.sem.template.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.persistence.*;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
-
+/**
+ * Class representing the RequestId - the composite key of the Request table in the database.
+ */
 @Embeddable
 public class RequestId implements java.io.Serializable {
+
+    static final long serialVersionUID = 42L;
 
     @Column(name = "house_nr", nullable = false)
     private int houseNr;
@@ -22,7 +26,7 @@ public class RequestId implements java.io.Serializable {
     }
 
     /**
-     * Constructor for RequestId class
+     * Constructor for RequestId class.
      *
      * @param houseNr   - house number
      * @param username  - username
@@ -52,11 +56,17 @@ public class RequestId implements java.io.Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         RequestId requestId = (RequestId) o;
-        return houseNr == requestId.houseNr &&
-                Objects.equals(username, requestId.username);
+
+        return houseNr == requestId.houseNr
+                && Objects.equals(username, requestId.username);
     }
 
     @Override

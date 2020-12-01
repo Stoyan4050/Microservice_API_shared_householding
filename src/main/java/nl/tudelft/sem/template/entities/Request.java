@@ -2,26 +2,32 @@ package nl.tudelft.sem.template.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
-import javax.persistence.Entity;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-
+/**
+ * Class representing the Request entity in the database - Request table.
+ */
 @Entity
 @Table(name = "request", catalog = "projects_SEM-51")
 public class Request implements java.io.Serializable {
 
+    static final long serialVersionUID = 42L;
+
     @EmbeddedId
-    @AttributeOverrides({@AttributeOverride(name = "houseNr", column = @Column(name = "house_nr", nullable = false)),
-            @AttributeOverride(name = "username", column = @Column(name = "username", nullable = false, length = 25))})
+    @AttributeOverrides({@AttributeOverride(name = "houseNr",
+                    column = @Column(name = "house_nr", nullable = false)),
+            @AttributeOverride(name = "username",
+                    column = @Column(name = "username", nullable = false, length = 25))
+    })
     private RequestId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,12 +46,27 @@ public class Request implements java.io.Serializable {
     public Request() {
     }
 
+    /**
+     * Constructor for the Request entity.
+     *
+     * @param id    - the request id
+     * @param house - the house object associated with the request
+     * @param user  - the user object associated with the request
+     */
     public Request(RequestId id, House house, User user) {
         this.id = id;
         this.house = house;
         this.user = user;
     }
 
+    /**
+     * Constructor for the Request entity.
+     *
+     * @param id       - the request id
+     * @param house    - the house object associated with the request
+     * @param user     - the user object associated with the request
+     * @param approved - the state of the request
+     */
     @JsonCreator
     public Request(@JsonProperty("id") RequestId id,
                    @JsonProperty("house") House house,
@@ -92,13 +113,19 @@ public class Request implements java.io.Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         Request request = (Request) o;
-        return approved == request.approved &&
-                Objects.equals(id, request.id) &&
-                Objects.equals(user, request.user) &&
-                Objects.equals(house, request.house);
+
+        return approved == request.approved
+                && Objects.equals(id, request.id)
+                && Objects.equals(user, request.user)
+                && Objects.equals(house, request.house);
     }
 
     @Override

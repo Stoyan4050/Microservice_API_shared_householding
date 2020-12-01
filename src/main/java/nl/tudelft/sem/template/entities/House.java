@@ -2,23 +2,26 @@ package nl.tudelft.sem.template.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Objects;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 
-
+/**
+ * Class representing the House entity in the database - House table.
+ */
 @Entity
 @Table(name = "house", catalog = "projects_SEM-51")
-public class House implements java.io.Serializable{
+public class House implements java.io.Serializable {
+
+    static final long serialVersionUID = 42L;
 
     // Primary key in the database
     @Id
@@ -69,9 +72,13 @@ public class House implements java.io.Serializable{
         this.users = users;
     }
 
-    public int getHouseNr() { return houseNr; }
+    public int getHouseNr() {
+        return houseNr;
+    }
 
-    public void setHouseNr(int houseNr) { this.houseNr = houseNr; }
+    public void setHouseNr(int houseNr) {
+        this.houseNr = houseNr;
+    }
 
     public String getName() {
         return name;

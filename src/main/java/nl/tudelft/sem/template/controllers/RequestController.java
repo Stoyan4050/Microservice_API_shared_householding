@@ -1,33 +1,27 @@
 package nl.tudelft.sem.template.controllers;
 
+import java.util.List;
+import java.util.Optional;
 import nl.tudelft.sem.template.entities.Request;
 import nl.tudelft.sem.template.entities.RequestId;
 import nl.tudelft.sem.template.repositories.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * The controller class for Request.
- *
- * @author Ina Lupu
  */
 @Controller
 public class RequestController {
 
     @Autowired
-    private RequestRepository repository;
+    private transient RequestRepository repository;
 
     /**
      * Get all requests from the database.

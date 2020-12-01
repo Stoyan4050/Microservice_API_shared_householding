@@ -2,23 +2,26 @@ package nl.tudelft.sem.template.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
+/**
+ * Class representing the User entity in the database - User table.
+ */
 @Entity
 @Table(name = "user", catalog = "projects_SEM-51")
 public class User implements java.io.Serializable {
+
+    static final long serialVersionUID = 42L;
 
     // Primary key in the database
     @Id
@@ -43,12 +46,17 @@ public class User implements java.io.Serializable {
     public User() {
     }
 
+    /**
+     * Constructor for the User class.
+     *
+     * @param username - the username of the user
+     */
     public User(String username) {
         this.username = username;
     }
 
     /**
-     * Constructor for the User class
+     * Constructor for the User class.
      *
      * @param username     - username of a user
      * @param house        - house the user belongs to
@@ -111,14 +119,20 @@ public class User implements java.io.Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         User user = (User) o;
-        return Float.compare(user.totalCredits, totalCredits) == 0 &&
-                Objects.equals(username, user.username) &&
-                Objects.equals(house, user.house) &&
-                Objects.equals(email, user.email) &&
-                Objects.equals(requests, user.requests);
+
+        return Float.compare(user.totalCredits, totalCredits) == 0
+                && Objects.equals(username, user.username)
+                && Objects.equals(house, user.house)
+                && Objects.equals(email, user.email)
+                && Objects.equals(requests, user.requests);
     }
 
     @Override
