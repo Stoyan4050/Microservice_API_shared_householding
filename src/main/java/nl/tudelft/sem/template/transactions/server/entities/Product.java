@@ -119,4 +119,8 @@ public class Product {
     public void removeTransaction(Transactions transaction) {
         this.transactionsList.remove(transaction);
     }
+
+    public void addTransaction (Transactions transaction){
+        this.transactionsList.add(transaction);
+    }
 }
