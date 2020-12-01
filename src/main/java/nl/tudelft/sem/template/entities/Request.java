@@ -1,63 +1,103 @@
 package nl.tudelft.sem.template.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 
 @Entity
-public class Request {
+@Table(name = "request", catalog = "projects_SEM-51")
+public class Request implements java.io.Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int requestId;
+    @EmbeddedId
+    @AttributeOverrides({@AttributeOverride(name = "houseNr",
+            column = @Column(name = "house_nr", nullable = false)),
+            @AttributeOverride(name = "username",
+                    column = @Column(name = "username", nullable = false, length = 25))
+    })
+    private RequestId id;
 
-    private String username;
+    public static final long serialVersionUID = 4328744;
 
-    private int houseNumber;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "username", nullable = false, insertable = false, updatable = false)
+    private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_nr", nullable = false, insertable = false, updatable = false)
+    private House house;
+
+    @Column(name = "approved")
     private boolean approved;
 
 
-    /** Constructor for request entity.
-     *
-     * @param username name of the user who requests to join to a house
-     * @param houseNumber number of the house that the user requests to join
-     * @param approved status of the request
-     */
-    public Request(String username, int houseNumber, boolean approved) {
-        this.username = username;
-        this.houseNumber = houseNumber;
-        this.approved = approved;
-    }
-
+    // Requirement by Spring
     public Request() {
     }
 
-    public int getRequestId() {
-        return requestId;
+    /**
+     * Constructor for the Request entity.
+     *
+     * @param id    - the request id
+     * @param house - the house object associated with the request
+     * @param user  - the user object associated with the request
+     */
+    public Request(RequestId id, House house, User user) {
+        this.id = id;
+        this.house = house;
+        this.user = user;
     }
 
-    public void setRequestId(int requestId) {
-        this.requestId = requestId;
+    /**
+     * Constructor for the Request entity.
+     *
+     * @param id       - the request id
+     * @param house    - the house object associated with the request
+     * @param user     - the user object associated with the request
+     * @param approved - the state of the request
+     */
+    @JsonCreator
+    public Request(@JsonProperty("id") RequestId id,
+                   @JsonProperty("house") House house,
+                   @JsonProperty("user") User user,
+                   @JsonProperty("approved") boolean approved) {
+        this.id = id;
+        this.house = house;
+        this.user = user;
+        this.approved = approved;
     }
 
-    public String getUsername() {
-        return username;
+    public RequestId getId() {
+        return this.id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setId(RequestId id) {
+        this.id = id;
     }
 
-    public int getHouseNumber() {
-        return houseNumber;
+    public House getHouse() {
+        return this.house;
     }
 
-    public void setHouseNumber(int houseNumber) {
-        this.houseNumber = houseNumber;
+    public void setHouse(House house) {
+        this.house = house;
+    }
+
+    public User getUser() {
+        return this.user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public boolean isApproved() {
@@ -68,23 +108,24 @@ public class Request {
         this.approved = approved;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Request)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         Request request = (Request) o;
-        return requestId == request.requestId
-                && houseNumber == request.houseNumber
-                && approved == request.approved
-                && username.equals(request.username);
+        return approved == request.approved
+                && Objects.equals(id, request.id)
+                && Objects.equals(user, request.user)
+                && Objects.equals(house, request.house);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requestId, username, houseNumber, approved);
+        return Objects.hash(id, user, house, approved);
     }
 }

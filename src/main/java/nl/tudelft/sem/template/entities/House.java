@@ -1,39 +1,81 @@
 package nl.tudelft.sem.template.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 
 @Entity
-public class House {
+@Table(name = "house", catalog = "projects_SEM-51")
+public class House implements java.io.Serializable {
 
+    // Primary key in the database
     @Id
+    @Column(name = "house_nr", unique = true, nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int houseNumber;
-    
+    private int houseNr;
+
+    public static final long serialVersionUID = 4328743;
+
+    @Column(name = "name", length = 25)
     private String name;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
+    private Set<Request> requests = new HashSet<Request>(0);
 
-    /** Constructor for House entity.
-     *
-     * @param name name of the house
-     */
-    public House(String name) {
-        this.name = name;
-    }
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
+    private Set<User> users = new HashSet<User>(0);
 
+    // Requirement by Spring
     public House() {
     }
 
-    public int getHouseNumber() {
-        return houseNumber;
+    /**
+     * Constructor for the House entity.
+     *
+     * @param houseNr - house number
+     * @param name    - name of the house
+     */
+    public House(int houseNr, String name) {
+        this.houseNr = houseNr;
+        this.name = name;
     }
 
-    public void setHouseNumber(int houseNumber) {
-        this.houseNumber = houseNumber;
+    /**
+     * Constructor for the House entity.
+     *
+     * @param houseNr  - house number
+     * @param name     - name of the house
+     * @param requests - requests of the house
+     * @param users    - users of the house
+     */
+    @JsonCreator
+    public House(@JsonProperty("houseNr") int houseNr,
+                 @JsonProperty("name") String name,
+                 @JsonProperty("requests") Set<Request> requests,
+                 @JsonProperty("users") Set<User> users) {
+        this.houseNr = houseNr;
+        this.name = name;
+        this.requests = requests;
+        this.users = users;
+    }
+
+    public int getHouseNr() {
+        return houseNr;
+    }
+
+    public void setHouseNr(int houseNr) {
+        this.houseNr = houseNr;
     }
 
     public String getName() {
@@ -42,6 +84,22 @@ public class House {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<Request> getRequests() {
+        return this.requests;
+    }
+
+    public void setRequests(Set<Request> requests) {
+        this.requests = requests;
+    }
+
+    public Set<User> getUsers() {
+        return this.users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 
     @Override
@@ -53,12 +111,12 @@ public class House {
             return false;
         }
         House house = (House) o;
-        return houseNumber == house.houseNumber
+        return houseNr == house.houseNr
                 && name.equals(house.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(houseNumber, name);
+        return Objects.hash(houseNr, name);
     }
 }
