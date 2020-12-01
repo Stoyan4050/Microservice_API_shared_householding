@@ -20,6 +20,7 @@ public class RequestId implements java.io.Serializable {
     @Column(name = "username", nullable = false, length = 25)
     private String username;
 
+    public static final long serialVersionUID = 4328745;
 
     // Requirement by Spring
     public RequestId() {
