@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 
 @SpringBootApplication
-//@EnableJpaRepositories("nl.tudelft.sem.template.")
-@EntityScan("nl.tudelft.sem.template")
+@EnableJpaRepositories("nl.tudelft.sem.template.repositories")
+@EntityScan("nl.tudelft.sem.template.entities")
 public class Application {
 
     public static void main(String[] args) {
