@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableJpaRepositories("nl.tudelft.sem.transactions.repositories")
-@EntityScan("nl.tudelft.sem.template")
+@EntityScan("nl.tudelft.sem.transactions.entities")
 
 @SuppressWarnings("PMD")
 public class Application {
