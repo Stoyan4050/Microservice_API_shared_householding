@@ -28,7 +28,7 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtConf jwtConfig;
 
     /**
-     * Creates an instance of a of a JwtFilter.
+     * Creates an instance of a JwtFilter.
 
      * @param authManager An authentication manager
      * @param jwtConfig A config for the JWT token defined in a separate class
