@@ -3,6 +3,13 @@
 ### Running 
 `gradle bootRun`
 
+To run all microservices:
+```
+gradle eureka:bootRun
+gradle gateway:bootRun
+gradle authentication:bootRun
+```
+
 ### Testing
 ```
 gradle test

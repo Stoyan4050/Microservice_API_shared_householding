@@ -1,3 +1,4 @@
 include:
+  - authentication/.gitlab-ci.yml
   - transactions/.gitlab-ci.yml
   - requests/.gitlab-ci.yml
