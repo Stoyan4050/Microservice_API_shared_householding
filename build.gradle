@@ -1,108 +1,74 @@
-buildscript {
+allprojects {
 	repositories {
 		mavenCentral()
-		//Needed only for SNAPSHOT versions
-		//maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 	}
-	dependencies {
-		classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
-	}
-}
 
-plugins {
-	id 'org.springframework.boot' version '2.3.5.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-	id 'java'
+	group = 'nl.tudelft.cse.sem.template'
+	version = '0.0.1-SNAPSHOT'
+}
+subprojects {
+	buildscript {
+		repositories {
+			mavenCentral()
+			//Needed only for SNAPSHOT versions
+			//maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+		}
+		dependencies {
+			classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
+		}
+	}
+
+	apply plugin: 'java'
 	// Test coverage
-	id 'jacoco'
+	apply plugin: 'jacoco'
 
 	// Code style
-	id 'checkstyle'
+	apply plugin: 'checkstyle'
 
 	// PMD
-	id 'pmd'
+	apply plugin: 'pmd'
 
 	// PITest
-	id 'info.solidsoft.pitest' version '1.5.2'
-}
+//	apply plugin: 'info.solidsoft.pitest' version '1.5.2'
 
-group = 'nl.tudelft.cse.sem.template'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 14
-targetCompatibility = 14
+	apply plugin: 'application'
 
-repositories {
-	mavenCentral()
-}
+	sourceCompatibility = 14
+	targetCompatibility = 14
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-security'
 
-	compile group: 'org.springframework.security', name: 'spring-security-config', version:'5.3.0.RELEASE'
-	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-
-	implementation 'mysql:mysql-connector-java:8.0.11'
-	compile group: 'org.glassfish', name: 'javax.ejb', version: '10.0-b28'
-
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-	implementation 'org.springframework:spring-webflux:5.1.8.RELEASE'
-	implementation 'junit:junit:4.12'
-	implementation 'junit:junit:4.12'
-	implementation 'org.junit.jupiter:junit-jupiter'
-}
-
-test {
-	useJUnitPlatform()
-	jacoco {
-		enabled = true
-		includes = ['nl.tudelft.sem.template.*']
-		excludes = []
-	}
-}
-
-repositories {
-	mavenCentral()
-}
-
-jacocoTestCoverageVerification() {
-	dependsOn test
-	violationRules {
-		rule {
+	test {
+		useJUnitPlatform()
+		jacoco {
 			enabled = true
-			element = 'CLASS'
-			includes = ['nl.tudelft.sem.template.*']
+			includes = ['nl.tudelft.sem.*']
+			excludes = []
+		}
+	}
 
-			limit {
-				counter = 'BRANCH'
-				value = 'COVEREDRATIO'
-				minimum = 0.1
+	jacocoTestCoverageVerification() {
+		dependsOn test
+		violationRules {
+			rule {
+				enabled = true
+				element = 'CLASS'
+				includes = ['nl.tudelft.sem.*']
+
+				limit {
+					counter = 'BRANCH'
+					value = 'COVEREDRATIO'
+					minimum = 0.1
+				}
 			}
 		}
 	}
-}
 
-checkstyle {
-	toolVersion "8.37"
-	configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
-}
+	checkstyle {
+		toolVersion "8.37"
+		configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+	}
 
-pmd {
-	incrementalAnalysis = true
-}
-
-apply plugin: 'info.solidsoft.pitest'
-pitest {
-	//adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
-	junit5PluginVersion = '0.12'
-
-	targetClasses = ['nl.tudelft.sem.template.*']  //by default "${project.group}.*"
-	pitestVersion = '1.5.1' //not needed when a default PIT version should be used
-	threads = 4
-	outputFormats = ['XML', 'HTML']
-	timestampedReports = false
+	pmd {
+		incrementalAnalysis = true
+	}
 }
