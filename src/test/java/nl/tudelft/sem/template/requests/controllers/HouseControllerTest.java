@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 /**
- * Tests for the RequestController class and RequestRepository.
+ * Tests for the HouseController.
  */
 @SuppressWarnings("PMD")
 public class HouseControllerTest {

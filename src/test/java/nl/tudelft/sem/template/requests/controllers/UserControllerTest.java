@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 /**
- * Tests for the RequestController class and RequestRepository.
+ * Tests for the UserController.
  */
 @SuppressWarnings("PMD")
 public class UserControllerTest {
