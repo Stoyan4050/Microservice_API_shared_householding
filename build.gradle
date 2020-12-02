@@ -1,0 +1,74 @@
+allprojects {
+	repositories {
+		mavenCentral()
+	}
+
+	group = 'nl.tudelft.cse.sem.template'
+	version = '0.0.1-SNAPSHOT'
+}
+subprojects {
+	buildscript {
+		repositories {
+			mavenCentral()
+			//Needed only for SNAPSHOT versions
+			//maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+		}
+		dependencies {
+			classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
+		}
+	}
+
+	apply plugin: 'java'
+	// Test coverage
+	apply plugin: 'jacoco'
+
+	// Code style
+	apply plugin: 'checkstyle'
+
+	// PMD
+	apply plugin: 'pmd'
+
+	// PITest
+//	apply plugin: 'info.solidsoft.pitest' version '1.5.2'
+
+	apply plugin: 'application'
+
+	sourceCompatibility = 11
+	targetCompatibility = 11
+
+
+	test {
+		useJUnitPlatform()
+		jacoco {
+			enabled = true
+			includes = ['nl.tudelft.sem.*']
+			excludes = []
+		}
+	}
+
+	jacocoTestCoverageVerification() {
+		dependsOn test
+		violationRules {
+			rule {
+				enabled = true
+				element = 'CLASS'
+				includes = ['nl.tudelft.sem.*']
+
+				limit {
+					counter = 'BRANCH'
+					value = 'COVEREDRATIO'
+					minimum = 0.1
+				}
+			}
+		}
+	}
+
+	checkstyle {
+		toolVersion "8.37"
+		configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+	}
+
+	pmd {
+		incrementalAnalysis = true
+	}
+}
