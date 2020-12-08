@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @SuppressWarnings("PMD")
-//@RequestMapping(path="/house")
 public class HouseController {
 
     @Autowired
@@ -41,9 +40,8 @@ public class HouseController {
     /** Returns a house with specified houseNumber.
      *
      * @param houseNumber houseNumber of the house to be returned
-     * @return House that was found with that houseNumber in the database
      */
-    @GetMapping("/getHouse/{houseNumber)")
+    @GetMapping("/getHouse/{houseNumber}")
     @ResponseBody
     public Optional<House> getHouseByHouseNumber(@PathVariable int houseNumber) {
         return houseRepository.findById(houseNumber);

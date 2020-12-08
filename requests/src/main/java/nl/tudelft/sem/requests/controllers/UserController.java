@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @SuppressWarnings("PMD")
-//@RequestMapping(path="/house")
 public class UserController {
     @Autowired
     transient UserRepository userRepository;
@@ -54,7 +53,6 @@ public class UserController {
      * Adds a new user to the database.
      *
      * @param user user to be added
-     * @return true if user was successfully added, false otherwise
      */
     @PostMapping("/addNewUser")
     public boolean addNewUser(@RequestBody User user) {
