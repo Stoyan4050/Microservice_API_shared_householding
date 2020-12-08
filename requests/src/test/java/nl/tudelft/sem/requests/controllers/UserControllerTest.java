@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -86,7 +87,7 @@ public class UserControllerTest {
         final ResponseEntity<User> result = userController.updateUser(userWithNewInfo, "username");
 
         // Verify the results
-        assertEquals("result", result);
+        assertEquals(HttpStatus.OK, result);
     }
      */
 
@@ -117,5 +118,27 @@ public class UserControllerTest {
     public void testDeleteUser() {
         userController.deleteUser("username2");
         verify(userRepository, times(1)).deleteById("username2");
+    }
+
+    @Test
+    public void testGetCreditsStatusForGroceriesOk() {
+        final User user = new User("username", new House(1, "name"),
+                5.0f, "email", Set.of(new Request()));
+
+        userRepository.save(user);
+
+        final ResponseEntity<User> result = userController.getCreditsStatusForGroceries("username");
+        assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
+    }
+
+    @Test
+    public void testGetCreditsStatusForGroceriesForbidden() {
+        final User user = new User("a", new House(1, "name"),
+                -60.0f, "email", Set.of(new Request()));
+
+        userRepository.save(user);
+
+        final ResponseEntity<User> result = userController.getCreditsStatusForGroceries("a");
+        assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
     }
 }

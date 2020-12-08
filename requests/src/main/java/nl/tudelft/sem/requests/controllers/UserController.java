@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -111,7 +112,6 @@ public class UserController {
         Optional<User> user = userRepository.findById(username);
 
         if(user.isPresent()) {
-
             user.get().setHouse(userWithNewInfo.getHouse());
             user.get().setTotalCredits(userWithNewInfo.getTotalCredits());
             user.get().setEmail(userWithNewInfo.getEmail());
@@ -139,5 +139,46 @@ public class UserController {
     public void deleteUser(@PathVariable String username) {
         userRepository.deleteById(username);
     }
+
+    /**
+     * A status message for the user representing whether or not they should buy groceries next.
+     *
+     * @param username - the username of the User
+     * @return OK - if the userBalance > -50
+     *         FORBIDDEN - if the userBalance <= -50
+     */
+    @GetMapping("/getCreditsStatusForGroceries/{username}")
+    public ResponseEntity<User> getCreditsStatusForGroceries(@PathVariable String username) {
+        Optional<User> user = userRepository.findById(username);
+
+        if(user.isPresent()) {
+            if (user.get().getTotalCredits() > -50) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+
+            return new ResponseEntity("Your credits are less than -50! You should buy groceries.",
+                    HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    /*
+    /**
+     * A status message for the user representing whether or not they should buy groceries next.
+     *
+     * @param username - the username of the User
+     * @return OK - if the userBalance > -50
+     *         FORBIDDEN - if the userBalance <= -50
+     */
+    /*
+    @GetMapping("/getCreditsStatusForGroceries")
+    public String getCreditsStatusForGroceries(@RequestParam(value = "username") String username) {
+        if (userRepository.findById(username).get().getTotalCredits() > -50)
+            return "Your credits seem in order, you are good to go!";
+
+        return "Your credits are less than -50! You should buy groceries.";
+    }
+    */
 
 }

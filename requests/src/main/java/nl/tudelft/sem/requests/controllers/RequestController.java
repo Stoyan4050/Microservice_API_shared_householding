@@ -72,7 +72,6 @@ public class RequestController {
         Optional<Request> request = requestRepository.findById(requestId);
 
         if(request.isPresent()) {
-
             request.get().setId(requestWithNewInfo.getId());
             request.get().setHouse(requestWithNewInfo.getHouse());
             request.get().setUser(requestWithNewInfo.getUser());

@@ -74,7 +74,6 @@ public class HouseController {
         Optional<House> house = houseRepository.findById(houseNr);
 
         if(house.isPresent()) {
-
             house.get().setHouseNr(houseWithNewInfo.getHouseNr());
             house.get().setName(houseWithNewInfo.getName());
             house.get().setRequests(houseWithNewInfo.getRequests());
