@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
+import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,10 +19,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * The controller class for Request.
  */
 @Controller
+@SuppressWarnings("PMD")
 public class RequestController {
 
     @Autowired
-    private transient RequestRepository repository;
+    private transient RequestRepository requestRepository;
 
     /**
      * Get all requests from the database.
@@ -31,7 +33,7 @@ public class RequestController {
     @GetMapping("allRequests")
     @ResponseBody
     public List<Request> getAllRequests() {
-        return repository.findAll();
+        return requestRepository.findAll();
     }
 
     /**
@@ -43,7 +45,7 @@ public class RequestController {
     @GetMapping("getRequest/{requestId}")
     @ResponseBody
     public Optional<Request> getRequestById(@PathVariable RequestId requestId) {
-        return repository.findById(requestId);
+        return requestRepository.findById(requestId);
     }
 
     /**
@@ -54,7 +56,39 @@ public class RequestController {
     @PutMapping("addNewRequest")
     @ResponseBody
     public void addRequest(@RequestBody Request newRequest) {
-        repository.save(newRequest);
+        requestRepository.save(newRequest);
+    }
+
+    /**
+     * Updates a Request, searched by the requestId. - Without HTTP response
+     *
+     * @param requestWithNewInfo - the Request containing new data
+     * @param requestId          - the requestId of the Request that is going to be changed
+     * @return status if the update was successful or not
+     */
+    @PutMapping("/updateRequest/{requestId}")
+    public String updateRequest(@RequestBody Request requestWithNewInfo,
+                                @PathVariable RequestId requestId) {
+        Optional<Request> request = requestRepository.findById(requestId);
+
+        if(request.isPresent()) {
+
+            request.get().setId(requestWithNewInfo.getId());
+            request.get().setHouse(requestWithNewInfo.getHouse());
+            request.get().setUser(requestWithNewInfo.getUser());
+            request.get().setApproved(requestWithNewInfo.isApproved());
+
+            Request newRequest;
+            try {
+                newRequest = requestRepository.save(request.get());
+            } catch (Exception e) {
+                return "Request couldn't be updated!";
+            }
+
+            return "Request updated successfully!";
+        }
+
+        return "Request not found!";
     }
 
     /**
@@ -65,7 +99,7 @@ public class RequestController {
     @DeleteMapping("deleteRequest/{requestId}")
     @ResponseBody
     public void removeRequest(@PathVariable RequestId requestId) {
-        repository.deleteById(requestId);
+        requestRepository.deleteById(requestId);
     }
 
 }
