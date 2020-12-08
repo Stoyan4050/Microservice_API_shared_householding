@@ -1,5 +1,6 @@
 package nl.tudelft.sem.requests.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
@@ -30,11 +31,12 @@ public class Request implements java.io.Serializable {
     })
     private RequestId id;
         
-
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", nullable = false, insertable = false, updatable = false)
     private User user;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_nr", nullable = false, insertable = false, updatable = false)
     private House house;

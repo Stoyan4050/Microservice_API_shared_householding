@@ -1,5 +1,6 @@
 package nl.tudelft.sem.requests.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ public class User implements java.io.Serializable {
     @Column(name = "username", unique = true, nullable = false, length = 30)
     private String username;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_nr")
     private House house;
