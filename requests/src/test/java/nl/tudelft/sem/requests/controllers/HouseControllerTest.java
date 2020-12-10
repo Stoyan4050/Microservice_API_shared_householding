@@ -10,7 +10,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.requests.entities.House;
+import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
+import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -24,6 +26,9 @@ public class HouseControllerTest {
 
     @Mock
     private transient HouseRepository houseRepository;
+
+    @Mock
+    private transient UserRepository userRepository;
 
     @InjectMocks
     private transient HouseController houseController;
@@ -55,6 +60,8 @@ public class HouseControllerTest {
     @Test
     public void testAddHouse() {
         final House newHouse = new House(1, "CoolHouse");
+        final Optional<User> user = Optional.of(new User("fabian"));
+        when(userRepository.findById("fabian")).thenReturn(user);
         houseController.addNewHouse(newHouse, "fabian");
         verify(houseRepository, times(1)).save(newHouse);
     }
