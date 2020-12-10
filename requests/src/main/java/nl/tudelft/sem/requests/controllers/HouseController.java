@@ -1,11 +1,14 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
+import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
+import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
@@ -26,6 +29,8 @@ public class HouseController {
 
     @Autowired
     private transient HouseRepository houseRepository;
+    @Autowired
+    private transient UserRepository userRepository;
 
     /** Returns all houses from the database.
      *
@@ -47,15 +52,34 @@ public class HouseController {
         return houseRepository.findById(houseNumber);
     }
 
+    /** Returns all users that belong to this house.
+     *
+     * @param houseNumber house number of the house that we want the users from.
+     * @return a list of users in this house
+     */
+    @GetMapping("/getUsersFromHouse/{houseNumber}")
+    public List<User> getAllUsersFromHouse(@PathVariable int houseNumber){
+        Optional<House> house = houseRepository.findById(houseNumber);
+        List<User> users = new ArrayList<>();
+        if(house.isPresent()){
+            users.addAll(house.get().getUsers());
+        }
+        return users;
+    }
+
     /** Adds a new house to the database.
      *
      * @param house house to be added
+     * @param username username of the user creating the house
      * @return true if house was successfully added, false otherwise
      */
     @PostMapping("/addNewHouse")
-    boolean addNewHouse(@RequestBody House house) {
+    boolean addNewHouse(@RequestBody House house, @PathVariable String username) {
         try {
             houseRepository.save(house);
+            Optional<User> user = userRepository.findById(username);
+            user.ifPresent(u -> u.setHouse(house));
+            user.ifPresent(u -> userRepository.save(u));
             return true;
         } catch (DataIntegrityViolationException e) {
             return false;
@@ -99,7 +123,6 @@ public class HouseController {
     @DeleteMapping("/deleteHouse/{houseNumber}")
     public void deleteHouse(@PathVariable int houseNumber) {
         houseRepository.deleteById(houseNumber);
-
     }
 
 }

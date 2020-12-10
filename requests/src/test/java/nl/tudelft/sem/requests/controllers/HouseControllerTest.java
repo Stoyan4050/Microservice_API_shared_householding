@@ -55,7 +55,7 @@ public class HouseControllerTest {
     @Test
     public void testAddHouse() {
         final House newHouse = new House(1, "CoolHouse");
-        houseController.addNewHouse(newHouse);
+        houseController.addNewHouse(newHouse, "fabian");
         verify(houseRepository, times(1)).save(newHouse);
     }
 
