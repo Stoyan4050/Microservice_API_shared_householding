@@ -49,7 +49,7 @@ public class UserController {
      * @param user user to be added
      * @return true if user was successfully added, false otherwise
      */
-    @PostMapping("/addNewUser")
+    @PostMapping(value = "auth/register", consumes = {"application/json"})
     public boolean addNewUser(@RequestBody User user) {
         try {
             userRepository.save(user);
