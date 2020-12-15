@@ -13,7 +13,6 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "transaction")
-@SuppressWarnings("PMD")
 public class Transactions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,11 +33,11 @@ public class Transactions {
     public Transactions() {
     }
 
-    public int getTransaction_id() {
+    public int getTransactionId() {
         return transactionId;
     }
 
-    public void setTransaction_id(int transactionId) {
+    public void setTransactionId(int transactionId) {
         this.transactionId = transactionId;
     }
 
@@ -50,7 +49,7 @@ public class Transactions {
         this.productFk = product;
     }
 
-    public int getProduct_id() {
+    public int getProductId() {
         return productFk.getProductId();
     }
 
@@ -63,11 +62,11 @@ public class Transactions {
     }
 
 
-    public int getPortions_consumed() {
+    public int getPortionsConsumed() {
         return portionsConsumed;
     }
 
-    public void setPortions_consumed(int portionsConsumed) {
+    public void setPortionsConsumed(int portionsConsumed) {
         this.portionsConsumed = portionsConsumed;
     }
 }

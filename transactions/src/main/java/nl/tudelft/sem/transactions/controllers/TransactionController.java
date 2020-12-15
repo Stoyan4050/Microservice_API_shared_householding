@@ -58,10 +58,10 @@ public class TransactionController {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
         try {
-            if (transactionsRepository.updateExistingTransaction(transaction.getProduct_id(),
+            if (transactionsRepository.updateExistingTransaction(transaction.getProductId(),
                     transaction.getUsername(),
-                    transaction.getPortions_consumed(),
-                    transaction.getTransaction_id()) == 1) {
+                    transaction.getPortionsConsumed(),
+                    transaction.getTransactionId()) == 1) {
                 return true;
             }
             return false;

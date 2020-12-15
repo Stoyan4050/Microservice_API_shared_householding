@@ -48,7 +48,7 @@ public class TransactionController {
         List<Transactions> transactionsById = new ArrayList<>();
 
         for (Transactions t : transactionsList) {
-            if (t.getProduct_id() == productId) {
+            if (t.getProductId() == productId) {
                 transactionsById.add(t);
             }
         }
