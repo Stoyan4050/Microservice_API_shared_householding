@@ -61,6 +61,13 @@ public class Transactions {
         this.username = username;
     }
 
+    public Product getProductFk() {
+        return productFk;
+    }
+
+    public void setProductFk(Product productFk) {
+        this.productFk = productFk;
+    }
 
     public int getPortionsConsumed() {
         return portionsConsumed;
