@@ -7,6 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import nl.tudelft.sem.transactions.config.JwtConf;
+import nl.tudelft.sem.transactions.config.Username;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,21 +102,10 @@ public class ProductController {
     @GetMapping("/allProducts")
     public @ResponseBody
     List<Product> getAllProducts(HttpServletRequest request,
-                                 HttpServletResponse response) {
+                                 HttpServletResponse response,
+                                 @Username String username) {
 
-        // TODO add a service that does all that
-        String header = request.getHeader(jwtConf.getHeader());
-        String token = header.replace(jwtConf.getPrefix(), "");
-        Claims claims = Jwts.parser()
-            .setSigningKey(jwtConf.getSecret().getBytes())
-            .parseClaimsJws(token)
-            .getBody();
-
-        String username = claims.getSubject();
-        System.out.println(request.getHeader("Authorization"));
         System.out.println(username);
-        System.out.println(response);
-        System.out.println(SecurityContextHolder.getContext());
         // This returns a JSON or XML with the products
         return productRepository.findAll();
     }
