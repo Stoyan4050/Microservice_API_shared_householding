@@ -12,8 +12,17 @@ import org.springframework.stereotype.Service;
 public class MicroserviceCommunicator {
 	
 	private static final HttpClient httpClient = HttpClient.newBuilder().build();
-	
-	public static void sendRequestForChangingCredits(String username, float credits, boolean add) {
+
+
+	/**
+	 * This method sends a request to change credits.
+	 *
+	 * @param username - username of the user whose credits need to be changed
+	 * @param credits - the number of credits to be added or substracted.
+	 * @param add -
+	 */
+	public static void sendRequestForChangingCredits(String username,
+													 float credits, boolean add) {
 		
 		if (username == null) {
 			throw new InvalidParameterException("One of the parameters is null!");
@@ -40,10 +49,7 @@ public class MicroserviceCommunicator {
 			System.out.println("Error encountered while trying to send a request for adding credits: "
 								+ e.getLocalizedMessage());
 		}
-		
-		
-		
-		
+
 	}
 	
 	

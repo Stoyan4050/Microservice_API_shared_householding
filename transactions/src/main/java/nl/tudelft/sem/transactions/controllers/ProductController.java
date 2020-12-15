@@ -14,7 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 
 @EnableJpaRepositories("nl.tudelft.sem.template.repositories")
@@ -37,6 +43,7 @@ public class ProductController {
      * @param totalPortions - the total number of portions a product has
      * @param username      - the username of the person who bought the product
      */
+
     @PostMapping("/addProduct/{product_name}/{price}/{total_portions}/{username}")
     @ResponseBody
     public Product addProduct(@PathVariable(value = "product_name") String productName,
@@ -48,7 +55,8 @@ public class ProductController {
         float credits = Math.round(newProduct.getPrice() * 100) / 100;
     
         try {
-            MicroserviceCommunicator.sendRequestForChangingCredits(newProduct.getUsername(), credits, true);
+            MicroserviceCommunicator.sendRequestForChangingCredits(newProduct.getUsername(),
+                    credits, true);
         } catch (Exception e) {
             System.out.println("Error adding credits!");
         }
