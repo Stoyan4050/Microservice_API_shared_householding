@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.config.JwtConf;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
@@ -13,13 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 
 @EnableJpaRepositories("nl.tudelft.sem.template.repositories")
@@ -50,6 +45,13 @@ public class ProductController {
                               @PathVariable(value = "username") String username) {
 
         Product newProduct = new Product(productName, price, totalPortions, username);
+        float credits = Math.round(newProduct.getPrice() * 100) / 100;
+    
+        try {
+            MicroserviceCommunicator.sendRequestForChangingCredits(newProduct.getUsername(), credits, true);
+        } catch (Exception e) {
+            System.out.println("Error adding credits!");
+        }
 
         System.out.println("Product added");
         return productRepository.save(newProduct);
@@ -75,6 +77,13 @@ public class ProductController {
         return products;
     }
 
+    /**Returns all products in the database.
+     *
+     * @param request request for products
+     *
+     * @param response response that will get
+     * @return List of all products
+     */
     @GetMapping("/allProducts")
     public @ResponseBody
     List<Product> getAllProducts(HttpServletRequest request,
