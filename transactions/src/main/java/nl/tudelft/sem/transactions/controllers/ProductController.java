@@ -94,7 +94,7 @@ public class ProductController {
     /**
      * Gets all products from the database.
      *
-     * @param request - Http request
+     * @param request  - Http request
      * @param response - Http response
      * @return All products in the database
      */
@@ -107,9 +107,9 @@ public class ProductController {
         String header = request.getHeader(jwtConf.getHeader());
         String token = header.replace(jwtConf.getPrefix(), "");
         Claims claims = Jwts.parser()
-                .setSigningKey(jwtConf.getSecret().getBytes())
-                .parseClaimsJws(token)
-                .getBody();
+            .setSigningKey(jwtConf.getSecret().getBytes())
+            .parseClaimsJws(token)
+            .getBody();
 
         String username = claims.getSubject();
         System.out.println(request.getHeader("Authorization"));
