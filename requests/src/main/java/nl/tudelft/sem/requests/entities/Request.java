@@ -2,6 +2,7 @@ package nl.tudelft.sem.requests.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import javax.persistence.AttributeOverride;
@@ -30,13 +31,11 @@ public class Request implements java.io.Serializable {
                     column = @Column(name = "username", nullable = false, length = 25))
     })
     private RequestId id;
-        
-    @JsonBackReference
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", nullable = false, insertable = false, updatable = false)
     private User user;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_nr", nullable = false, insertable = false, updatable = false)
     private House house;
@@ -89,6 +88,7 @@ public class Request implements java.io.Serializable {
         this.id = id;
     }
 
+    @JsonBackReference
     public House getHouse() {
         return this.house;
     }
@@ -97,6 +97,7 @@ public class Request implements java.io.Serializable {
         this.house = house;
     }
 
+    @JsonBackReference
     public User getUser() {
         return this.user;
     }
@@ -133,6 +134,6 @@ public class Request implements java.io.Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, house, approved);
+        return Objects.hash(id, approved);
     }
 }

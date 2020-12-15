@@ -27,6 +27,10 @@ public class UserController {
     @Autowired
     transient UserRepository userRepository;
 
+    public UserController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     /**
      * Returns all users from the database.
      *

@@ -2,7 +2,11 @@ package nl.tudelft.sem.requests.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -33,6 +37,7 @@ public class House implements java.io.Serializable {
 
     @Column(name = "name", length = 25)
     private String name;
+
 
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")

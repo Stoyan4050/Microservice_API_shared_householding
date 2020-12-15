@@ -12,9 +12,11 @@ import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 /**
  * The controller class for House.
  */
-@Controller
+@RestController
 @SuppressWarnings("PMD")
 public class HouseController {
 
@@ -31,6 +33,11 @@ public class HouseController {
     private transient HouseRepository houseRepository;
     @Autowired
     private transient UserRepository userRepository;
+
+    public HouseController(HouseRepository houseRepository, UserRepository userRepository) {
+        this.houseRepository = houseRepository;
+        this.userRepository = userRepository;
+    }
 
     /** Returns all houses from the database.
      *
@@ -74,7 +81,7 @@ public class HouseController {
      * @return true if house was successfully added, false otherwise
      */
     @PostMapping("/addNewHouse")
-    boolean addNewHouse(@RequestBody House house, @PathVariable String username) {
+    boolean addNewHouse(@RequestBody House house, @RequestParam("username") String username) {
         try {
             houseRepository.save(house);
             Optional<User> user = userRepository.findById(username);
@@ -125,4 +132,21 @@ public class HouseController {
         houseRepository.deleteById(houseNumber);
     }
 
+    /**
+     * User joining a house, once a request has been approved
+     *
+     * @param username - the username of the User entering the household
+     * @param houseNumber - the house number of the House to add the user in
+     */
+    public void userJoiningHouse(String username,int houseNumber) {
+        Optional<House> house = houseRepository.findById(houseNumber);
+        Optional<User> user = userRepository.findById(username);
+
+        System.out.println("HOuse nr  "+houseNumber);
+        user.get().setHouse(house.get());
+
+        UserController userController = new UserController(userRepository);
+        userController.updateUser(user.get(),user.get().getUsername());
+
+    }
 }

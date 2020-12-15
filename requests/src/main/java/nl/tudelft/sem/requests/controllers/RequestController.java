@@ -2,28 +2,35 @@ package nl.tudelft.sem.requests.controllers;
 
 import java.util.List;
 import java.util.Optional;
+
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
 import nl.tudelft.sem.requests.entities.User;
+import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.repositories.RequestRepository;
+import nl.tudelft.sem.requests.repositories.HouseRepository;
+import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * The controller class for Request.
  */
-@Controller
+@RestController
 @SuppressWarnings("PMD")
 public class RequestController {
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private transient RequestRepository requestRepository;
+
+    @Autowired
+    private transient HouseRepository houseRepository;
+
 
     /**
      * Get all requests from the database.
@@ -39,7 +46,7 @@ public class RequestController {
     /**
      * Get one request from the database identified by the ID.
      *
-     * @param requestId The ID of the request to return
+     * @param requestId - the ID of the request to return
      * @return The request corresponding with that ID
      */
     @GetMapping("getRequest/{requestId}")
@@ -51,7 +58,7 @@ public class RequestController {
     /**
      * Create or update a request in the database.
      *
-     * @param newRequest The Request to add to the database
+     * @param newRequest - the Request to add to the database
      */
     @PutMapping("addNewRequest")
     @ResponseBody
@@ -71,7 +78,7 @@ public class RequestController {
                                 @PathVariable RequestId requestId) {
         Optional<Request> request = requestRepository.findById(requestId);
 
-        if(request.isPresent()) {
+        if (request.isPresent()) {
             request.get().setId(requestWithNewInfo.getId());
             request.get().setHouse(requestWithNewInfo.getHouse());
             request.get().setUser(requestWithNewInfo.getUser());
@@ -93,12 +100,81 @@ public class RequestController {
     /**
      * Delete a request from the database identified by the ID.
      *
-     * @param requestId The ID of the request to delete from the database
+     * @param requestId - the ID of the request to delete from the database
      */
     @DeleteMapping("deleteRequest/{requestId}")
     @ResponseBody
     public void removeRequest(@PathVariable RequestId requestId) {
         requestRepository.deleteById(requestId);
     }
+
+    /**
+     * One of the members accepting a request from a user to join their household
+     *
+     * @return true - if the request has been accepted
+     * false - if the request has not been accepted/not found
+     */
+    @PostMapping("/membersAcceptedRequest")
+    public String membersAcceptedRequest(@RequestParam(name = "username") String username,
+                                         @RequestParam(name = "houseNumber") int houseNumber,
+                                         @RequestParam(name = "myUsername") String myUsername) {
+
+        RequestId id = new RequestId(houseNumber, username);
+
+        UserController userController = new UserController(userRepository);
+
+
+        if (!requestRepository.existsById(id))
+            // return new ResponseEntity("The request is not found!", HttpStatus.NOT_FOUND);
+            return "error";
+        Optional<User> currentUser = userController.getUserByUsername(myUsername);
+
+        if (!currentUser.isPresent())
+            //return new ResponseEntity("User not found!", HttpStatus.NOT_FOUND);
+            return "error";
+        if (currentUser.get().getHouse().getHouseNr() != houseNumber)
+            //return new ResponseEntity("You can't accept a user from other household!", HttpStatus.FORBIDDEN);
+            return "error";
+        Optional<Request> currentRequest = requestRepository.findById(id);
+
+        currentRequest.get().setApproved(true);
+
+        HouseController houseController = new HouseController(houseRepository, userRepository);
+        Optional<User> finalUser = userController.getUserByUsername(username);
+        finalUser.get().setHouse(houseController.getHouseByHouseNumber(houseNumber).get());
+
+        userRepository.save(finalUser.get());
+
+        this.updateRequest(currentRequest.get(), currentRequest.get().getId());
+
+
+        //return new ResponseEntity("You have successfully accepted the user: " +
+             //   currentRequest.get().getUser().getUsername(), HttpStatus.OK);
+
+        return "e bine";
+    }
+
+    /*
+    @PutMapping("/membersAcceptedRequest/{requestId}")
+    public boolean membersAcceptedRequest(@PathVariable RequestId requestId) {
+        Optional<Request> request = requestRepository.findById(requestId);
+        Optional<House> house = houseRepository.findById(requestId.getHouseNr());
+
+        List<User> listOfUsers = HouseController.getAllUsersFromHouse(requestId.getHouseNr());
+
+        if (request.isPresent() && house.isPresent()) {
+            for(User user: listOfUsers) {
+                if(user) {
+                    HouseController.userJoiningHouse(user.getUsername(), house.get().getHouseNr());
+                    removeRequest(requestId);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return false;
+    }
+     */
 
 }
