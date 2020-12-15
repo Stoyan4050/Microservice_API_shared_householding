@@ -1,6 +1,5 @@
 package nl.tudelft.sem.transactions.client.entities;
 
-@SuppressWarnings("PMD")
 public class Transactions {
     private int transactionId;
 
@@ -11,6 +10,30 @@ public class Transactions {
     private int portionsConsumed;
 
     public Transactions() {
+    }
+
+    public int getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(int transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public int getProductId() {
+        return productId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
+    public int getPortionsConsumed() {
+        return portionsConsumed;
+    }
+
+    public void setPortionsConsumed(int portionsConsumed) {
+        this.portionsConsumed = portionsConsumed;
     }
 
     public int getTransaction_id() {
