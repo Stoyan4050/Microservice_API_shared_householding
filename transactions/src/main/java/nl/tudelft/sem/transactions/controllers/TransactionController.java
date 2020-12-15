@@ -16,10 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@SuppressWarnings("PMD")
 public class TransactionController {
     @Autowired
     private TransactionsRepository transactionsRepository;
+
+    public TransactionsRepository getTransactionsRepository() {
+        return transactionsRepository;
+    }
+
+    public void setTransactionsRepository(
+        TransactionsRepository transactionsRepository) {
+        this.transactionsRepository = transactionsRepository;
+    }
 
     @GetMapping("/allTransactions")
     public @ResponseBody
@@ -58,14 +66,11 @@ public class TransactionController {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
         try {
-            if (transactionsRepository.updateExistingTransaction(transaction.getProduct_id(),
-                    transaction.getUsername(),
-                    transaction.getPortions_consumed(),
-                    transaction.getTransaction_id()) == 1) {
-                return true;
-            }
-            return false;
-        } catch (NullPointerException e) {
+            return transactionsRepository.updateExistingTransaction(transaction.getProductId(),
+                transaction.getUsername(),
+                transaction.getPortionsConsumed(),
+                transaction.getTransactionId()) == 1;
+        } catch (Exception e) {
             return false;
         }
     }
@@ -79,8 +84,6 @@ public class TransactionController {
     @DeleteMapping("/deleteTransaction/{transactionId}")
     @ResponseBody
     public void deleteTransaction(@PathVariable(value = "transactionId") int transactionId) {
-        List<Transactions> allTransactions = transactionsRepository.findAll();
-
         try {
             Optional<Transactions> t = transactionsRepository.findById(transactionId);
             Transactions transaction = t.get();

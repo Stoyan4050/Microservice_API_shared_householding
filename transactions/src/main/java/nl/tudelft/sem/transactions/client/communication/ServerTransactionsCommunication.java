@@ -15,6 +15,18 @@ public class ServerTransactionsCommunication {
     private final String baseUrl = "http://localhost:8080";
     protected WebClient webClient = WebClient.create(baseUrl);
 
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public WebClient getWebClient() {
+        return webClient;
+    }
+
+    public void setWebClient(WebClient webClient) {
+        this.webClient = webClient;
+    }
+
     /**
      * Gets all transaction from the database.
      *
@@ -24,56 +36,52 @@ public class ServerTransactionsCommunication {
     public List<Transactions> getTransactions() throws IOException {
         String jsonString;
         jsonString = this.webClient.get().uri("/allTransactions")
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> {
-                    System.out.println("4xx error");
-                    return Mono.error(new RuntimeException("4xx"));
-                })
-                .onStatus(HttpStatus::is5xxServerError, response -> {
-                    System.out.println("5xx error");
-                    return Mono.error(new RuntimeException("5xx"));
-                })
-                .bodyToMono(String.class)
-                .block();
-    
-        ObjectMapper mapper = new ObjectMapper();
-        List<Transactions> transactionsJsonList = mapper
-                .readValue(jsonString, new com
-                        .fasterxml
-                        .jackson
-                        .core
-                        .type
-                        .TypeReference<List<Transactions>>() {
-                });
+            .retrieve()
+            .onStatus(HttpStatus::is4xxClientError, response -> {
+                System.out.println("4xx error");
+                return Mono.error(new RuntimeException("4xx"));
+            })
+            .onStatus(HttpStatus::is5xxServerError, response -> {
+                System.out.println("5xx error");
+                return Mono.error(new RuntimeException("5xx"));
+            })
+            .bodyToMono(String.class)
+            .block();
 
-        return transactionsJsonList;
+        ObjectMapper mapper = new ObjectMapper();
+
+        return mapper
+            .readValue(jsonString, new com
+                .fasterxml
+                .jackson
+                .core
+                .type
+                .TypeReference<List<Transactions>>() {
+            });
     }
 
     /**
      * Adds new transaction.
      *
-     * @param productId the id of a product
-     *
-     * @param username the username of the user
-     *
+     * @param productId        the id of a product
+     * @param username         the username of the user
      * @param portionsConsumed the number of portions consumed
-     *
      * @return true if a new transaction was added
      */
     public boolean addTransaction(int productId, String username, int portionsConsumed) {
 
         String body = "{\"product_id\":\"" + productId
-                + "\",\"username\":\"" + username
-                + "\",\"portions_consumed\":\"" + portionsConsumed + "\"}";
+            + "\",\"username\":\"" + username
+            + "\",\"portions_consumed\":\"" + portionsConsumed + "\"}";
         System.out.println(body);
         try {
             boolean bool = this.webClient.post().uri("/addNewTransaction")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromObject(body))
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .bodyToMono(Boolean.class)
-                    .block();
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromObject(body))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
             if (bool) {
                 System.out.println("Transaction added");
                 return true;

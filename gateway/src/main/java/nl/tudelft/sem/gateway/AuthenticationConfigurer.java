@@ -13,10 +13,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@SuppressWarnings("PMD")
 public class AuthenticationConfigurer extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtConf jwtConf;
+
+    public JwtConf getJwtConf() {
+        return jwtConf;
+    }
+
+    public void setJwtConf(JwtConf jwtConf) {
+        this.jwtConf = jwtConf;
+    }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {

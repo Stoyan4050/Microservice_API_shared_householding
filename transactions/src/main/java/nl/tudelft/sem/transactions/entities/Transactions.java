@@ -1,20 +1,20 @@
 package nl.tudelft.sem.transactions.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import javax.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.*;
-
 @Entity
 @Table(name = "transaction")
-@SuppressWarnings("PMD")
 public class Transactions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,11 +36,11 @@ public class Transactions {
     public Transactions() {
     }
 
-    public int getTransaction_id() {
+    public int getTransactionId() {
         return transactionId;
     }
 
-    public void setTransaction_id(int transactionId) {
+    public void setTransactionId(int transactionId) {
         this.transactionId = transactionId;
     }
 
@@ -52,7 +52,7 @@ public class Transactions {
         this.productFk = product;
     }
 
-    public int getProduct_id() {
+    public int getProductId() {
         return productFk.getProductId();
     }
 
@@ -64,12 +64,19 @@ public class Transactions {
         this.username = username;
     }
 
+    public Product getProductFk() {
+        return productFk;
+    }
 
-    public int getPortions_consumed() {
+    public void setProductFk(Product productFk) {
+        this.productFk = productFk;
+    }
+
+    public int getPortionsConsumed() {
         return portionsConsumed;
     }
 
-    public void setPortions_consumed(int portionsConsumed) {
+    public void setPortionsConsumed(int portionsConsumed) {
         this.portionsConsumed = portionsConsumed;
     }
 }

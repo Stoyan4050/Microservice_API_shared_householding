@@ -14,21 +14,36 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
-@SuppressWarnings("PMD")
 public class UserController {
 
     @Autowired
     JdbcUserDetailsManager jdbcUserDetailsManager;
-
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    public JdbcUserDetailsManager getJdbcUserDetailsManager() {
+        return jdbcUserDetailsManager;
+    }
+
+    public void setJdbcUserDetailsManager(
+        JdbcUserDetailsManager jdbcUserDetailsManager) {
+        this.jdbcUserDetailsManager = jdbcUserDetailsManager;
+    }
+
+    public PasswordEncoder getPasswordEncoder() {
+        return passwordEncoder;
+    }
+
+    public void setPasswordEncoder(
+        PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     /**
      * POST Mapping for registration of users.
-
+     *
      * @param user User to be added to the authentication database.
-     * @param b A URI components builder
-
+     * @param b    A URI components builder
      * @return A response entity depending on whether the operation was successful.
      */
     @PostMapping(value = "auth/register", consumes = {"application/json"})
@@ -43,10 +58,10 @@ public class UserController {
         final UriComponents uri = b.path("register/{user_name}").buildAndExpand(username);
 
         jdbcUserDetailsManager.createUser(org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(passwordEncoder.encode(user.getPassword()))
-                .roles("USER")
-                .build());
+            .withUsername(user.getUsername())
+            .password(passwordEncoder.encode(user.getPassword()))
+            .roles("USER")
+            .build());
 
         return ResponseEntity.created(uri.toUri()).build();
     }

@@ -15,16 +15,21 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories
 @PropertySource("application.properties")
 @EnableTransactionManagement
-@SuppressWarnings("PMD")
 public class AuthDataSource {
-
     @Autowired
-    @SuppressWarnings("PMD")
     private Environment environment;
+
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 
     /**
      * Create a datasource that communicates with the authentication database.
-
+     *
      * @return a datasource that can add/authenticate users.
      */
     @Bean
