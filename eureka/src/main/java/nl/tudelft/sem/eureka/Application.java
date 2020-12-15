@@ -10,10 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 // TODO more sensible names for the main classes of Eureka and Authentication
 @SpringBootApplication
 @EnableEurekaServer
-@SuppressWarnings("PMD")
 public class Application {
 
-    @SuppressWarnings("PMD")
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

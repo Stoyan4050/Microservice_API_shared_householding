@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @EnableJpaRepositories("nl.tudelft.sem.template.repositories")
 
 @Controller
-@SuppressWarnings("PMD")
 public class ProductController {
 
     @Autowired
@@ -33,6 +32,23 @@ public class ProductController {
 
     @Autowired
     private JwtConf jwtConf;
+
+    public ProductRepository getProductRepository() {
+        return productRepository;
+    }
+
+    public void setProductRepository(
+        ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
+    public JwtConf getJwtConf() {
+        return jwtConf;
+    }
+
+    public void setJwtConf(JwtConf jwtConf) {
+        this.jwtConf = jwtConf;
+    }
 
     /**
      * Adds a new product to the table of products.
@@ -75,6 +91,13 @@ public class ProductController {
         return products;
     }
 
+    /**
+     * Gets all products from the database.
+     *
+     * @param request  - Http request
+     * @param response - Http response
+     * @return All products in the database
+     */
     @GetMapping("/allProducts")
     public @ResponseBody
     List<Product> getAllProducts(HttpServletRequest request,
@@ -84,9 +107,9 @@ public class ProductController {
         String header = request.getHeader(jwtConf.getHeader());
         String token = header.replace(jwtConf.getPrefix(), "");
         Claims claims = Jwts.parser()
-                .setSigningKey(jwtConf.getSecret().getBytes())
-                .parseClaimsJws(token)
-                .getBody();
+            .setSigningKey(jwtConf.getSecret().getBytes())
+            .parseClaimsJws(token)
+            .getBody();
 
         String username = claims.getSubject();
         System.out.println(request.getHeader("Authorization"));
@@ -124,17 +147,14 @@ public class ProductController {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
         try {
-            if (productRepository.updateExistingProduct(product.getProductName(),
-                    product.getUsername(),
-                    product.getPrice(),
-                    product.getTotalPortions(),
-                    product.getPortionsLeft(),
-                    product.getExpired(),
-                    product.getProductId()) == 1) {
-                return true;
-            }
-            return false;
-        } catch (NullPointerException e) {
+            return productRepository.updateExistingProduct(product.getProductName(),
+                product.getUsername(),
+                product.getPrice(),
+                product.getTotalPortions(),
+                product.getPortionsLeft(),
+                product.getExpired(),
+                product.getProductId()) == 1;
+        } catch (Exception e) {
             return false;
         }
     }
@@ -149,12 +169,8 @@ public class ProductController {
     public @ResponseBody
     boolean deleteProduct(@RequestParam int productId) {
         try {
-            if (productRepository.deleteProductById(productId) != 0) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (NullPointerException e) {
+            return productRepository.deleteProductById(productId) != 0;
+        } catch (Exception e) {
             return false;
         }
     }
