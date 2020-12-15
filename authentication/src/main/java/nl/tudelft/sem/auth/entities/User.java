@@ -1,6 +1,5 @@
 package nl.tudelft.sem.auth.entities;
 
-@SuppressWarnings("PMD")
 public class User {
     private String username;
     private String password;
