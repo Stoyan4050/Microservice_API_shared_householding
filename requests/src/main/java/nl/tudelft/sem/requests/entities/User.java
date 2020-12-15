@@ -1,6 +1,8 @@
 package nl.tudelft.sem.requests.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
 import java.util.Objects;
@@ -30,6 +32,7 @@ public class User implements java.io.Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_nr")
+    @JsonManagedReference
     private House house;
 
     @Column(name = "total_credits", precision = 12, scale = 0)
@@ -39,6 +42,7 @@ public class User implements java.io.Serializable {
     private String email;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @JsonBackReference
     private Set<Request> requests = new HashSet<Request>(0);
 
 

@@ -1,6 +1,8 @@
 package nl.tudelft.sem.requests.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashSet;
 import java.util.Objects;
@@ -34,9 +36,11 @@ public class House implements java.io.Serializable {
     private String name;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
+    @JsonBackReference
     private Set<Request> requests = new HashSet<Request>(0);
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
+    @JsonBackReference
     private Set<User> users = new HashSet<User>(0);
 
     // Requirement by Spring
