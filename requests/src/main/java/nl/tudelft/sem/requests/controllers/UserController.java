@@ -91,11 +91,11 @@ public class UserController {
             if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
                     currentUser.getEmail(),
                     currentUser.getTotalCredits() + credits,
-                    currentUser.getUsername()) == 1) {
+                    currentUser.getUsername()) == 1) {//NOPMD
                 return true;
             }
             return false;
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             return false;
         }
     }
