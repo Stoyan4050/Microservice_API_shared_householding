@@ -16,7 +16,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "product")
-@SuppressWarnings("PMD")
 public class Product {
 
     @Id
@@ -124,5 +123,17 @@ public class Product {
 
     public void addTransaction(Transactions transaction) {
         this.transactionsList.add(transaction);
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
+    public void setExpired(int expired) {
+        this.expired = expired;
+    }
+
+    public void setTransactionsList(List<Transactions> transactionsList) {
+        this.transactionsList = transactionsList;
     }
 }
