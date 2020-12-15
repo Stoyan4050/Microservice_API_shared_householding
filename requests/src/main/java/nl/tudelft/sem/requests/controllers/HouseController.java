@@ -3,6 +3,7 @@ package nl.tudelft.sem.requests.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
@@ -18,9 +19,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+//import org.springframework.http.MediaType#APPLICATION_JSON_VALUE;
 
 /**
  * The controller class for House.
@@ -31,6 +35,7 @@ public class HouseController {
 
     @Autowired
     private transient HouseRepository houseRepository;
+
     @Autowired
     private transient UserRepository userRepository;
 
@@ -39,7 +44,8 @@ public class HouseController {
         this.userRepository = userRepository;
     }
 
-    /** Returns all houses from the database.
+    /**
+     * Returns all houses from the database.
      *
      * @return a list of all houses
      */
@@ -49,7 +55,8 @@ public class HouseController {
         return houseRepository.findAll();
     }
 
-    /** Returns a house with specified houseNumber.
+    /**
+     * Returns a house with specified houseNumber.
      *
      * @param houseNumber houseNumber of the house to be returned
      */
@@ -59,38 +66,37 @@ public class HouseController {
         return houseRepository.findById(houseNumber);
     }
 
-    /** Returns all users that belong to this house.
+    /**
+     * Returns all users that belong to this house.
      *
      * @param houseNumber house number of the house that we want the users from.
      * @return a list of users in this house
      */
     @GetMapping("/getUsersFromHouse/{houseNumber}")
-    public List<User> getAllUsersFromHouse(@PathVariable int houseNumber){
+    public List<User> getAllUsersFromHouse(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         List<User> users = new ArrayList<>();
-        if(house.isPresent()){
+        if (house.isPresent()) {
             users.addAll(house.get().getUsers());
         }
         return users;
     }
 
-    /** Adds a new house to the database.
+    /**
+     * Adds a new house to the database.
      *
-     * @param house house to be added
+     * @param house    house to be added
      * @param username username of the user creating the house
      * @return true if house was successfully added, false otherwise
      */
     @PostMapping("/addNewHouse")
-    boolean addNewHouse(@RequestBody House house, @RequestParam("username") String username) {
-        try {
-            houseRepository.save(house);
-            Optional<User> user = userRepository.findById(username);
-            user.ifPresent(u -> u.setHouse(house));
-            user.ifPresent(u -> userRepository.save(u));
-            return true;
-        } catch (DataIntegrityViolationException e) {
-            return false;
-        }
+    //@RequestMapping(value = "/addNewHouse", method=RequestMethod.POST,
+    //       consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
+    public void addNewHouse(@RequestBody House house, @RequestParam("username") String username) {
+        houseRepository.save(house);
+        Optional<User> user = userRepository.findById(username);
+        user.ifPresent(u -> u.setHouse(house));
+        user.ifPresent(u -> userRepository.save(u));
     }
 
     /**
@@ -104,7 +110,7 @@ public class HouseController {
     public String updateRequest(@RequestBody House houseWithNewInfo, @PathVariable int houseNr) {
         Optional<House> house = houseRepository.findById(houseNr);
 
-        if(house.isPresent()) {
+        if (house.isPresent()) {
             house.get().setHouseNr(houseWithNewInfo.getHouseNr());
             house.get().setName(houseWithNewInfo.getName());
             house.get().setRequests(houseWithNewInfo.getRequests());
@@ -123,7 +129,8 @@ public class HouseController {
         return "House not found!";
     }
 
-    /** Deletes a house with a given houseNumber.
+    /**
+     * Deletes a house with a given houseNumber.
      *
      * @param houseNumber houseNumber of the house to delete from the database
      */
@@ -135,18 +142,18 @@ public class HouseController {
     /**
      * User joining a house, once a request has been approved
      *
-     * @param username - the username of the User entering the household
+     * @param username    - the username of the User entering the household
      * @param houseNumber - the house number of the House to add the user in
      */
-    public void userJoiningHouse(String username,int houseNumber) {
+    public void userJoiningHouse(String username, int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
 
-        System.out.println("HOuse nr  "+houseNumber);
+        System.out.println("HOuse nr  " + houseNumber);
         user.get().setHouse(house.get());
 
         UserController userController = new UserController(userRepository);
-        userController.updateUser(user.get(),user.get().getUsername());
+        userController.updateUser(user.get(), user.get().getUsername());
 
     }
 }
