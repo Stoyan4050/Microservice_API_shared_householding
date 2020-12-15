@@ -75,6 +75,13 @@ public class ProductController {
         return products;
     }
 
+    /**
+     * Gets all products from the database.
+     *
+     * @param request - Http request
+     * @param response - Http response
+     * @return All products in the database
+     */
     @GetMapping("/allProducts")
     public @ResponseBody
     List<Product> getAllProducts(HttpServletRequest request,
