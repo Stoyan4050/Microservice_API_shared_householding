@@ -200,11 +200,13 @@ public class ProductController {
         try {
             Optional<Product> p = productRepository.findById(productId);
             Product product = p.get();
-            if(product.getExpired() == 1)
-                productRepository.delete(product);
-            else
+            if (product.getExpired() == 0) {
                 System.out.println("The product is not expired");
-            return true;
+                return false;
+            } else {
+                productRepository.delete(product);
+                return true;
+            }
         } catch (Exception e) {
             return false;
         }
