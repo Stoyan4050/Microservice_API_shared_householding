@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import nl.tudelft.sem.transactions.config.JwtConf;
@@ -195,14 +196,14 @@ public class ProductController {
      */
     @DeleteMapping("deleteExpired")
     public @ResponseBody
-    boolean deleteExpired() {
+    boolean deleteExpired(@RequestParam int productId) {
         try {
-            List<Product> allProducts = productRepository.findAll();
-            for (Product p : allProducts) {
-                if (p.getExpired() == 1) {
-                    productRepository.delete(p);
-                }
-            }
+            Optional<Product> p = productRepository.findById(productId);
+            Product product = p.get();
+            if(product.getExpired() == 1)
+                productRepository.delete(product);
+            else
+                System.out.println("The product is not expired");
             return true;
         } catch (Exception e) {
             return false;
