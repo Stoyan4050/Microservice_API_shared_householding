@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -115,20 +116,6 @@ public class ProductController {
         return productRepository.findAll();
     }
 
-    /*
-    @PostMapping("/addProduct") // Map ONLY POST Requests
-    public @ResponseBody
-    boolean addHolidays(@RequestBody Product product) {
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestBody means it is a parameter from the GET or POST request
-        try {
-            productRepository.save(product);
-            return true;
-        } catch (DataIntegrityViolationException e) {
-            return false;
-        }
-    }
-     */
 
     /**
      * Edits a product.
@@ -160,7 +147,7 @@ public class ProductController {
      * @param productId - id of a product
      * @return true if product successfully deleted, false otherwise
      */
-    @GetMapping("/deleteProduct")
+    @DeleteMapping("/deleteProduct")
     public @ResponseBody
     boolean deleteProduct(@RequestParam int productId) {
         try {
@@ -170,6 +157,13 @@ public class ProductController {
         }
     }
 
+    /**
+     * This method allows the user to change the status of
+     * an object to expired once it has gone bad.
+     *
+     * @param product - the product of which the expired field must be changed
+     * @return - true in case the expired field was changed, fale otherwise.
+     */
     @PostMapping("/changeExpired")
     public @ResponseBody
     boolean changeExpired(@RequestBody Product product) {
@@ -181,6 +175,12 @@ public class ProductController {
         }
     }
 
+    /**
+     * This method allows a user to check whether a product was marked as expired.
+     *
+     * @param product - the product whose expired field must be checked
+     * @return - an integer, 1 if the product is expired and 0 otherwise.
+     */
     @GetMapping("/isExpired")
     public @ResponseBody
     int isExpired(@RequestParam Product product) {
