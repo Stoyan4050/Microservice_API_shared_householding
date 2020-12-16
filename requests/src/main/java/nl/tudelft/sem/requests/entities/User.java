@@ -90,8 +90,7 @@ public class User implements java.io.Serializable {
     public void setUsername(String username) {
         this.username = username;
     }
-
-
+    
     @JsonBackReference("u1")
     public House getHouse() {
         return this.house;

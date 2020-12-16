@@ -36,6 +36,14 @@ public class HouseController {
     @Autowired
     private transient UserRepository userRepository;
 
+    /**
+     * Constructor for linking the house and user repositories used in membersAcceptingRequest
+     * method of the RequestController.
+     * Note: can be used in other classes/controllers.
+     *
+     * @param houseRepository - the house repository
+     * @param userRepository  - the user repository
+     */
     public HouseController(HouseRepository houseRepository, UserRepository userRepository) {
         this.houseRepository = houseRepository;
         this.userRepository = userRepository;
@@ -103,7 +111,7 @@ public class HouseController {
      * @return status if the update was successful or not
      */
     @PutMapping("/updateHouse/{houseNr}")
-    public String updateRequest(@RequestBody House houseWithNewInfo, @PathVariable int houseNr) {
+    public String updateHouse(@RequestBody House houseWithNewInfo, @PathVariable int houseNr) {
         Optional<House> house = houseRepository.findById(houseNr);
 
         if (house.isPresent()) {

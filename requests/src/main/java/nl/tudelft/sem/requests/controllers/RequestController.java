@@ -123,7 +123,7 @@ public class RequestController {
      *         OK        - if the user was successfully updated
      */
     @PostMapping("/membersAcceptedRequest")
-    public ResponseEntity<Request> membersAcceptedRequest(
+    public ResponseEntity<Request> membersAcceptingRequest(
                     @RequestParam(name = "username") String username,
                     @RequestParam(name = "houseNumber") int houseNumber,
                     @RequestParam(name = "myUsername") String myUsername) {
@@ -150,14 +150,13 @@ public class RequestController {
 
         Optional<Request> currentRequest = requestRepository.findById(id);
 
+        //set the field of the request from false to true
         currentRequest.get().setApproved(true);
 
+        //create an instance of house controller - constructor defined in HouseController
         HouseController houseController = new HouseController(houseRepository, userRepository);
-        //Optional<User> finalUser = userController.getUserByUsername(username);
-        //finalUser.get().setHouse(houseController.getHouseByHouseNumber(houseNumber).get());
 
-        //userRepository.save(finalUser.get());
-
+        //method userJoiningHouse of HouseController -> setting the house of the new user
         houseController.userJoiningHouse(username, houseNumber);
 
         this.updateRequest(currentRequest.get(), currentRequest.get().getId());
@@ -166,28 +165,5 @@ public class RequestController {
         return new ResponseEntity("You have successfully accepted the user: "
                 + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
     }
-
-    /*
-    @PutMapping("/membersAcceptedRequest/{requestId}")
-    public boolean membersAcceptedRequest(@PathVariable RequestId requestId) {
-        Optional<Request> request = requestRepository.findById(requestId);
-        Optional<House> house = houseRepository.findById(requestId.getHouseNr());
-
-        List<User> listOfUsers = HouseController.getAllUsersFromHouse(requestId.getHouseNr());
-
-        if (request.isPresent() && house.isPresent()) {
-            for(User user: listOfUsers) {
-                if(user) {
-                    HouseController.userJoiningHouse(user.getUsername(), house.get().getHouseNr());
-                    removeRequest(requestId);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        return false;
-    }
-     */
 
 }

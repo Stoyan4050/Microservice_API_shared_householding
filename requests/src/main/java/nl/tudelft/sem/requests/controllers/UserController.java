@@ -67,6 +67,7 @@ public class UserController {
         userRepository.save(user);
     }
 
+    // TODO - choose the update method returning String or ResponseEntity (useful for tests)
     /*
     /**
      * Updates a User, searched by the username. - With HTTP response
@@ -169,23 +170,5 @@ public class UserController {
 
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
-    /*
-    /**
-     * A status message for the user representing whether or not they should buy groceries next.
-     *
-     * @param username - the username of the User
-     * @return OK - if the userBalance > -50
-     *         FORBIDDEN - if the userBalance <= -50
-     */
-    /*
-    @GetMapping("/getCreditsStatusForGroceries")
-    public String getCreditsStatusForGroceries(@RequestParam(value = "username") String username) {
-        if (userRepository.findById(username).get().getTotalCredits() > -50)
-            return "Your credits seem in order, you are good to go!";
-
-        return "Your credits are less than -50! You should buy groceries.";
-    }
-    */
 
 }
