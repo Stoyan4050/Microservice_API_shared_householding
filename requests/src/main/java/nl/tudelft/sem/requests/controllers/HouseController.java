@@ -134,7 +134,12 @@ public class HouseController {
      */
     @DeleteMapping("/deleteHouse/{houseNumber}")
     public void deleteHouse(@PathVariable int houseNumber) {
-        houseRepository.deleteById(houseNumber);
+        Optional<House> house = houseRepository.findById(houseNumber);
+        if(house.isPresent()) {
+            houseRepository.deleteById(houseNumber);
+            System.out.println("house successfully deleted");
+        }
+        System.out.println("house not found!");
     }
 
     /**
