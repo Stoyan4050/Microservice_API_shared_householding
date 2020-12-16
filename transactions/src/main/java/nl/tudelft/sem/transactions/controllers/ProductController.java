@@ -1,8 +1,11 @@
 package nl.tudelft.sem.transactions.controllers;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.config.JwtConf;
 import nl.tudelft.sem.transactions.config.Username;
 import nl.tudelft.sem.transactions.entities.Product;
@@ -10,6 +13,7 @@ import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,12 +59,18 @@ public class ProductController {
      * @param product - the new product to be added in the fridge
      */
     @PostMapping("/addProduct")
-    boolean addProduct(@RequestBody Product product) {
+    ResponseEntity<?> addProduct(@RequestBody Product product) {
+        float credits = product.getPrice();
+        credits = Math.round(credits * 100) / 100;
+
         try {
             productRepository.save(product);
-            return true;
+            MicroserviceCommunicator.sendRequestForChangingCredits(product.getUsername(),
+                    credits, true);
+
+            return ResponseEntity.created(URI.create("/addProduct")).build();
         } catch (DataIntegrityViolationException e) {
-            return false;
+            return ResponseEntity.badRequest().build();
         }
     }
 

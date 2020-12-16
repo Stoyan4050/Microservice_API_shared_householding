@@ -32,7 +32,7 @@ public class MicroserviceCommunicator {
 	String url = "http://localhost:9102/editUserCredits";
 	
 	HttpRequest request = HttpRequest.newBuilder()
-		.uri(URI.create(url + "&username=" + username
+		.uri(URI.create(url + "?username=" + username
 						+ "&credits=" + credits + "&add=" + add))
 		.POST(HttpRequest.BodyPublishers.noBody())
 		.build();
@@ -76,7 +76,7 @@ public class MicroserviceCommunicator {
         try {
             String jsonParse = mapper.writeValueAsString(usernames);
             HttpRequest request = HttpRequest.newBuilder()
-					.uri(URI.create(url + "&credits=" + credits))
+					.uri(URI.create(url + "?credits=" + credits))
 					.POST(
 					HttpRequest.BodyPublishers.ofString(jsonParse))
 					.header("Content-type", "application/json")

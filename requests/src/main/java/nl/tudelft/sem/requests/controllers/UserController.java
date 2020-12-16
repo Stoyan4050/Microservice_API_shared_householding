@@ -181,7 +181,7 @@ public class UserController {
     */
     @PostMapping("/editUserCredits")
     public @ResponseBody
-    boolean editUserCredits(@RequestParam String username,
+    ResponseEntity<?> editUserCredits(@RequestParam String username,
                              @RequestParam float credits,
                              @RequestParam boolean add) {
         // @ResponseBody means the returned String is the response, not a view name
@@ -191,16 +191,17 @@ public class UserController {
         }
     
         User currentUser = userRepository.findByUsername(username);
+        System.out.println(currentUser.toString());
         try {
             if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
                     currentUser.getEmail(),
                     currentUser.getTotalCredits() + credits,
                     currentUser.getUsername()) == 1) { //NOPMD
-                return true;
+                return ResponseEntity.created(URI.create("/editUserCredits")).build();
             }
-            return false;
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            return false;
+            return ResponseEntity.badRequest().build();
         }
     }
 
