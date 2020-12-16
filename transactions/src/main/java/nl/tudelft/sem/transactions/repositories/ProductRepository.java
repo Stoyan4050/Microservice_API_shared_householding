@@ -19,7 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     int updateExistingProduct(String productName, String username, float price,
                               int totalPortions, int portionsLeft,
                               int expired, long productId);
-    
+
     @Query(value = "DELETE FROM product WHERE productId = ?1", nativeQuery = true)
     @Modifying
     @Transactional

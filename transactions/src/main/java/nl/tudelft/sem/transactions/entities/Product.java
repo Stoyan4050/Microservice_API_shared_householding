@@ -23,7 +23,6 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     // @GenericGenerator(name = "idGenerator", strategy = "increment")
     private long productId;
-    
     @Column(name = "product_name")
     private String productName;
 

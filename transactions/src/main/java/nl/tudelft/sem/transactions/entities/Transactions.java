@@ -20,7 +20,7 @@ public class Transactions {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "transaction_id")
     private long transactionId;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "product_id")
