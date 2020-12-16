@@ -194,6 +194,7 @@ public class ProductController {
      * @return - true if the products were successfully deleted, false otherwise
      */
     @DeleteMapping("deleteExpired")
+    public @ResponseBody
     boolean deleteExpired() {
         try {
             List<Product> allProducts = productRepository.findAll();
