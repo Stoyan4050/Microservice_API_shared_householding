@@ -62,7 +62,7 @@ public class UserController {
      *
      * @param user user to be added
      */
-    @PostMapping(value = "/addNewUser", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/addNewUser", consumes = "application/json")
     public void addNewUser(@RequestBody User user) {
         userRepository.save(user);
     }
