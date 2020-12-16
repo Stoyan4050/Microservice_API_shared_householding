@@ -1,11 +1,7 @@
 package nl.tudelft.sem.requests.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-//import org.hibernate.annotations.Fetch;
-//import org.hibernate.annotations.FetchMode;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -46,6 +42,26 @@ public class User implements java.io.Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private Set<Request> requests = new HashSet<Request>(0);
 
+    public User(String username) {
+        this.username = username;
+    }
+
+    /**Constructor for creating user.
+     *
+     * @param username username of the user
+     * @param house house in which is the user
+     * @param totalCredits credits of the user
+     * @param email email of the user
+     * @param requests all of the requests of the use for joining house
+     */
+    public User(String username, House house,
+                float totalCredits, String email, Set<Request> requests) {
+        this.username = username;
+        this.house = house;
+        this.totalCredits = totalCredits;
+        this.email = email;
+        this.requests = requests;
+    }
 
     // Requirement by Spring
     public User() {

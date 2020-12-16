@@ -1,9 +1,6 @@
 package nl.tudelft.sem.requests.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -44,6 +41,19 @@ public class Request implements java.io.Serializable {
     @Column(name = "approved")
     private boolean approved;
 
+    /**Constructor for requests.
+     *
+     * @param id request id.
+     * @param user the user which request will be send.
+     * @param house the house the user wants to join.
+     * @param approved check if the request is approved.
+     */
+    public Request(RequestId id, House house, User user, boolean approved) {
+        this.id = id;
+        this.user = user;
+        this.house = house;
+        this.approved = approved;
+    }
 
     // Requirement by Spring
     public Request() {

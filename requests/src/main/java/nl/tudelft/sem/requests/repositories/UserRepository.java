@@ -19,4 +19,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Transactional
     int updateUserCredits(int houseNumber, String email,
 					  float totalCredits, String username);
+
+    User findByUsername(String username);
 }
+
