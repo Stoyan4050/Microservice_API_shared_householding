@@ -10,9 +10,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "UPDATE product "
-            + "SET product_name = ?1, username = ?2, price = ?3, "
-            + "total_portions = ?4, portions_left = ?5, expired = ?6 "
-            + "WHERE product_id = ?7", nativeQuery = true)
+                           + "SET product_name = ?1, username = ?2, price = ?3, "
+                           + "total_portions = ?4, portions_left = ?5, expired = ?6 "
+                           + "WHERE product_id = ?7", nativeQuery = true)
+    
     @Modifying
     @Transactional
     int updateExistingProduct(String productName, String username, float price,
@@ -23,5 +24,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Modifying
     @Transactional
     int deleteProductById(long productId);
-
 }
+

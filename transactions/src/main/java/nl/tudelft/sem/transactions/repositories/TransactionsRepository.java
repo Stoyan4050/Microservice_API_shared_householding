@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface TransactionsRepository  extends JpaRepository<Transactions, Long> {
     @Query(value = "UPDATE transaction "
-            + "SET product_id = ?1, username = ?2, portions_consumed = ?3 "
-            + "WHERE transaction_id = ?4", nativeQuery = true)
+                           + "SET product_id = ?1, username = ?2, portions_consumed = ?3 "
+                           + "WHERE transaction_id = ?4", nativeQuery = true)
     @Modifying
     @Transactional
     int updateExistingTransaction(long productId, String username,
@@ -19,5 +19,4 @@ public interface TransactionsRepository  extends JpaRepository<Transactions, Lon
     @Modifying
     @Transactional
     int deleteTransactionById(long transactionId); //delete transaction
-
 }

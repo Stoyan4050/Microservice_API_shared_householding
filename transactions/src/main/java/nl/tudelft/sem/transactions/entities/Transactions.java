@@ -12,6 +12,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+
 @Entity
 @Table(name = "transaction")
 public class Transactions {
