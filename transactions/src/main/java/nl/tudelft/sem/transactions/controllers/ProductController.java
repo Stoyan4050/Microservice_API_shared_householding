@@ -181,4 +181,9 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/isExpired")
+    public @ResponseBody
+    int isExpired(@RequestParam Product product){ return product.getExpired();}
+
 }
+
