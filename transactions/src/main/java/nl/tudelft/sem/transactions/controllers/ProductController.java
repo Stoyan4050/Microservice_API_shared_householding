@@ -1,19 +1,15 @@
 package nl.tudelft.sem.transactions.controllers;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import nl.tudelft.sem.transactions.config.JwtConf;
+import nl.tudelft.sem.transactions.config.Username;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -68,6 +64,8 @@ public class ProductController {
         }
     }
 
+ 
+ 
     /**
      * The method returns the products added by a specified user.
      *
@@ -87,33 +85,18 @@ public class ProductController {
         }
         return products;
     }
-
+    
     /**
      * Gets all products from the database.
      *
-     * @param request  - Http request
-     * @param response - Http response
+     * @param username The username of the user making the request
      * @return All products in the database
      */
     @GetMapping("/allProducts")
     public @ResponseBody
-    List<Product> getAllProducts(HttpServletRequest request,
-                                 HttpServletResponse response) {
+    List<Product> getAllProducts(@Username String username) {
 
-        // TODO add a service that does all that
-        String header = request.getHeader(jwtConf.getHeader());
-        String token = header.replace(jwtConf.getPrefix(), "");
-        Claims claims = Jwts.parser()
-            .setSigningKey(jwtConf.getSecret().getBytes())
-            .parseClaimsJws(token)
-            .getBody();
-
-        String username = claims.getSubject();
-        System.out.println(request.getHeader("Authorization"));
         System.out.println(username);
-        System.out.println(response);
-        System.out.println(SecurityContextHolder.getContext());
-        // This returns a JSON or XML with the products
         return productRepository.findAll();
     }
 
@@ -199,7 +182,7 @@ public class ProductController {
      */
     @DeleteMapping("deleteExpired")
     public @ResponseBody
-    boolean deleteExpired(@RequestParam int productId) {
+    boolean deleteExpired(@RequestParam long productId) {
         try {
             Optional<Product> p = productRepository.findById(productId);
             Product product = p.get();

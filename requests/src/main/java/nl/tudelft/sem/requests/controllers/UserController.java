@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -68,4 +69,34 @@ public class UserController {
         userRepository.deleteById(username);
     }
 
+    /**Method For changing the credits of a user.
+    *
+    * @param username Username of the user which credits will be changed
+    * @param credits credits that will be added or subtracted from a user
+    * @return true if the credits were changed
+    */
+    @PostMapping("/editUserCredits")
+    public @ResponseBody
+    boolean editUserCredits(@RequestParam String username,
+                             @RequestParam float credits,
+                             @RequestParam boolean add) {
+        // @ResponseBody means the returned String is the response, not a view name
+        // @RequestParam means it is a parameter from the GET or POST request
+        if (!add) {
+            credits = credits * (-1);
+        }
+    
+        User currentUser = userRepository.getOne(username);
+        try {
+            if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
+                    currentUser.getEmail(),
+                    currentUser.getTotalCredits() + credits,
+                    currentUser.getUsername()) == 1) { //NOPMD
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
