@@ -32,6 +32,7 @@ public class Request implements java.io.Serializable {
     })
     private RequestId id;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", nullable = false, insertable = false, updatable = false)
     private User user;
@@ -88,7 +89,7 @@ public class Request implements java.io.Serializable {
         this.id = id;
     }
 
-    @JsonBackReference
+    @JsonBackReference("r1")
     public House getHouse() {
         return this.house;
     }
@@ -97,7 +98,7 @@ public class Request implements java.io.Serializable {
         this.house = house;
     }
 
-    @JsonBackReference
+    @JsonBackReference("r2")
     public User getUser() {
         return this.user;
     }
