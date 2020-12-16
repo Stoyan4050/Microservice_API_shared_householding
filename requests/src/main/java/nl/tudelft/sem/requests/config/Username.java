@@ -1,4 +1,4 @@
-package nl.tudelft.sem.transactions.config;
+package nl.tudelft.sem.requests.config;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

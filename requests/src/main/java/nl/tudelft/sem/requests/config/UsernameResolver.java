@@ -1,4 +1,4 @@
-package nl.tudelft.sem.transactions.config;
+package nl.tudelft.sem.requests.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
