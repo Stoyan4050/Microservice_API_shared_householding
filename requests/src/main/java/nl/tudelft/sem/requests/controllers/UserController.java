@@ -1,5 +1,6 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.requests.entities.User;
@@ -62,9 +63,10 @@ public class UserController {
      *
      * @param user user to be added
      */
-    @PostMapping(value = "/addNewUser", consumes = "application/json")
-    public void addNewUser(@RequestBody User user) {
+    @PostMapping("/addNewUser")
+    public ResponseEntity<?> addNewUser(@RequestBody User user) {
         userRepository.save(user);
+        return ResponseEntity.created(URI.create("/addNewUser")).build();
     }
 
     // TODO - choose the update method returning String or ResponseEntity (useful for tests)

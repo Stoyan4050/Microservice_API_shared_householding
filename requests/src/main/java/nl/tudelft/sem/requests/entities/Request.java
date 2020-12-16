@@ -49,38 +49,6 @@ public class Request implements java.io.Serializable {
     public Request() {
     }
 
-    /**
-     * Constructor for the Request entity.
-     *
-     * @param id    - the request id
-     * @param house - the house object associated with the request
-     * @param user  - the user object associated with the request
-     */
-    public Request(RequestId id, House house, User user) {
-        this.id = id;
-        this.house = house;
-        this.user = user;
-    }
-
-    /**
-     * Constructor for the Request entity.
-     *
-     * @param id       - the request id
-     * @param house    - the house object associated with the request
-     * @param user     - the user object associated with the request
-     * @param approved - the state of the request
-     */
-    @JsonCreator
-    public Request(@JsonProperty("id") RequestId id,
-                   @JsonProperty("house") House house,
-                   @JsonProperty("user") User user,
-                   @JsonProperty("approved") boolean approved) {
-        this.id = id;
-        this.house = house;
-        this.user = user;
-        this.approved = approved;
-    }
-
     public RequestId getId() {
         return this.id;
     }

@@ -51,38 +51,6 @@ public class User implements java.io.Serializable {
     public User() {
     }
 
-    /**
-     * Constructor for the User class.
-     *
-     * @param username - the username of the user
-     */
-    public User(String username) {
-        this.username = username;
-    }
-
-    /**
-     * Constructor for the User class.
-     *
-     * @param username     - username of a user
-     * @param house        - house the user belongs to
-     * @param totalCredits - total number of credits
-     * @param email        - email of user
-     * @param requests     - the requests of the user
-     */
-    @JsonCreator
-    public User(@JsonProperty("username") String username,
-                @JsonProperty("house") House house,
-                @JsonProperty("totalCredits") float totalCredits,
-                @JsonProperty("email") String email,
-                Set<Request> requests) {
-        this.username = username;
-        this.house = house;
-        this.totalCredits = totalCredits;
-        this.email = email;
-        this.requests = requests;
-    }
-
-
     public String getUsername() {
         return this.username;
     }

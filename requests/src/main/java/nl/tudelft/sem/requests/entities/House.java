@@ -47,36 +47,6 @@ public class House implements java.io.Serializable {
     public House() {
     }
 
-    /**
-     * Constructor for the House entity.
-     *
-     * @param houseNr - house number
-     * @param name    - name of the house
-     */
-    public House(int houseNr, String name) {
-        this.houseNr = houseNr;
-        this.name = name;
-    }
-
-    /**
-     * Constructor for the House entity.
-     *
-     * @param houseNr  - house number
-     * @param name     - name of the house
-     * @param requests - requests of the house
-     * @param users    - users of the house
-     */
-    @JsonCreator
-    public House(@JsonProperty("houseNr") int houseNr,
-                 @JsonProperty("name") String name,
-                 Set<Request> requests,
-                 Set<User> users) {
-        this.houseNr = houseNr;
-        this.name = name;
-        this.requests = requests;
-        this.users = users;
-    }
-
     public int getHouseNr() {
         return houseNr;
     }

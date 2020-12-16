@@ -68,7 +68,7 @@ public class RequestController {
      *
      * @param newRequest - the Request to add to the database
      */
-    @PostMapping(value = "/addNewRequest", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/addNewRequest")
     public void addRequest(@RequestBody Request newRequest) {
         requestRepository.save(newRequest);
     }
