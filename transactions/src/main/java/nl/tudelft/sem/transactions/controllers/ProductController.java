@@ -1,18 +1,13 @@
 package nl.tudelft.sem.transactions.controllers;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.config.JwtConf;
+import nl.tudelft.sem.transactions.config.Username;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -88,15 +83,14 @@ public class ProductController {
     /**
      * Gets all products from the database.
      *
-     * @param request  - Http request
-     * @param response - Http response
+     * @param username The username of the user making the request
      * @return All products in the database
      */
     @GetMapping("/allProducts")
     public @ResponseBody
-    List<Product> getAllProducts(HttpServletRequest request,
-                                 HttpServletResponse response) {
+    List<Product> getAllProducts(@Username String username) {
 
+        System.out.println(username);
         return productRepository.findAll();
     }
 

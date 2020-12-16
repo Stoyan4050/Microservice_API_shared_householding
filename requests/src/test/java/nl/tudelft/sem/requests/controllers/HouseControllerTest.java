@@ -48,7 +48,7 @@ public class HouseControllerTest {
     public void testGetHouseById() {
         final Optional<House> houses = Optional.of(new House(1, "CoolHouse"));
         when(houseRepository.findById(1)).thenReturn(houses);
-        final Optional<House> result = houseController.getHouseByHouseNumber(1);
+        final Optional<House> result = houseController.getHouseByHouseNumber(1, "user");
         assertEquals(houses, result);
     }
 
