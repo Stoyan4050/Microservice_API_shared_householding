@@ -1,7 +1,11 @@
 package nl.tudelft.sem.requests.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.hibernate.annotations.Fetch;
+//import org.hibernate.annotations.FetchMode;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -27,6 +31,7 @@ public class User implements java.io.Serializable {
     @Id
     @Column(name = "username", unique = true, nullable = false, length = 30)
     private String username;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_nr")
@@ -69,13 +74,14 @@ public class User implements java.io.Serializable {
                 @JsonProperty("house") House house,
                 @JsonProperty("totalCredits") float totalCredits,
                 @JsonProperty("email") String email,
-                @JsonProperty("requests") Set<Request> requests) {
+                Set<Request> requests) {
         this.username = username;
         this.house = house;
         this.totalCredits = totalCredits;
         this.email = email;
         this.requests = requests;
     }
+
 
     public String getUsername() {
         return this.username;
@@ -84,7 +90,8 @@ public class User implements java.io.Serializable {
     public void setUsername(String username) {
         this.username = username;
     }
-
+    
+    @JsonBackReference("u1")
     public House getHouse() {
         return this.house;
     }
@@ -109,6 +116,7 @@ public class User implements java.io.Serializable {
         this.email = email;
     }
 
+    @JsonIgnore
     public Set<Request> getRequests() {
         return this.requests;
     }
@@ -137,6 +145,6 @@ public class User implements java.io.Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, house, totalCredits, email, requests);
+        return Objects.hash(username, totalCredits, email);
     }
 }

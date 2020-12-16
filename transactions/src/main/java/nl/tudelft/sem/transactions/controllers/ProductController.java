@@ -72,7 +72,7 @@ public class ProductController {
      * @param username - the username of the person whose products we are searching for
      * @return - a list of products that were added by the user with the indicated username
      */
-    @GetMapping("getUserProducts/{userID}")
+    @GetMapping("getUserProducts/{username}")
     @ResponseBody
     public List<Product> getUserProducts(@PathVariable String username) {
         List<Product> allProducts = productRepository.findAll();
@@ -163,7 +163,8 @@ public class ProductController {
      * This method allows a user to check whether a product was marked as expired.
      *
      * @param product - the product whose expired field must be checked
-     * @return - this method returns true if the product is indeed expired and it returns false otherwise.
+     * @return - this method returns true if the product
+     *           is indeed expired and it returns false otherwise.
      */
     @GetMapping("/isExpired")
     public @ResponseBody
