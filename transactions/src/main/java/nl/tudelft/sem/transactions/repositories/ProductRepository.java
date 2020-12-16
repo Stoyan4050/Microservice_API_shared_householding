@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Integer> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "UPDATE product "
             + "SET product_name = ?1, username = ?2, price = ?3, "
             + "total_portions = ?4, portions_left = ?5, expired = ?6 "
@@ -17,11 +17,11 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Transactional
     int updateExistingProduct(String productName, String username, float price,
                               int totalPortions, int portionsLeft,
-                              int expired, int productId);
+                              int expired, long productId);
 
     @Query(value = "DELETE FROM product WHERE productId = ?1", nativeQuery = true)
     @Modifying
     @Transactional
-    int deleteProductById(int productId);
+    int deleteProductById(long productId);
 
 }

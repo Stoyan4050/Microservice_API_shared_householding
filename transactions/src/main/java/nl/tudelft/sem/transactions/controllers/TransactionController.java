@@ -83,7 +83,7 @@ public class TransactionController {
      */
     @DeleteMapping("/deleteTransaction/{transactionId}")
     @ResponseBody
-    public void deleteTransaction(@PathVariable(value = "transactionId") int transactionId) {
+    public void deleteTransaction(@PathVariable(value = "transactionId") long transactionId) {
         try {
             Optional<Transactions> t = transactionsRepository.findById(transactionId);
             Transactions transaction = t.get();

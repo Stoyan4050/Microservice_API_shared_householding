@@ -16,9 +16,9 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "transaction")
 public class Transactions {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "transaction_id")
-    private int transactionId;
+    private long transactionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.NO_ACTION)
@@ -34,11 +34,11 @@ public class Transactions {
     public Transactions() {
     }
 
-    public int getTransactionId() {
+    public long getTransactionId() {
         return transactionId;
     }
 
-    public void setTransactionId(int transactionId) {
+    public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
     }
 
@@ -50,7 +50,7 @@ public class Transactions {
         this.productFk = product;
     }
 
-    public int getProductId() {
+    public long getProductId() {
         return productFk.getProductId();
     }
 

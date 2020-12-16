@@ -53,22 +53,13 @@ public class ProductController {
     /**
      * Adds a new product to the table of products.
      *
-     * @param productName   - name of the product to be added
-     * @param price         - the price of the product to be added
-     * @param totalPortions - the total number of portions a product has
-     * @param username      - the username of the person who bought the product
+     * @param product       - the product to be added
      */
-    @PostMapping("/addProduct/{product_name}/{price}/{total_portions}/{username}")
+    @PostMapping("/addProduct")
     @ResponseBody
-    public Product addProduct(@PathVariable(value = "product_name") String productName,
-                              @PathVariable(value = "price") float price,
-                              @PathVariable(value = "total_portions") int totalPortions,
-                              @PathVariable(value = "username") String username) {
-
-        Product newProduct = new Product(productName, price, totalPortions, username);
-
+    public Product addProduct(@RequestBody Product product) {
         System.out.println("Product added");
-        return productRepository.save(newProduct);
+        return productRepository.save(product);
     }
 
     /**
@@ -103,19 +94,6 @@ public class ProductController {
     List<Product> getAllProducts(HttpServletRequest request,
                                  HttpServletResponse response) {
 
-        // TODO add a service that does all that
-        String header = request.getHeader(jwtConf.getHeader());
-        String token = header.replace(jwtConf.getPrefix(), "");
-        Claims claims = Jwts.parser()
-            .setSigningKey(jwtConf.getSecret().getBytes())
-            .parseClaimsJws(token)
-            .getBody();
-
-        String username = claims.getSubject();
-        System.out.println(request.getHeader("Authorization"));
-        System.out.println(username);
-        System.out.println(response);
-        System.out.println(SecurityContextHolder.getContext());
         // This returns a JSON or XML with the products
         return productRepository.findAll();
     }
