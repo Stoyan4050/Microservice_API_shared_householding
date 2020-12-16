@@ -6,9 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
@@ -17,6 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import javax.swing.text.html.Option;
 
 /**
  * Tests for the HouseController.
@@ -68,7 +69,32 @@ public class HouseControllerTest {
 
     @Test
     public void testDeleteHouse() {
+        Optional<House> house = Optional.of(new House(1, "house"));
+        when(houseRepository.findById(1)).thenReturn(house);
         houseController.deleteHouse(1);
         verify(houseRepository, times(1)).deleteById(1);
+    }
+
+    @Test
+    public void testDeleteHouse2() {
+        Optional<House> house = Optional.ofNullable(null);
+        when(houseRepository.findById(7)).thenReturn(house);
+        houseController.deleteHouse(7);
+        verify(houseRepository, times(0)).deleteById(1);
+    }
+
+    @Test
+    public void testGetUsersFromHouse() {
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        User user = new User("Malwina");
+        Set<User> set = new HashSet<>();
+        set.add(user);
+        house.get().setUsers(set);
+        when(houseRepository.findById(1)).thenReturn(house);
+
+        List<User> result = houseController.getAllUsersFromHouse(1);
+        List<User> expected = new ArrayList<>();
+        expected.add(user);
+        assertEquals(expected, result);
     }
 }
