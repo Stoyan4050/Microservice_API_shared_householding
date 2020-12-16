@@ -10,6 +10,7 @@ import nl.tudelft.sem.transactions.config.JwtConf;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -53,22 +54,16 @@ public class ProductController {
     /**
      * Adds a new product to the table of products.
      *
-     * @param productName   - name of the product to be added
-     * @param price         - the price of the product to be added
-     * @param totalPortions - the total number of portions a product has
-     * @param username      - the username of the person who bought the product
+     * @param product - the new product to be added in the fridge
      */
-    @PostMapping("/addProduct/{product_name}/{price}/{total_portions}/{username}")
-    @ResponseBody
-    public Product addProduct(@PathVariable(value = "product_name") String productName,
-                              @PathVariable(value = "price") float price,
-                              @PathVariable(value = "total_portions") int totalPortions,
-                              @PathVariable(value = "username") String username) {
-
-        Product newProduct = new Product(productName, price, totalPortions, username);
-
-        System.out.println("Product added");
-        return productRepository.save(newProduct);
+    @PostMapping("/addProduct")
+    boolean addProduct(@RequestBody Product product) {
+        try {
+            productRepository.save(product);
+            return true;
+        } catch (DataIntegrityViolationException e) {
+            return false;
+        }
     }
 
     /**
