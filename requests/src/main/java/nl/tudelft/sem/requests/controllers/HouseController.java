@@ -3,7 +3,6 @@ package nl.tudelft.sem.requests.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
@@ -12,19 +11,19 @@ import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+//import org.springframework.web.bind.annotation.RequestMapping;
+//import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-//import org.springframework.http.MediaType#APPLICATION_JSON_VALUE;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The controller class for House.
@@ -87,9 +86,8 @@ public class HouseController {
      *
      * @param house    house to be added
      * @param username username of the user creating the house
-     * @return true if house was successfully added, false otherwise
      */
-    @PostMapping("/addNewHouse")
+    @PostMapping(value = "/addNewHouse", consumes = "application/json")
     //@RequestMapping(value = "/addNewHouse", method=RequestMethod.POST,
     //       consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
     public void addNewHouse(@RequestBody House house, @RequestParam("username") String username) {
@@ -140,7 +138,7 @@ public class HouseController {
     }
 
     /**
-     * User joining a house, once a request has been approved
+     * User joining a house, once a request has been approved.
      *
      * @param username    - the username of the User entering the household
      * @param houseNumber - the house number of the House to add the user in
@@ -149,7 +147,6 @@ public class HouseController {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
 
-        System.out.println("HOuse nr  " + houseNumber);
         user.get().setHouse(house.get());
 
         UserController userController = new UserController(userRepository);
