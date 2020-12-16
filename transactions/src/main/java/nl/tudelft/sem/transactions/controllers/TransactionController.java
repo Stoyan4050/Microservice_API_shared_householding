@@ -5,6 +5,7 @@ import java.util.Optional;
 import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
+import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -59,6 +60,39 @@ public class TransactionController {
             MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
                     credits, false);
     
+            return true;
+        } catch (DataIntegrityViolationException e) {
+            return false;
+        }
+    }
+
+    /**New transaction which credits will be split among the users that are eating together.
+     *
+     * @param transactionsSplitCredits List of usernames and float with the credits
+     *                                that we will have to subtract
+     * @return true if the the credits were evenly distributed and subtracted from the users.
+     */
+    @PostMapping("/transactionSplittingCredits")
+    public @ResponseBody
+    boolean addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
+                                                      transactionsSplitCredits) {
+        
+        List<String> usernames = transactionsSplitCredits.getUsernames();
+        Transactions transaction = transactionsSplitCredits.getTransactionsSplit();
+        
+        Product product = transaction.getProduct();
+        float credits = product.getPrice()
+                                / product.getTotalPortions();
+        
+        credits = credits * transaction.getPortionsConsumed();
+        float splitCredits = credits / usernames.size();
+        
+        splitCredits = Math.round(splitCredits * 100) / 100;
+        
+        try {
+            transactionsRepository.save(transaction);
+            MicroserviceCommunicator.sendRequestForSplittingCredits(usernames, splitCredits);
+            
             return true;
         } catch (DataIntegrityViolationException e) {
             return false;

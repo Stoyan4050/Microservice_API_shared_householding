@@ -1,5 +1,6 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.requests.entities.User;
@@ -86,7 +87,7 @@ public class UserController {
             credits = credits * (-1);
         }
     
-        User currentUser = userRepository.getOne(username);
+        User currentUser = userRepository.findByUsername(username);
         try {
             if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
                     currentUser.getEmail(),
@@ -98,5 +99,40 @@ public class UserController {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**Method for splitting credits, when users are eating together.
+     *
+     * @param usernames usernames of the users eating together*
+     * @param credits amount of credits to be split
+     *
+     * @return true if the credits were subtracted from each user
+     */
+    @PostMapping("/splitCredits")
+    public @ResponseBody
+    boolean splitUserCredits(@RequestBody List<String> usernames, @RequestParam float credits) {
+        
+        List<User> users = new ArrayList<>();
+        for (String username : usernames) {
+            users.add(userRepository.findByUsername(username));
+        }
+        
+        for (User user : users) {
+            float currentCredits = user.getTotalCredits();
+            currentCredits = currentCredits - credits;
+            user.setTotalCredits(currentCredits);
+    
+            try {
+                if (userRepository.updateUserCredits(user.getHouse().getHouseNr(),
+                        user.getEmail(),
+                        currentCredits,
+                        user.getUsername()) == 1) { //NOPMD
+                    continue;
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true;
     }
 }
