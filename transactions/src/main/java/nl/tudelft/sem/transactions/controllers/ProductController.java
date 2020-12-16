@@ -180,7 +180,7 @@ public class ProductController {
      * This method allows a user to check whether a product was marked as expired.
      *
      * @param product - the product whose expired field must be checked
-     * @return - an integer, 1 if the product is expired and 0 otherwise.
+     * @return - this method returns true if the product is indeed expired and it returns false otherwise. 
      */
     @GetMapping("/isExpired")
     public @ResponseBody
