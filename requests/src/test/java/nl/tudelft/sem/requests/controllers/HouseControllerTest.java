@@ -6,8 +6,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
@@ -17,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.swing.text.html.Option;
 
 /**
  * Tests for the HouseController.

@@ -124,7 +124,8 @@ public class UserControllerTest {
 
     @Test
     public void testDeleteUser2() {
-        // in this situation there's no user with username "username1", thus the deleteById won't be invoked
+        // in this situation there's no user with username "username1",
+        // thus the deleteById won't be invoked
         Optional<User> user = Optional.ofNullable(null);
         when(userRepository.findById("username1")).thenReturn(user);
         userController.deleteUser("username1");
