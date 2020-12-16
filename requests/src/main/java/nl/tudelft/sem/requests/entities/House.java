@@ -1,11 +1,5 @@
 package nl.tudelft.sem.requests.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-//import org.hibernate.annotations.Fetch;
-//import org.hibernate.annotations.FetchMode;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -17,6 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+//import org.hibernate.annotations.Fetch;
+//import org.hibernate.annotations.FetchMode;
 
 /**
  * Class representing the House entity in the database - House table.
@@ -42,39 +39,28 @@ public class House implements java.io.Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
     private Set<User> users = new HashSet<User>(0);
-
-    // Requirement by Spring
-    public House() {
-    }
-
-    /**
-     * Constructor for the House entity.
-     *
-     * @param houseNr - house number
-     * @param name    - name of the house
-     */
+    
     public House(int houseNr, String name) {
         this.houseNr = houseNr;
         this.name = name;
     }
 
-    /**
-     * Constructor for the House entity.
+    /**Constructor for a house.
      *
-     * @param houseNr  - house number
-     * @param name     - name of the house
-     * @param requests - requests of the house
-     * @param users    - users of the house
+     * @param houseNr the number of the house
+     * @param name name of the house
+     * @param requests all of the requests for joining this house
+     * @param users all of the users living in this house
      */
-    @JsonCreator
-    public House(@JsonProperty("houseNr") int houseNr,
-                 @JsonProperty("name") String name,
-                 Set<Request> requests,
-                 Set<User> users) {
+    public House(int houseNr, String name, Set<Request> requests, Set<User> users) {
         this.houseNr = houseNr;
         this.name = name;
         this.requests = requests;
         this.users = users;
+    }
+
+    // Requirement by Spring
+    public House() {
     }
 
     public int getHouseNr() {

@@ -97,7 +97,7 @@ public class HouseController {
      * @param house    house to be added
      * @param username username of the user creating the house
      */
-    @PostMapping(value = "/addNewHouse", consumes = "application/json")
+    @PostMapping("/addNewHouse")
     //@RequestMapping(value = "/addNewHouse", method=RequestMethod.POST,
     //       consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
     public void addNewHouse(@RequestBody House house, @RequestParam("username") String username) {

@@ -1,16 +1,14 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+
 
 /**
  * The controller class for User.
@@ -63,9 +63,10 @@ public class UserController {
      *
      * @param user user to be added
      */
-    @PostMapping(value = "/addNewUser", consumes = "application/json")
-    public void addNewUser(@RequestBody User user) {
+    @PostMapping("/addNewUser")
+    public ResponseEntity<?> addNewUser(@RequestBody User user) {
         userRepository.save(user);
+        return ResponseEntity.created(URI.create("/addNewUser")).build();
     }
 
     // TODO - choose the update method returning String or ResponseEntity (useful for tests)

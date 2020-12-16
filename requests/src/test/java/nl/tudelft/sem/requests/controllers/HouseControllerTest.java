@@ -88,6 +88,9 @@ public class HouseControllerTest {
 
     @Test
     public void testGetUsersFromHouse() {
+        //House house = new House();
+        //house.setHouseNr(1);
+        //house.setName("CoolHouse");
         final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
         User user = new User("Malwina");
         Set<User> set = new HashSet<>();
