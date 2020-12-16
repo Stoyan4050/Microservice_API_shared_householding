@@ -1,18 +1,17 @@
 package nl.tudelft.sem.transactions.controllers;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Optional;
 import nl.tudelft.sem.transactions.config.JwtConf;
+import nl.tudelft.sem.transactions.config.Username;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @EnableJpaRepositories("nl.tudelft.sem.template.repositories")
 
 @Controller
-@SuppressWarnings("PMD")
 public class ProductController {
 
     @Autowired
@@ -34,27 +32,40 @@ public class ProductController {
     @Autowired
     private JwtConf jwtConf;
 
+    public ProductRepository getProductRepository() {
+        return productRepository;
+    }
+
+    public void setProductRepository(
+        ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
+    public JwtConf getJwtConf() {
+        return jwtConf;
+    }
+
+    public void setJwtConf(JwtConf jwtConf) {
+        this.jwtConf = jwtConf;
+    }
+
     /**
      * Adds a new product to the table of products.
      *
-     * @param productName   - name of the product to be added
-     * @param price         - the price of the product to be added
-     * @param totalPortions - the total number of portions a product has
-     * @param username      - the username of the person who bought the product
+     * @param product - the new product to be added in the fridge
      */
-    @PostMapping("/addProduct/{product_name}/{price}/{total_portions}/{username}")
-    @ResponseBody
-    public Product addProduct(@PathVariable(value = "product_name") String productName,
-                              @PathVariable(value = "price") float price,
-                              @PathVariable(value = "total_portions") int totalPortions,
-                              @PathVariable(value = "username") String username) {
-
-        Product newProduct = new Product(productName, price, totalPortions, username);
-
-        System.out.println("Product added");
-        return productRepository.save(newProduct);
+    @PostMapping("/addProduct")
+    boolean addProduct(@RequestBody Product product) {
+        try {
+            productRepository.save(product);
+            return true;
+        } catch (DataIntegrityViolationException e) {
+            return false;
+        }
     }
 
+ 
+ 
     /**
      * The method returns the products added by a specified user.
      *
@@ -74,43 +85,21 @@ public class ProductController {
         }
         return products;
     }
-
+    
+    /**
+     * Gets all products from the database.
+     *
+     * @param username The username of the user making the request
+     * @return All products in the database
+     */
     @GetMapping("/allProducts")
     public @ResponseBody
-    List<Product> getAllProducts(HttpServletRequest request,
-                                 HttpServletResponse response) {
+    List<Product> getAllProducts(@Username String username) {
 
-        // TODO add a service that does all that
-        String header = request.getHeader(jwtConf.getHeader());
-        String token = header.replace(jwtConf.getPrefix(), "");
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtConf.getSecret().getBytes())
-                .parseClaimsJws(token)
-                .getBody();
-
-        String username = claims.getSubject();
-        System.out.println(request.getHeader("Authorization"));
         System.out.println(username);
-        System.out.println(response);
-        System.out.println(SecurityContextHolder.getContext());
-        // This returns a JSON or XML with the products
         return productRepository.findAll();
     }
 
-    /*
-    @PostMapping("/addProduct") // Map ONLY POST Requests
-    public @ResponseBody
-    boolean addHolidays(@RequestBody Product product) {
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestBody means it is a parameter from the GET or POST request
-        try {
-            productRepository.save(product);
-            return true;
-        } catch (DataIntegrityViolationException e) {
-            return false;
-        }
-    }
-     */
 
     /**
      * Edits a product.
@@ -124,17 +113,14 @@ public class ProductController {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
         try {
-            if (productRepository.updateExistingProduct(product.getProductName(),
-                    product.getUsername(),
-                    product.getPrice(),
-                    product.getTotalPortions(),
-                    product.getPortionsLeft(),
-                    product.getExpired(),
-                    product.getProductId()) == 1) {
-                return true;
-            }
-            return false;
-        } catch (NullPointerException e) {
+            return productRepository.updateExistingProduct(product.getProductName(),
+                product.getUsername(),
+                product.getPrice(),
+                product.getTotalPortions(),
+                product.getPortionsLeft(),
+                product.getExpired(),
+                product.getProductId()) == 1;
+        } catch (Exception e) {
             return false;
         }
     }
@@ -145,18 +131,73 @@ public class ProductController {
      * @param productId - id of a product
      * @return true if product successfully deleted, false otherwise
      */
-    @GetMapping("/deleteProduct")
+    @DeleteMapping("/deleteProduct")
     public @ResponseBody
     boolean deleteProduct(@RequestParam int productId) {
         try {
-            if (productRepository.deleteProductById(productId) != 0) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (NullPointerException e) {
+            return productRepository.deleteProductById(productId) != 0;
+        } catch (Exception e) {
             return false;
         }
     }
 
+    /**
+     * This method allows the user to change the status of
+     * an object to expired once it has gone bad.
+     *
+     * @param product - the product of which the expired field must be changed
+     * @return - true in case the expired field was changed, fale otherwise.
+     */
+    @PostMapping("/setExpired")
+    public @ResponseBody
+    boolean setExpired(@RequestBody Product product) {
+        try {
+            product.setExpired(1);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * This method allows a user to check whether a product was marked as expired.
+     *
+     * @param product - the product whose expired field must be checked
+     * @return - this method returns true if the product is indeed expired and it returns false otherwise.
+     */
+    @GetMapping("/isExpired")
+    public @ResponseBody
+    boolean isExpired(@RequestParam Product product) {
+        if (product.getExpired() == 0) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * This method deletes all the products which are expired but are still in the database.
+     *
+     * @return - true if the products were successfully deleted, false otherwise
+     */
+    @DeleteMapping("deleteExpired")
+    public @ResponseBody
+    boolean deleteExpired(@RequestParam long productId) {
+        try {
+            Optional<Product> p = productRepository.findById(productId);
+            Product product = p.get();
+            if (product.getExpired() == 0) {
+                System.out.println("The product is not expired");
+                return false;
+            } else {
+                productRepository.delete(product);
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 }
+

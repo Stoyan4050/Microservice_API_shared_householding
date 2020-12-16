@@ -18,12 +18,12 @@ class ProductTest {
 
         t1 = new Transactions();
         t1.setProduct(product);
-        t1.setPortions_consumed(4);
+        t1.setPortionsConsumed(4);
         t1.setUsername("Alice");
 
         t2 = new Transactions();
         t2.setProduct(product);
-        t2.setPortions_consumed(1);
+        t2.setPortionsConsumed(1);
         t2.setUsername("Alice");
 
     }
