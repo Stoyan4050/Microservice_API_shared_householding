@@ -21,8 +21,9 @@ public class Product {
     @Id
     @Column(name = "product_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int productId;
-
+    // @GenericGenerator(name = "idGenerator", strategy = "increment")
+    private long productId;
+    
     @Column(name = "product_name")
     private String productName;
 
@@ -65,11 +66,11 @@ public class Product {
     public Product() {
     }
 
-    public int getProductId() {
+    public long getProductId() {
         return productId;
     }
 
-    public void setProductId(int productId) {
+    public void setProductId(long productId) {
         this.productId = productId;
     }
 

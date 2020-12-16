@@ -2,6 +2,8 @@ package nl.tudelft.sem.transactions.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.transactions.MicroserviceCommunicator;
+import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +47,18 @@ public class TransactionController {
     @PostMapping("/addNewTransaction")
     public @ResponseBody
     boolean addNewTransaction(@RequestBody Transactions transaction) {
-
+        Product product = transaction.getProduct();
+        float credits = product.getPrice()
+                                / product.getTotalPortions();
+        
+        credits = credits * transaction.getPortionsConsumed();
+        credits = Math.round(credits * 100) / 100;
+    
         try {
             transactionsRepository.save(transaction);
+            MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
+                    credits, false);
+    
             return true;
         } catch (DataIntegrityViolationException e) {
             return false;
@@ -62,7 +73,7 @@ public class TransactionController {
      */
     @RequestMapping("/editTransaction")
     public @ResponseBody
-    boolean editHolidays(@RequestBody Transactions transaction) {
+    boolean editTransactions(@RequestBody Transactions transaction) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
         try {
@@ -83,7 +94,7 @@ public class TransactionController {
      */
     @DeleteMapping("/deleteTransaction/{transactionId}")
     @ResponseBody
-    public void deleteTransaction(@PathVariable(value = "transactionId") int transactionId) {
+    public void deleteTransaction(@PathVariable(value = "transactionId") long transactionId) {
         try {
             Optional<Transactions> t = transactionsRepository.findById(transactionId);
             Transactions transaction = t.get();
