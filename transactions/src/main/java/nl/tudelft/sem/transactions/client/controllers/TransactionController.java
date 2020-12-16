@@ -6,19 +6,23 @@ import java.util.List;
 import nl.tudelft.sem.transactions.client.communication.ServerTransactionsCommunication;
 import nl.tudelft.sem.transactions.entities.Transactions;
 
-@SuppressWarnings("PMD")
 public class TransactionController {
     ServerTransactionsCommunication con = new ServerTransactionsCommunication();
 
+    public ServerTransactionsCommunication getCon() {
+        return con;
+    }
+
+    public void setCon(ServerTransactionsCommunication con) {
+        this.con = con;
+    }
+
     /**
-     * New transaction.
+     * Adds a new transaction.
      *
-     * @param username username of user
-     *
+     * @param username  username of user
      * @param productId Id of product
-     *
-     * @param portions number of portions
-     *
+     * @param portions  number of portions
      */
     public void addNewTransaction(String username, int productId, int portions) {
 
@@ -38,9 +42,7 @@ public class TransactionController {
      * Get transactions by ID.
      *
      * @param productId Id of a product
-     *
      * @return transactions for this iD
-     *
      * @throws IOException when there is an error in Server Communication
      */
     public List<Transactions> getTransactionsByProductId(int productId) throws IOException {
@@ -48,7 +50,7 @@ public class TransactionController {
         List<Transactions> transactionsById = new ArrayList<>();
 
         for (Transactions t : transactionsList) {
-            if (t.getProduct_id() == productId) {
+            if (t.getProductId() == productId) {
                 transactionsById.add(t);
             }
         }
@@ -57,12 +59,10 @@ public class TransactionController {
     }
 
     /**
-     *Gives all transactions for particular user.
+     * Gives all transactions for particular user.
      *
      * @param username username of user
-     *
      * @return all transaction for that user
-     *
      * @throws IOException when there is an error in Server Communication
      */
     public List<Transactions> getTransactionsByUsername(String username) throws IOException {

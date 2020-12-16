@@ -3,6 +3,7 @@ package nl.tudelft.sem.requests.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 
 /**
  * The controller class for House.
@@ -67,7 +69,9 @@ public class HouseController {
      */
     @GetMapping("/getHouse/{houseNumber}")
     @ResponseBody
-    public Optional<House> getHouseByHouseNumber(@PathVariable int houseNumber) {
+    public Optional<House> getHouseByHouseNumber(@PathVariable int houseNumber,
+                                                 @Username String username) {
+        System.out.println(username);
         return houseRepository.findById(houseNumber);
     }
 

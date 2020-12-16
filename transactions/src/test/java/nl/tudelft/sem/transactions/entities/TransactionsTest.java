@@ -20,14 +20,14 @@ class TransactionsTest {
 
     @Test
     void getTransaction_id() {
-        transactions.setTransaction_id(42);
-        Assertions.assertEquals(42, transactions.getTransaction_id());
+        transactions.setTransactionId(42);
+        Assertions.assertEquals(42, transactions.getTransactionId());
     }
 
     @Test
     void setTransaction_id() {
-        transactions.setTransaction_id(53);
-        Assertions.assertEquals(53, transactions.getTransaction_id());
+        transactions.setTransactionId(53);
+        Assertions.assertEquals(53, transactions.getTransactionId());
     }
 
     @Test
@@ -60,13 +60,13 @@ class TransactionsTest {
 
     @Test
     void getPortions_consumed() {
-        transactions.setPortions_consumed(48);
-        Assertions.assertEquals(48, transactions.getPortions_consumed());
+        transactions.setPortionsConsumed(48);
+        Assertions.assertEquals(48, transactions.getPortionsConsumed());
     }
 
     @Test
     void setPortions_consumed() {
-        transactions.setPortions_consumed(128);
-        Assertions.assertEquals(128, transactions.getPortions_consumed());
+        transactions.setPortionsConsumed(128);
+        Assertions.assertEquals(128, transactions.getPortionsConsumed());
     }
 }

@@ -16,14 +16,14 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "product")
-@SuppressWarnings("PMD")
 public class Product {
 
     @Id
     @Column(name = "product_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int productId;
-
+    // @GenericGenerator(name = "idGenerator", strategy = "increment")
+    private long productId;
+    
     @Column(name = "product_name")
     private String productName;
 
@@ -52,7 +52,7 @@ public class Product {
      * @param productName   - the productName
      * @param price         - the price
      * @param totalPortions - the number of total portions a product has
-     * @param username - the username of the person who bought the product
+     * @param username      - the username of the person who bought the product
      */
     public Product(String productName, float price, int totalPortions, String username) {
         this.productName = productName;
@@ -66,56 +66,68 @@ public class Product {
     public Product() {
     }
 
-    public int getProductId() {
+    public long getProductId() {
         return productId;
+    }
+
+    public void setProductId(long productId) {
+        this.productId = productId;
     }
 
     public String getProductName() {
         return productName;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public float getPrice() {
-        return price;
-    }
-
-    public int getTotalPortions() {
-        return totalPortions;
-    }
-
-    public int getPortionsLeft() {
-        return portionsLeft;
-    }
-
-    public int getExpired() {
-        return expired;
-    }
-
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
     }
 
+    public float getPrice() {
+        return price;
+    }
+
     public void setPrice(float price) {
         this.price = price;
+    }
+
+    public int getTotalPortions() {
+        return totalPortions;
     }
 
     public void setTotalPortions(int totalPortions) {
         this.totalPortions = totalPortions;
     }
 
+    public int getPortionsLeft() {
+        return portionsLeft;
+    }
+
     public void setPortionsLeft(int portionsLeft) {
         this.portionsLeft = portionsLeft;
     }
 
+    public int getExpired() {
+        return expired;
+    }
+
+    public void setExpired(int expired) {
+        this.expired = expired;
+    }
+
     public List<Transactions> getTransactionsList() {
         return transactionsList;
+    }
+
+    public void setTransactionsList(List<Transactions> transactionsList) {
+        this.transactionsList = transactionsList;
     }
 
     public void removeTransaction(Transactions transaction) {

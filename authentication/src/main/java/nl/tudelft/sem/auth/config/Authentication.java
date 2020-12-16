@@ -18,40 +18,61 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 
 @Configuration
 @EnableWebSecurity
-@SuppressWarnings("PMD")
 public class Authentication extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
-
     @Autowired
     private UserDetailsService userDetailsService;
-
     @Autowired
     private JwtConf jwtConf;
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public UserDetailsService getUserDetailsService() {
+        return userDetailsService;
+    }
+
+    public void setUserDetailsService(
+        UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+    public JwtConf getJwtConf() {
+        return jwtConf;
+    }
+
+    public void setJwtConf(JwtConf jwtConf) {
+        this.jwtConf = jwtConf;
+    }
 
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
         auth.jdbcAuthentication().dataSource(dataSource)
-                .usersByUsernameQuery(
-                        "select username, password, enabled from users where binary username = ?"
-        );
+            .usersByUsernameQuery(
+                "select username, password, enabled from users where binary username = ?");
     }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .exceptionHandling()
-                .authenticationEntryPoint(
-                        (req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                )
-                .and()
-                .addFilter(new JwtFilter(authenticationManager(), jwtConf))
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, jwtConf.getUri()).permitAll()
-                .anyRequest().authenticated();
+            .csrf().disable()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .exceptionHandling()
+            .authenticationEntryPoint(
+                (req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+            )
+            .and()
+            .addFilter(new JwtFilter(authenticationManager(), jwtConf))
+            .authorizeRequests()
+            .antMatchers(HttpMethod.POST, jwtConf.getUri()).permitAll()
+            .anyRequest().authenticated();
     }
 
     /**
@@ -59,7 +80,7 @@ public class Authentication extends WebSecurityConfigurerAdapter {
      * It is used for creating users and checking if users exist.
      *
      * @return A new JdbcUserDetailsManager
-     * */
+     */
     @Bean
     public JdbcUserDetailsManager jdbcUserDetailsManager() {
         final JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
