@@ -5,15 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.House;
-import nl.tudelft.sem.requests.entities.Request;
-import nl.tudelft.sem.requests.entities.RequestId;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -145,11 +140,17 @@ public class HouseController {
     @DeleteMapping("/deleteHouse/{houseNumber}")
     public void deleteHouse(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
-        if(house.isPresent()) {
+        if (house.isPresent()) {
+            List<User> users = getAllUsersFromHouse(houseNumber);
+            for (User user : users) {
+                user.setHouse(null);
+                userRepository.save(user);
+            }
             houseRepository.deleteById(houseNumber);
             System.out.println("house successfully deleted");
+        } else {
+            System.out.println("house not found!");
         }
-        System.out.println("house not found!");
     }
 
     /**
