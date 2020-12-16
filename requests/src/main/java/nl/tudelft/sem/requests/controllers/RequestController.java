@@ -2,19 +2,17 @@ package nl.tudelft.sem.requests.controllers;
 
 import java.util.List;
 import java.util.Optional;
-
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
 import nl.tudelft.sem.requests.entities.User;
-import nl.tudelft.sem.requests.entities.House;
-import nl.tudelft.sem.requests.repositories.RequestRepository;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
+import nl.tudelft.sem.requests.repositories.RequestRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The controller class for Request.
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RestController
 @SuppressWarnings("PMD")
 public class RequestController {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -68,8 +68,7 @@ public class RequestController {
      *
      * @param newRequest - the Request to add to the database
      */
-    @PutMapping("addNewRequest")
-    @ResponseBody
+    @PostMapping(value = "/addNewRequest", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addRequest(@RequestBody Request newRequest) {
         requestRepository.save(newRequest);
     }
@@ -117,49 +116,55 @@ public class RequestController {
     }
 
     /**
-     * One of the members accepting a request from a user to join their household
+     * One of the members accepting a request from a user to join their household.
      *
-     * @return true - if the request has been accepted
-     * false - if the request has not been accepted/not found
+     * @return NOT_FOUND - if the user/request was not found
+     *         FORBIDDEN - if the request house does not coincide with the user house
+     *         OK        - if the user was successfully updated
      */
     @PostMapping("/membersAcceptedRequest")
-    public String membersAcceptedRequest(@RequestParam(name = "username") String username,
-                                         @RequestParam(name = "houseNumber") int houseNumber,
-                                         @RequestParam(name = "myUsername") String myUsername) {
+    public ResponseEntity<Request> membersAcceptedRequest(
+                    @RequestParam(name = "username") String username,
+                    @RequestParam(name = "houseNumber") int houseNumber,
+                    @RequestParam(name = "myUsername") String myUsername) {
 
         RequestId id = new RequestId(houseNumber, username);
 
         UserController userController = new UserController(userRepository);
 
 
-        if (!requestRepository.existsById(id))
-            // return new ResponseEntity("The request is not found!", HttpStatus.NOT_FOUND);
-            return "error";
+        if (!requestRepository.existsById(id)) {
+            return new ResponseEntity("The request is not found!", HttpStatus.NOT_FOUND);
+        }
+
         Optional<User> currentUser = userController.getUserByUsername(myUsername);
 
-        if (!currentUser.isPresent())
-            //return new ResponseEntity("User not found!", HttpStatus.NOT_FOUND);
-            return "error";
-        if (currentUser.get().getHouse().getHouseNr() != houseNumber)
-            //return new ResponseEntity("You can't accept a user from other household!", HttpStatus.FORBIDDEN);
-            return "error";
+        if (!currentUser.isPresent()) {
+            return new ResponseEntity("User not found!", HttpStatus.NOT_FOUND);
+        }
+
+        if (currentUser.get().getHouse().getHouseNr() != houseNumber) {
+            return new ResponseEntity("You can't accept a user from other household!",
+                    HttpStatus.FORBIDDEN);
+        }
+
         Optional<Request> currentRequest = requestRepository.findById(id);
 
         currentRequest.get().setApproved(true);
 
         HouseController houseController = new HouseController(houseRepository, userRepository);
-        Optional<User> finalUser = userController.getUserByUsername(username);
-        finalUser.get().setHouse(houseController.getHouseByHouseNumber(houseNumber).get());
+        //Optional<User> finalUser = userController.getUserByUsername(username);
+        //finalUser.get().setHouse(houseController.getHouseByHouseNumber(houseNumber).get());
 
-        userRepository.save(finalUser.get());
+        //userRepository.save(finalUser.get());
+
+        houseController.userJoiningHouse(username, houseNumber);
 
         this.updateRequest(currentRequest.get(), currentRequest.get().getId());
 
 
-        //return new ResponseEntity("You have successfully accepted the user: " +
-             //   currentRequest.get().getUser().getUsername(), HttpStatus.OK);
-
-        return "e bine";
+        return new ResponseEntity("You have successfully accepted the user: "
+                + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
     }
 
     /*
