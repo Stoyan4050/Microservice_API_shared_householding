@@ -86,21 +86,13 @@ public class RequestController {
         Optional<Request> request = requestRepository.findById(requestId);
 
         if (request.isPresent()) {
-            request.get().setId(requestWithNewInfo.getId());
-            request.get().setHouse(requestWithNewInfo.getHouse());
-            request.get().setUser(requestWithNewInfo.getUser());
-            request.get().setApproved(requestWithNewInfo.isApproved());
-
-            Request newRequest;
             try {
-                newRequest = requestRepository.save(request.get());
+                requestRepository.save(requestWithNewInfo);
             } catch (Exception e) {
                 return "Request couldn't be updated!";
             }
-
             return "Request updated successfully!";
         }
-
         return "Request not found!";
     }
 
