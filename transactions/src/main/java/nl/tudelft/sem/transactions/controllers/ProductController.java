@@ -187,5 +187,27 @@ public class ProductController {
         return product.getExpired();
     }
 
+
+    /**
+     * This method deletes all the products which are expired but are still in the database.
+     *
+     * @return - true if the products were successfully deleted, false otherwise
+     */
+    @DeleteMapping("deleteExpired")
+    boolean deleteExpired() {
+        try {
+            List<Product> allProducts = productRepository.findAll();
+            for (Product p : allProducts) {
+                if (p.getExpired() == 1) {
+                    productRepository.delete(p);
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 }
 
