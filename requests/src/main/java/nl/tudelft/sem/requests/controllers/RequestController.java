@@ -159,7 +159,7 @@ public class RequestController {
         //method userJoiningHouse of HouseController -> setting the house of the new user
         houseController.userJoiningHouse(username, houseNumber);
 
-        this.updateRequest(currentRequest.get(), currentRequest.get().getId());
+        updateRequest(currentRequest.get(), currentRequest.get().getId());
 
 
         return new ResponseEntity("You have successfully accepted the user: "
