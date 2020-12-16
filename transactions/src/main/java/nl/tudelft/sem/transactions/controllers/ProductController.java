@@ -167,7 +167,7 @@ public class ProductController {
      */
     @PostMapping("/changeExpired")
     public @ResponseBody
-    boolean changeExpired(@RequestBody Product product) {
+    boolean setExpired(@RequestBody Product product) {
         try {
             product.setExpired(1);
             return true;
