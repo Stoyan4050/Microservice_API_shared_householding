@@ -170,4 +170,15 @@ public class ProductController {
         }
     }
 
+    @PostMapping("/changeExpired")
+    boolean changeExpired(@RequestBody Product product){
+        int exp = product.getExpired();
+        try {
+            product.setExpired(1);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
 }
