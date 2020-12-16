@@ -139,7 +139,12 @@ public class UserController {
      */
     @DeleteMapping("/deleteUser/{username}")
     public void deleteUser(@PathVariable String username) {
-        userRepository.deleteById(username);
+        Optional<User> user = userRepository.findById(username);
+        if(user.isPresent()){
+            userRepository.deleteById(username);
+            System.out.println("user successfully deleted");
+        }
+        System.out.println("user not found!");
     }
 
     /**

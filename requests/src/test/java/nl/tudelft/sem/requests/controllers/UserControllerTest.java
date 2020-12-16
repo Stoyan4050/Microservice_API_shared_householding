@@ -116,8 +116,20 @@ public class UserControllerTest {
 
     @Test
     public void testDeleteUser() {
+        Optional<User> user = Optional.of(new User("username2"));
+        when(userRepository.findById("username2")).thenReturn(user);
         userController.deleteUser("username2");
         verify(userRepository, times(1)).deleteById("username2");
+    }
+
+    @Test
+    public void testDeleteUser2() {
+        // in this situation there's no user with username "username1",
+        // thus the deleteById won't be invoked
+        Optional<User> user = Optional.ofNullable(null);
+        when(userRepository.findById("username1")).thenReturn(user);
+        userController.deleteUser("username1");
+        verify(userRepository, times(0)).deleteById("username2");
     }
 
     @Test
