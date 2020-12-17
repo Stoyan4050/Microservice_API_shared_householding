@@ -42,6 +42,17 @@ class ProductControllerTest {
 
 
     @Test
+    public void getUserProducts(){
+        final List<Product> products = Arrays.asList(new Product("Butter",5,5,"kendra"));
+
+        when(productRepository.findAll()).thenReturn(products);
+        final List<Product> result = productController.getUserProducts("kendra");
+
+        assertEquals(products.size(), result.size());
+        assertEquals(products.get(0), result.get(0));
+    }
+
+    @Test
     void deleteProduct() {
         Assertions.assertFalse(productController.deleteProduct(-128));
     }
