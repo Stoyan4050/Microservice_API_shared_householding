@@ -112,14 +112,15 @@ public class ProductController {
     /**
      * Edits a product.
      *
-     * @param product - product to be edited in the database
+     * @param productId - product to be got by Id
      * @return true if product successfully edited, false otherwise
      */
     @RequestMapping("/editProduct") // Map ONLY POST Requests
     public @ResponseBody
-    boolean editProduct(@RequestBody Product product) {
+    boolean editProduct(@RequestBody Product productId) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
+        Product product = productRepository.findByProductId(productId.getProductId());
         try {
             return productRepository.updateExistingProduct(product.getProductName(),
                 product.getUsername(),
@@ -153,12 +154,16 @@ public class ProductController {
      * This method allows the user to change the status of
      * an object to expired once it has gone bad.
      *
-     * @param product - the product of which the expired field must be changed
+     * @param productId - the product of which the expired field must be changed
      * @return - true in case the expired field was changed, fale otherwise.
      */
     @PostMapping("/setExpired")
     public @ResponseBody
-    ResponseEntity<?> setExpired(@Username String username, @RequestBody Product product) {
+    ResponseEntity<?> setExpired(@Username String username, @RequestBody Product productId) {
+        Product product = productRepository.findByProductId(productId.getProductId());
+        if(product == null){
+            return ResponseEntity.badRequest().build();
+        }
         try {
             float price = product.getPrice();
             float pricePerPortion = price / product.getTotalPortions();
@@ -182,7 +187,7 @@ public class ProductController {
      *
      * @return - true if the products were successfully deleted, false otherwise
      */
-    @DeleteMapping("deleteExpired")
+    @DeleteMapping("/deleteExpired")
     public @ResponseBody
     boolean deleteExpired(@RequestParam long productId) {
         try {

@@ -17,7 +17,11 @@ public class TransactionsSplitCredits {
 	
     }
 
-    public List<String> getUsernames() {
+	public TransactionsSplitCredits() {
+    	
+	}
+
+public List<String> getUsernames() {
 	return usernames;
     }
 
