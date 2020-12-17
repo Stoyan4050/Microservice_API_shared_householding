@@ -98,7 +98,7 @@ public class HouseController {
     @PostMapping("/addNewHouse")
     //@RequestMapping(value = "/addNewHouse", method=RequestMethod.POST,
     //       consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
-    public void addNewHouse(@RequestBody House house, @RequestParam("username") String username) {
+    public void addNewHouse(@RequestBody House house, @Username String username) {
         houseRepository.save(house);
         Optional<User> user = userRepository.findById(username);
         user.ifPresent(u -> u.setHouse(house));

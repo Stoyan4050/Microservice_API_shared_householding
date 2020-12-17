@@ -61,7 +61,7 @@ public class TransactionController {
         int portionsLeft = product.getPortionsLeft()
                                    - transaction.getPortionsConsumed();
         
-        if (transaction.getProduct().getExpired() == 1 || portionsLeft < 0) {
+        if (transaction.getProductFk().getExpired() == 1 || portionsLeft < 0) {
             return false;
         }
         
@@ -118,7 +118,6 @@ public class TransactionController {
                                 / product.getTotalPortions();
         
         credits = credits * transaction.getPortionsConsumed();
-        System.out.println("USername size: " + usernames.size());
         float splitCredits = credits / usernames.size();
         
         splitCredits = Math.round(splitCredits * 100) / 100;
@@ -148,14 +147,28 @@ public class TransactionController {
     boolean editTransactions(@RequestBody Transactions transaction) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
+        //Transactions oldTransaction =
+        // transactionsRepository.getOne(transaction.getTransactionId());
+        //Product product = oldTransaction.getProductFk();
+        //oldTransaction.setPortionsConsumed(
+        // product.getPortionsLeft() + oldTransaction.getPortionsConsumed());
+        
+        //float pricePerPortion = product.getPrice() / product.getTotalPortions();
+        
+        
+        
+        
         try {
-            return transactionsRepository.updateExistingTransaction(transaction.getProductId(),
+            if (transactionsRepository.updateExistingTransaction(transaction.getProductId(),
                 transaction.getUsername(),
                 transaction.getPortionsConsumed(),
-                transaction.getTransactionId()) == 1;
+                transaction.getTransactionId()) == 0) {
+                return false;
+            }
         } catch (Exception e) {
             return false;
         }
+        return true;
     }
 
     /**
@@ -170,8 +183,8 @@ public class TransactionController {
         try {
             Optional<Transactions> t = transactionsRepository.findById(transactionId);
             Transactions transaction = t.get();
-            transaction.getProduct().removeTransaction(transaction);
-            transaction.setProduct(null);
+            transaction.getProductFk().removeTransaction(transaction);
+            transaction.setProductFk(null);
             transactionsRepository.delete(transaction);
             System.out.println("The transaction was deleted.");
         } catch (Exception e) {

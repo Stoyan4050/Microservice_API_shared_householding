@@ -43,14 +43,6 @@ public class Transactions {
         this.transactionId = transactionId;
     }
 
-    public Product getProduct() {
-        return this.productFk;
-    }
-
-    public void setProduct(Product product) {
-        this.productFk = product;
-    }
-
     public long getProductId() {
         return productFk.getProductId();
     }

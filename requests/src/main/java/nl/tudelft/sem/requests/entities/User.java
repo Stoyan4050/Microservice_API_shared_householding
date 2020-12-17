@@ -13,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 
 /**
  * Class representing the User entity in the database - User table.
@@ -39,6 +42,7 @@ public class User implements java.io.Serializable {
     @Column(name = "email", length = 1000)
     private String email;
 
+    @Cascade(CascadeType.DELETE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private Set<Request> requests = new HashSet<Request>(0);
 

@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,8 +113,8 @@ public class UserController {
      * @param username        - the name of the User that is going to be changed
      * @return status if the update was successful or not
      */
-    @PutMapping("/updateUser/{username}")
-    public String updateUser(@RequestBody User userWithNewInfo, @PathVariable String username) {
+    @PutMapping("/updateUser")
+    public String updateUser(@RequestBody User userWithNewInfo, @Username String username) {
         Optional<User> user = userRepository.findById(username);
 
         if (user.isPresent()) {
@@ -140,8 +141,8 @@ public class UserController {
      *
      * @param username username of the user to delete from the database
      */
-    @DeleteMapping("/deleteUser/{username}")
-    public void deleteUser(@PathVariable String username) {
+    @DeleteMapping("/deleteUser")
+    public void deleteUser(@Username String username) {
         Optional<User> user = userRepository.findById(username);
         if (user.isPresent()) {
             userRepository.deleteById(username);
@@ -157,8 +158,8 @@ public class UserController {
      * @return OK - if the userBalance > -50
      *         FORBIDDEN - if the userBalance <= -50
      */
-    @GetMapping("/getCreditsStatusForGroceries/{username}")
-    public ResponseEntity<User> getCreditsStatusForGroceries(@PathVariable String username) {
+    @GetMapping("/getCreditsStatusForGroceries")
+    public ResponseEntity<User> getCreditsStatusForGroceries(@Username String username) {
         Optional<User> user = userRepository.findById(username);
 
         if (user.isPresent()) {
