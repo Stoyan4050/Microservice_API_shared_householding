@@ -151,7 +151,7 @@ public class TransactionController {
         Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
         Product product = oldTransaction.getProductFk();
         
-        float pricePerPortion = product.getPrice() / product.getTotalPortions();//NOPMD
+        float pricePerPortion = product.getPrice() / product.getTotalPortions(); //NOPMD
         
         
         product.setPortionsLeft(product.getPortionsLeft() + oldTransaction.getPortionsConsumed());

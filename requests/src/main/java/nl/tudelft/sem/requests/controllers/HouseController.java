@@ -48,7 +48,7 @@ public class HouseController {
         this.houseRepository = houseRepository;
         this.userRepository = userRepository;
     }
-
+    
     /**
      * Returns all houses from the database.
      *
@@ -59,7 +59,7 @@ public class HouseController {
     public List<House> getAllHouses() {
         return houseRepository.findAll();
     }
-
+    
     /**
      * Returns a house with specified houseNumber.
      *
@@ -72,7 +72,7 @@ public class HouseController {
         System.out.println(username);
         return houseRepository.findById(houseNumber);
     }
-
+    
     /**
      * Returns all users that belong to this house.
      *
@@ -88,7 +88,7 @@ public class HouseController {
         }
         return users;
     }
-
+    
     /**
      * Adds a new house to the database.
      *
@@ -104,7 +104,7 @@ public class HouseController {
         user.ifPresent(u -> u.setHouse(house));
         user.ifPresent(u -> userRepository.save(u));
     }
-
+    
     /**
      * Updates a Request, searched by the houseNr. - Without HTTP response
      *
@@ -115,26 +115,26 @@ public class HouseController {
     @PutMapping("/updateHouse/{houseNr}")
     public String updateHouse(@RequestBody House houseWithNewInfo, @PathVariable int houseNr) {
         Optional<House> house = houseRepository.findById(houseNr);
-
+        
         if (house.isPresent()) {
             house.get().setHouseNr(houseWithNewInfo.getHouseNr());
             house.get().setName(houseWithNewInfo.getName());
             house.get().setRequests(houseWithNewInfo.getRequests());
             house.get().setUsers(houseWithNewInfo.getUsers());
-
+            
             House newHouse;
             try {
                 newHouse = houseRepository.save(house.get());
             } catch (Exception e) {
                 return "House couldn't be updated!";
             }
-
+            
             return "House updated successfully!";
         }
-
+        
         return "House not found!";
     }
-
+    
     /**
      * Deletes a house with a given houseNumber.
      *
@@ -149,7 +149,7 @@ public class HouseController {
         }
         System.out.println("house not found!");
     }
-
+    
     /**
      * User joining a house, once a request has been approved.
      *
@@ -159,58 +159,89 @@ public class HouseController {
     public void userJoiningHouse(String username, int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
-
+        
         user.get().setHouse(house.get());
-
+        
         UserController userController = new UserController(userRepository);
         userController.updateUser(user.get(), user.get().getUsername());
-
+        
     }
-
-    /**Method for subtracting credits, when products is expired.
+    
+    /**
+     * Method for subtracting credits, when products is expired.
      *
      * @param username username of the user that has reported the product as expired
-     * @param credits amount of credits to be split
-     *
+     * @param credits  amount of credits to be split
      * @return true if the credits were subtracted from each user
      */
     @PostMapping("/splitCreditsExpired")
     public @ResponseBody
     ResponseEntity<?> splitCreditsWhenExpired(@RequestParam String username,
-                                  @RequestParam float credits) {
-    
+                                              @RequestParam float credits) {
+        
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
-
-    
+        
+        
         User currentUser = userRepository.findByUsername(username);
         
         House house = currentUser.getHouse();
         
         Set<User> users = house.getUsers();
-    
+        
         if (users == null || users.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-    
+        
         credits = credits / users.size();
-    
+        
         try {
             for (User user : users) {
                 if (userRepository.updateUserCredits(user.getHouse().getHouseNr(),
-                    user.getEmail(),
-                    user.getTotalCredits() - credits,
-                    user.getUsername()) == 0) { //NOPMD
+                        user.getEmail(),
+                        user.getTotalCredits() - credits,
+                        user.getUsername()) == 0) { //NOPMD
                     return ResponseEntity.badRequest().build();
                 }
-    
+                
             }
             return ResponseEntity.created(URI.create("/editUserCredits")).build();
-    
+            
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
-    
 
+    /**Get all products from a fridge of the house.
+     *
+     *@param houseNr the number of the house which products from the fridge will be displayed
+     *@return all products from the fridge
+     */
+    @PostMapping("/getUsernamesByHouse")
+    public @ResponseBody
+    ResponseEntity<?> getUsernamesByHouse(@RequestParam int houseNr) {
+        
+        // @ResponseBody means the returned String is the response, not a view name
+        // @RequestParam means it is a parameter from the GET or POST request
+        
+        House house = houseRepository.findByHouseNr(houseNr);
+        Set<User> users = house.getUsers();
+        
+        
+        if (users == null || users.isEmpty() || house == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        List<String> usernames = new ArrayList<>();
+        for (User user : users) {
+            usernames.add(user.getUsername());
+        }
+        
+        try {
+            return ResponseEntity.created(URI.create("/getUsernamesByHouse")).body(usernames);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
+

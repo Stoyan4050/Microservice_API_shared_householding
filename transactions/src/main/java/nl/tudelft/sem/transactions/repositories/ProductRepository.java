@@ -1,5 +1,6 @@
 package nl.tudelft.sem.transactions.repositories;
 
+import java.util.List;
 import javax.transaction.Transactional;
 import nl.tudelft.sem.transactions.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +27,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     int deleteProductById(long productId);
 
     Product findByProductId(long productId);
+    
+    List<Product> findByUsername(String username);
     
 }
 

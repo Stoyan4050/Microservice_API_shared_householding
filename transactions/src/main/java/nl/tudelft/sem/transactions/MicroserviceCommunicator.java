@@ -1,6 +1,7 @@
 package nl.tudelft.sem.transactions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
@@ -40,13 +41,11 @@ public class MicroserviceCommunicator {
 	try {
 	    HttpResponse<String> httpResponse = httpClient.send(
 				request, HttpResponse.BodyHandlers.ofString());
-		   //ObjectMapper mapper = new ObjectMapper();
-		   //mapper.readValue(httpResponse.body(), new TypeReference<Float>() {
-		   //});
+
 	    System.out.println("Request sent successfully!");
 		
 	    if (httpResponse.body().equals("" + false)) {
-	    	System.out.print("Error: Operation did not succeed!");
+	    	System.out.print("Error: Operation changing credits did not succeed!");
 	    }
 	    System.out.println("Operation was successful!");
 		
@@ -80,12 +79,12 @@ public class MicroserviceCommunicator {
 	    HttpResponse<String> httpResponse = httpClient.send(
 				request, HttpResponse.BodyHandlers.ofString());
 		
-	    System.out.println("Request sent successfully!");
+	    System.out.println("Subtract Request sent successfully!");
 		
 	    if (httpResponse.body().equals("" + false)) {
 	        System.out.print("Error: Operation did not succeed!");
 	    }
-	    System.out.println("Operation was successful!");
+	    System.out.println("Subtract Operation was successful!");
 		
 	} catch (IOException | InterruptedException e) {
 	    System.out.println(
@@ -140,6 +139,45 @@ public class MicroserviceCommunicator {
         }
 	
 	
+    }
+
+    /**Get the list of a usernames from particular house.
+     *
+	 * @param houseNr number of the house
+	 * @return the list of usernames
+     */
+    public static List<String> sendRequestForUsersOfHouse(int houseNr) {
+	
+	
+	String url = "http://localhost:9102/getUsernamesByHouse";
+	
+	HttpRequest request = HttpRequest.newBuilder()
+						.uri(URI.create(url + "?houseNr=" + houseNr))
+						.POST(HttpRequest.BodyPublishers.noBody())
+						.build();
+	
+	try {
+	    HttpResponse<String> httpResponse = httpClient.send(
+				request, HttpResponse.BodyHandlers.ofString());
+		
+	    System.out.println("Request sent successfully!");
+		
+	    if (httpResponse.body().equals("" + false)) {
+	        System.out.print("Error: Operation did not succeed!");
+	    }
+	    
+	    ObjectMapper mapper = new ObjectMapper();
+	    List<String> usernames = mapper.readValue(httpResponse.body(),
+				new TypeReference<List<String>>() {});
+	    System.out.println("Operation was successful!");
+	    return usernames;
+		
+	} catch (IOException | InterruptedException e) {
+	    System.out.println(
+		"Error encountered while trying to send a request for expired credits: "
+						+ e.getLocalizedMessage());
+	    return null;
+	}
     }
 	
 }
