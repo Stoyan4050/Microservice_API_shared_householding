@@ -72,7 +72,7 @@ public class ProductController {
      * @param username - the username of the person whose products we are searching for
      * @return - a list of products that were added by the user with the indicated username
      */
-    @GetMapping("getUserProducts/{userID}")
+    @GetMapping("getUserProducts/{username}")
     @ResponseBody
     public List<Product> getUserProducts(@PathVariable String username) {
         List<Product> allProducts = productRepository.findAll();
