@@ -1,19 +1,17 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.House;
-import nl.tudelft.sem.requests.entities.Request;
-import nl.tudelft.sem.requests.entities.RequestId;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -168,4 +166,51 @@ public class HouseController {
         userController.updateUser(user.get(), user.get().getUsername());
 
     }
+
+    /**Method for subtracting credits, when products is expired.
+     *
+     * @param username username of the user that has reported the product as expired
+     * @param credits amount of credits to be split
+     *
+     * @return true if the credits were subtracted from each user
+     */
+    @PostMapping("/splitCreditsExpired")
+    public @ResponseBody
+    ResponseEntity<?> splitCreditsWhenExpired(@RequestParam String username,
+                                  @RequestParam float credits) {
+    
+        // @ResponseBody means the returned String is the response, not a view name
+        // @RequestParam means it is a parameter from the GET or POST request
+
+    
+        User currentUser = userRepository.findByUsername(username);
+        
+        House house = currentUser.getHouse();
+        
+        Set<User> users = house.getUsers();
+    
+        if (users == null || users.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+    
+        credits = credits / users.size();
+    
+        try {
+            for (User user : users) {
+                if (userRepository.updateUserCredits(user.getHouse().getHouseNr(),
+                    user.getEmail(),
+                    user.getTotalCredits() - credits,
+                    user.getUsername()) == 0) { //NOPMD
+                    return ResponseEntity.badRequest().build();
+                }
+    
+            }
+            return ResponseEntity.created(URI.create("/editUserCredits")).build();
+    
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+
 }

@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.config.JwtConf;
 import nl.tudelft.sem.transactions.config.Username;
@@ -160,12 +159,22 @@ public class ProductController {
      */
     @PostMapping("/setExpired")
     public @ResponseBody
-    boolean setExpired(@RequestBody Product product) {
+    ResponseEntity<?> setExpired(@RequestParam String username, @RequestBody Product product) {
         try {
-            product.setExpired(1);
-            return true;
+            float price = product.getPrice();
+            float pricePerPortion = price / product.getTotalPortions();
+            price = pricePerPortion * product.getPortionsLeft();
+            
+            MicroserviceCommunicator.subtractCreditsWhenExpired(username, price);
+            
+            productRepository.updateExistingProduct(product.getProductName(),
+                    product.getUsername(), product.getPrice(),
+                    product.getTotalPortions(), product.getPortionsLeft(),
+                    1, product.getProductId());
+            return ResponseEntity.created(URI.create("/setExpired")).build();
+    
         } catch (Exception e) {
-            return false;
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -178,7 +187,7 @@ public class ProductController {
      */
     @GetMapping("/isExpired")
     public @ResponseBody
-    boolean isExpired(@RequestParam Product product) {
+    boolean isExpired(@RequestBody Product product) {
         if (product.getExpired() == 0) {
             return false;
         }

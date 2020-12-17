@@ -50,12 +50,49 @@ public class MicroserviceCommunicator {
 		
 	} catch (IOException | InterruptedException e) {
 	    System.out.println(
-		    "Error encountered while trying to send a request for adding credits: "
+		    "Error encountered while trying to send a request for adding/deleting credits: "
 								   + e.getLocalizedMessage());
 	}
 	
     }
+    /**
+     * This method sends a request to change credits.
+     *
+     * @param username - username of the users that has reported th product as expired
+     * @param credits - the number of credits to be added or subtracted.
+     */
 
+    public static void subtractCreditsWhenExpired(
+		String username, float credits) {
+	
+	
+	String url = "http://localhost:9102/splitCreditsExpired";
+	
+	HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(url + "?username=" + username
+									+ "&credits=" + credits))
+					.POST(HttpRequest.BodyPublishers.noBody())
+					.build();
+	
+	try {
+	    HttpResponse<String> httpResponse = httpClient.send(
+				request, HttpResponse.BodyHandlers.ofString());
+		
+	    System.out.println("Request sent successfully!");
+		
+	    if (httpResponse.body().equals("" + false)) {
+	        System.out.print("Error: Operation did not succeed!");
+	    }
+	    System.out.println("Operation was successful!");
+		
+	} catch (IOException | InterruptedException e) {
+	    System.out.println(
+		    "Error encountered while trying to send a request for expired credits: "
+		     + e.getLocalizedMessage());
+	}
+	
+    }
+    
     /**
 	 * Sending request for splitting the credits of a meal when users are eating together.
 	 *

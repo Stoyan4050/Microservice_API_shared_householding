@@ -21,7 +21,7 @@ public class Transactions {
     @Column(name = "transaction_id")
     private long transactionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "product_id")
     private Product productFk;

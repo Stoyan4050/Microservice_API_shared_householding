@@ -48,6 +48,10 @@ public class TransactionController {
     @PostMapping("/addNewTransaction")
     public @ResponseBody
     boolean addNewTransaction(@RequestBody Transactions transaction) {
+        if (transaction.getProduct().getExpired() == 1) {
+            return false;
+        }
+        
         Product product = transaction.getProduct();
         float credits = product.getPrice()
                                 / product.getTotalPortions();
@@ -59,7 +63,6 @@ public class TransactionController {
             transactionsRepository.save(transaction);
             MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
                     credits, false);
-    
             return true;
         } catch (DataIntegrityViolationException e) {
             return false;
