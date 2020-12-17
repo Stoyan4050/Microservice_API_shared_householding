@@ -6,6 +6,7 @@ import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
+import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,6 +23,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class TransactionController {
     @Autowired
     private TransactionsRepository transactionsRepository;
+
+    @Autowired
+    private transient ProductRepository productRepository;
 
     public TransactionsRepository getTransactionsRepository() {
         return transactionsRepository;
@@ -48,9 +52,15 @@ public class TransactionController {
     @PostMapping("/addNewTransaction")
     public @ResponseBody
     boolean addNewTransaction(@RequestBody Transactions transaction) {
-        if (transaction.getProduct().getExpired() == 1) {
+        
+        int portionsLeft = transaction.getProductFk().getPortionsLeft()
+                                   - transaction.getPortionsConsumed();
+        
+        if (transaction.getProduct().getExpired() == 1 || portionsLeft < 0) {
             return false;
         }
+        
+        
         
         Product product = transaction.getProduct();
         float credits = product.getPrice()
@@ -58,9 +68,14 @@ public class TransactionController {
         
         credits = credits * transaction.getPortionsConsumed();
         credits = Math.round(credits * 100) / 100;
+        
     
         try {
             transactionsRepository.save(transaction);
+            productRepository.updateExistingProduct(product.getProductName(),
+                    product.getUsername(), product.getPrice(), product.getTotalPortions(),
+                    portionsLeft, 0, product.getProductId());
+            
             MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
                     credits, false);
             return true;

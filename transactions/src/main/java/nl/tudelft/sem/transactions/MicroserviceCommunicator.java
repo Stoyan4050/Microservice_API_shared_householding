@@ -40,7 +40,9 @@ public class MicroserviceCommunicator {
 	try {
 	    HttpResponse<String> httpResponse = httpClient.send(
 				request, HttpResponse.BodyHandlers.ofString());
-		
+		   //ObjectMapper mapper = new ObjectMapper();
+		   //mapper.readValue(httpResponse.body(), new TypeReference<Float>() {
+		   //});
 	    System.out.println("Request sent successfully!");
 		
 	    if (httpResponse.body().equals("" + false)) {

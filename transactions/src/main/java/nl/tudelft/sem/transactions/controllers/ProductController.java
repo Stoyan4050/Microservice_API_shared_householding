@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -81,9 +80,9 @@ public class ProductController {
      * @param username - the username of the person whose products we are searching for
      * @return - a list of products that were added by the user with the indicated username
      */
-    @GetMapping("getUserProducts/{username}")
+    @GetMapping("/getUserProducts")
     @ResponseBody
-    public List<Product> getUserProducts(@PathVariable String username) {
+    public List<Product> getUserProducts(@Username String username) {
         List<Product> allProducts = productRepository.findAll();
         List<Product> products = new ArrayList<>();
         for (Product p : allProducts) {
@@ -159,7 +158,7 @@ public class ProductController {
      */
     @PostMapping("/setExpired")
     public @ResponseBody
-    ResponseEntity<?> setExpired(@RequestParam String username, @RequestBody Product product) {
+    ResponseEntity<?> setExpired(@Username String username, @RequestBody Product product) {
         try {
             float price = product.getPrice();
             float pricePerPortion = price / product.getTotalPortions();
@@ -177,24 +176,7 @@ public class ProductController {
             return ResponseEntity.badRequest().build();
         }
     }
-
-    /**
-     * This method allows a user to check whether a product was marked as expired.
-     *
-     * @param product - the product whose expired field must be checked
-     * @return - this method returns true if the product
-     *           is indeed expired and it returns false otherwise.
-     */
-    @GetMapping("/isExpired")
-    public @ResponseBody
-    boolean isExpired(@RequestBody Product product) {
-        if (product.getExpired() == 0) {
-            return false;
-        }
-        return true;
-    }
-
-
+    
     /**
      * This method deletes all the products which are expired but are still in the database.
      *

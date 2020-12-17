@@ -1,5 +1,6 @@
 package nl.tudelft.sem.requests.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -86,7 +87,8 @@ public class House implements java.io.Serializable {
     public void setRequests(Set<Request> requests) {
         this.requests = requests;
     }
-
+    
+    @JsonIgnore
     public Set<User> getUsers() {
         return this.users;
     }

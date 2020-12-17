@@ -197,7 +197,8 @@ public class UserController {
                     currentUser.getEmail(),
                     currentUser.getTotalCredits() + credits,
                     currentUser.getUsername()) == 1) { //NOPMD
-                return ResponseEntity.created(URI.create("/editUserCredits")).build();
+                //return ResponseEntity.created(URI.create("/editUserCredits")).build();
+                ResponseEntity.created(URI.create("/editUserCredits")).body(15.f);
             }
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {

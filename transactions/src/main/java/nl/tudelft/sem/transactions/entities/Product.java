@@ -1,5 +1,6 @@
 package nl.tudelft.sem.transactions.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -120,7 +121,8 @@ public class Product {
     public void setExpired(int expired) {
         this.expired = expired;
     }
-
+    
+    @JsonIgnore
     public List<Transactions> getTransactionsList() {
         return transactionsList;
     }
