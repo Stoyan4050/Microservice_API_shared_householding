@@ -16,12 +16,12 @@ public class TransactionsSplitCredits {
 	this.transactionsSplit = transactionsSplit;
 	
     }
+    
+    public TransactionsSplitCredits() {
+    
+    }
 
-	public TransactionsSplitCredits() {
-    	
-	}
-
-public List<String> getUsernames() {
+    public List<String> getUsernames() {
 	return usernames;
     }
 

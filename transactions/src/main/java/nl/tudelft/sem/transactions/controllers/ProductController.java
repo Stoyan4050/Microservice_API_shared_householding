@@ -161,7 +161,7 @@ public class ProductController {
     public @ResponseBody
     ResponseEntity<?> setExpired(@Username String username, @RequestBody Product productId) {
         Product product = productRepository.findByProductId(productId.getProductId());
-        if(product == null){
+        if (product == null) {
             return ResponseEntity.badRequest().build();
         }
         try {

@@ -97,12 +97,12 @@ public class TransactionController {
     boolean addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
                                                       transactionsSplitCredits) {
         
-        List<String> usernames = transactionsSplitCredits.getUsernames();
+        
         Transactions transaction = transactionsSplitCredits.getTransactionsSplit();
         
         Product product = productRepository.findByProductId(transaction.getProductId());
         
-        if(product == null){
+        if (product == null) {
             return false;
         }
         
@@ -112,18 +112,20 @@ public class TransactionController {
         if (product.getExpired() == 1 || portionsLeft < 0) {
             return false;
         }
-        
+    
+        List<String> usernames = transactionsSplitCredits.getUsernames();
         float credits = product.getPrice()
                                 / product.getTotalPortions();
         
         credits = credits * transaction.getPortionsConsumed();
-        System.out.println("USername size: "+ usernames.size() );
+        System.out.println("USername size: " + usernames.size());
         float splitCredits = credits / usernames.size();
         
         splitCredits = Math.round(splitCredits * 100) / 100;
         
         try {
-            productRepository.updateExistingProduct(product.getProductName(), product.getUsername(), product.getPrice(),
+            productRepository.updateExistingProduct(product.getProductName(),
+                    product.getUsername(), product.getPrice(),
                     product.getTotalPortions(), portionsLeft, 0, product.getProductId());
             
             transactionsRepository.save(transaction);
