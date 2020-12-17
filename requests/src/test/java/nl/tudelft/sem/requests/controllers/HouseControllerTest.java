@@ -20,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 
 /**
@@ -57,8 +59,9 @@ public class HouseControllerTest {
     public void testGetHouseById() {
         final Optional<House> houses = Optional.of(new House(1, "CoolHouse"));
         when(houseRepository.findById(1)).thenReturn(houses);
-        final Optional<House> result = houseController.getHouseByHouseNumber(1, "user");
-        assertEquals(houses, result);
+        final ResponseEntity<House> result = houseController.getHouseByHouseNumber(1);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
+        assertEquals(houses.get(), result.getBody());
     }
 
     @Test
@@ -98,9 +101,9 @@ public class HouseControllerTest {
         house.get().setUsers(set);
         when(houseRepository.findById(1)).thenReturn(house);
 
-        List<User> result = houseController.getAllUsersFromHouse(1);
-        List<User> expected = new ArrayList<>();
-        expected.add(user);
-        assertEquals(expected, result);
+        ResponseEntity<List<User>> result = houseController.getAllUsersFromHouse(1);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
+        List<User> expected = List.of(user);
+        assertEquals(expected, result.getBody());
     }
 }

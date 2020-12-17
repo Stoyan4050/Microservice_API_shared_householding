@@ -11,6 +11,7 @@ import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,10 +68,10 @@ public class HouseController {
      */
     @GetMapping("/getHouse/{houseNumber}")
     @ResponseBody
-    public Optional<House> getHouseByHouseNumber(@PathVariable int houseNumber,
-                                                 @Username String username) {
-        System.out.println(username);
-        return houseRepository.findById(houseNumber);
+    public ResponseEntity<House> getHouseByHouseNumber(@PathVariable int houseNumber) {
+        Optional<House> house = houseRepository.findById(houseNumber);
+        return house.map(value -> ResponseEntity.ok().body(value))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -80,13 +81,10 @@ public class HouseController {
      * @return a list of users in this house
      */
     @GetMapping("/getUsersFromHouse/{houseNumber}")
-    public List<User> getAllUsersFromHouse(@PathVariable int houseNumber) {
+    public ResponseEntity<List<User>> getAllUsersFromHouse(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
-        List<User> users = new ArrayList<>();
-        if (house.isPresent()) {
-            users.addAll(house.get().getUsers());
-        }
-        return users;
+        return house.map(value -> ResponseEntity.ok().body(List.copyOf(value.getUsers())))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -98,11 +96,15 @@ public class HouseController {
     @PostMapping("/addNewHouse")
     //@RequestMapping(value = "/addNewHouse", method=RequestMethod.POST,
     //       consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
-    public void addNewHouse(@RequestBody House house, @Username String username) {
-        houseRepository.save(house);
+    public ResponseEntity<?> addNewHouse(@RequestBody House house, @Username String username) {
         Optional<User> user = userRepository.findById(username);
-        user.ifPresent(u -> u.setHouse(house));
-        user.ifPresent(u -> userRepository.save(u));
+        return user.map(u -> {
+            houseRepository.save(house);
+            u.setHouse(house);
+            userRepository.save(u);
+            return ResponseEntity.created(URI.create("/addNewHouse")).build();
+        }).orElseGet(() ->
+                ResponseEntity.badRequest().body("User is not present in the database."));
     }
 
     /**
@@ -113,7 +115,8 @@ public class HouseController {
      * @return status if the update was successful or not
      */
     @PutMapping("/updateHouse/{houseNr}")
-    public String updateHouse(@RequestBody House houseWithNewInfo, @PathVariable int houseNr) {
+    public ResponseEntity<String> updateHouse(@RequestBody House houseWithNewInfo,
+                                              @PathVariable int houseNr) {
         Optional<House> house = houseRepository.findById(houseNr);
 
         if (house.isPresent()) {
@@ -122,17 +125,17 @@ public class HouseController {
             house.get().setRequests(houseWithNewInfo.getRequests());
             house.get().setUsers(houseWithNewInfo.getUsers());
 
-            House newHouse;
             try {
-                newHouse = houseRepository.save(house.get());
+                houseRepository.save(house.get());
             } catch (Exception e) {
-                return "House couldn't be updated!";
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("House couldn't be updated!");
             }
 
-            return "House updated successfully!";
+            return ResponseEntity.ok().body("House updated successfully!");
         }
 
-        return "House not found!";
+        return ResponseEntity.notFound().build();
     }
 
     /**
@@ -141,13 +144,16 @@ public class HouseController {
      * @param houseNumber houseNumber of the house to delete from the database
      */
     @DeleteMapping("/deleteHouse/{houseNumber}")
-    public void deleteHouse(@PathVariable int houseNumber) {
+    public ResponseEntity<?> deleteHouse(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         if (house.isPresent()) {
+            if (!house.get().getUsers().isEmpty()) {
+                return ResponseEntity.badRequest().body("House is not empty.");
+            }
             houseRepository.deleteById(houseNumber);
-            System.out.println("house successfully deleted");
+            return ResponseEntity.ok().body("House successfully deleted.");
         }
-        System.out.println("house not found!");
+        return ResponseEntity.notFound().build();
     }
 
     /**
