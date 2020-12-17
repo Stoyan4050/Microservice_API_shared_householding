@@ -144,10 +144,16 @@ public class HouseController {
     public void deleteHouse(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         if (house.isPresent()) {
+            List<User> users = getAllUsersFromHouse(houseNumber);
+            for (User user : users) {
+                user.setHouse(null);
+                userRepository.save(user);
+            }
             houseRepository.deleteById(houseNumber);
             System.out.println("house successfully deleted");
+        } else {
+            System.out.println("house not found!");
         }
-        System.out.println("house not found!");
     }
     
     /**

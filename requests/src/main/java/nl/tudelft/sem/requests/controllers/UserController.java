@@ -147,8 +147,9 @@ public class UserController {
         if (user.isPresent()) {
             userRepository.deleteById(username);
             System.out.println("user successfully deleted");
+        } else {
+            System.out.println("user not found!");
         }
-        System.out.println("user not found!");
     }
 
     /**
