@@ -65,53 +65,42 @@ public class UserControllerTest {
         verify(userRepository, times(1)).save(newUser);
     }
 
-    /* - The HTTP response is 404, which is incorrect
-
     @Test
     public void testUpdateUser() {
-        // Setup
         final User userWithNewInfo = new User("username", new House(1, "name"),
-                5.0f, "email", Set.of(new Request()));
+                10.0f, "email", Set.of(new Request()));
 
-        // Configure UserRepository.getOne(...).
         final User user = new User("username", new House(1, "name"),
                 5.0f, "email", Set.of(new Request()));
-        when(userRepository.getOne("username")).thenReturn(user);
 
-        // Configure UserRepository.save(...).
-        final User user1 = new User("username", new House(1, "name"),
-                5.0f, "email", Set.of(new Request()));
-        when(userRepository.save(any(User.class))).thenReturn(user1);
+        when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
-        // Run the test
         final ResponseEntity<User> result = userController.updateUser(userWithNewInfo, "username");
+        verify(userRepository, times(1)).save(user);
 
-        // Verify the results
-        assertEquals(HttpStatus.OK, result);
+        final ResponseEntity<User> expected = new ResponseEntity("User updated successfully!",
+                    HttpStatus.OK);
+
+        assertEquals(expected, result);
     }
-     */
 
     @Test
-    public void testUpdateUser() {
-        // Setup
+    public void testUpdateUserNotFound() {
         final User userWithNewInfo = new User("username", new House(1, "name"),
-                5.0f, "email", Set.of(new Request()));
+            10.0f, "email", Set.of(new Request()));
 
-        // Configure UserRepository.getOne(...).
         final User user = new User("username", new House(1, "name"),
-                5.0f, "email", Set.of(new Request()));
-        when(userRepository.getOne("username")).thenReturn(user);
+            5.0f, "email", Set.of(new Request()));
 
-        // Configure UserRepository.save(...).
-        final User user1 = new User("username", new House(1, "name"),
-                5.0f, "email", Set.of(new Request()));
-        when(userRepository.save(any(User.class))).thenReturn(user1);
+        when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
-        // Run the test
-        final String result = userController.updateUser(userWithNewInfo, "username");
+        final ResponseEntity<User> result = userController.updateUser(userWithNewInfo,
+            "usernameName");
 
-        // Verify the results - should be "Updated successfully"
-        assertEquals("User not found!", result);
+        final ResponseEntity<User> expected = new ResponseEntity("User not found!",
+                    HttpStatus.NOT_FOUND);
+
+        assertEquals(expected, result);
     }
 
     @Test

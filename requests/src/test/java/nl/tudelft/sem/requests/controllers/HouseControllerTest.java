@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import nl.tudelft.sem.requests.entities.House;
+import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
@@ -71,7 +72,38 @@ public class HouseControllerTest {
         verify(houseRepository, times(1)).save(newHouse);
     }
 
+    @Test
+    public void testUpdateHouse() {
+        final House houseWithNewInfo = new House(1, "CoolHouse");
 
+        final House house = new House(1, "CoolestHouse");
+
+        when(houseRepository.findById(1)).thenReturn(Optional.of(house));
+
+        final ResponseEntity<House> result = houseController.updateHouse(houseWithNewInfo, 1);
+        verify(houseRepository, times(1)).save(house);
+
+        final ResponseEntity<House> expected = new ResponseEntity("House updated successfully!",
+            HttpStatus.OK);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testUpdateHouseNotFound() {
+        final House houseWithNewInfo = new House(1, "CoolHouse");
+
+        final House house = new House(1, "CoolestHouse");
+
+        when(houseRepository.findById(1)).thenReturn(Optional.of(house));
+
+        final ResponseEntity<House> result = houseController.updateHouse(houseWithNewInfo, 2);
+
+        final ResponseEntity<House> expected = new ResponseEntity("House not found!",
+            HttpStatus.NOT_FOUND);
+
+        assertEquals(expected, result);
+    }
 
     @Test
     public void testDeleteHouse() {

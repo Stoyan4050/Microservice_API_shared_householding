@@ -105,14 +105,16 @@ public class HouseController {
     }
 
     /**
-     * Updates a Request, searched by the houseNr. - Without HTTP response
+     * Updates a House, searched by the houseNr.
      *
-     * @param houseWithNewInfo - the Request containing new data
-     * @param houseNr          - the requestId of the Request that is going to be changed
-     * @return status if the update was successful or not
+     * @param houseWithNewInfo - the House containing new data
+     * @param houseNr          - the houseNr of the House that is going to be updated
+     * @return OK                    - the house was updated successfully
+     *         NOT_FOUND             - the house was not found
+     *         INTERNAL_SERVER_ERROR - the house couldn't be updated because of a server error
      */
     @PutMapping("/updateHouse/{houseNr}")
-    public ResponseEntity<String> updateHouse(@RequestBody House houseWithNewInfo,
+    public ResponseEntity<House> updateHouse(@RequestBody House houseWithNewInfo,
                                               @PathVariable int houseNr) {
         Optional<House> house = houseRepository.findById(houseNr);
 
@@ -125,14 +127,14 @@ public class HouseController {
             try {
                 houseRepository.save(house.get());
             } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("House couldn't be updated!");
+                return new ResponseEntity("House couldn't be updated!",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return ResponseEntity.ok().body("House updated successfully!");
+            return new ResponseEntity("House updated successfully!", HttpStatus.OK);
         }
 
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity("House not found!", HttpStatus.NOT_FOUND);
     }
 
     /**
