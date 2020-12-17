@@ -109,7 +109,7 @@ public class MicroserviceCommunicator {
             throw new InvalidParameterException("One of the parameters is null!");
 	}
 	
-	String url = "http://localhost:9102/editUserCredits";
+	String url = "http://localhost:9102/splitCredits";
 	
 	ObjectMapper mapper = new ObjectMapper();
         try {

@@ -53,16 +53,18 @@ public class TransactionController {
     public @ResponseBody
     boolean addNewTransaction(@RequestBody Transactions transaction) {
         
-        int portionsLeft = transaction.getProductFk().getPortionsLeft()
+        Product product = productRepository.findByProductId(transaction.getProductId());
+        if (product == null) {
+            return false;
+        }
+        
+        int portionsLeft = product.getPortionsLeft()
                                    - transaction.getPortionsConsumed();
         
         if (transaction.getProduct().getExpired() == 1 || portionsLeft < 0) {
             return false;
         }
         
-        
-        
-        Product product = transaction.getProduct();
         float credits = product.getPrice()
                                 / product.getTotalPortions();
         
@@ -95,19 +97,37 @@ public class TransactionController {
     boolean addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
                                                       transactionsSplitCredits) {
         
-        List<String> usernames = transactionsSplitCredits.getUsernames();
+        
         Transactions transaction = transactionsSplitCredits.getTransactionsSplit();
         
-        Product product = transaction.getProduct();
+        Product product = productRepository.findByProductId(transaction.getProductId());
+        
+        if (product == null) {
+            return false;
+        }
+        
+        int portionsLeft = product.getPortionsLeft()
+                                   - transaction.getPortionsConsumed();
+    
+        if (product.getExpired() == 1 || portionsLeft < 0) {
+            return false;
+        }
+    
+        List<String> usernames = transactionsSplitCredits.getUsernames();
         float credits = product.getPrice()
                                 / product.getTotalPortions();
         
         credits = credits * transaction.getPortionsConsumed();
+        System.out.println("USername size: " + usernames.size());
         float splitCredits = credits / usernames.size();
         
         splitCredits = Math.round(splitCredits * 100) / 100;
         
         try {
+            productRepository.updateExistingProduct(product.getProductName(),
+                    product.getUsername(), product.getPrice(),
+                    product.getTotalPortions(), portionsLeft, 0, product.getProductId());
+            
             transactionsRepository.save(transaction);
             MicroserviceCommunicator.sendRequestForSplittingCredits(usernames, splitCredits);
             

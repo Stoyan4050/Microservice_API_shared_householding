@@ -20,10 +20,5 @@ class ProductControllerTest {
     void deleteProduct() {
         Assertions.assertFalse(productController.deleteProduct(-128));
     }
-
-    @Test
-    void editProduct() {
-        productController.editProduct(product);
-        Assertions.assertEquals("Milk", this.product.getProductName());
-    }
+    
 }
