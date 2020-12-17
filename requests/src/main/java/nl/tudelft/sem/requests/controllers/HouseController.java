@@ -9,6 +9,8 @@ import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -168,5 +170,46 @@ public class HouseController {
         UserController userController = new UserController(userRepository);
         userController.updateUser(user.get(), user.get().getUsername());
 
+    }
+
+    /**
+     * User leaving a house.
+     *
+     * @param username    - the username of the User entering the household
+     * @param houseNumber - the house number of the House to add the user in
+     * @return OK        - the user was successfully remove from the household
+     *         FORBIDDEN - the house number of the user is different from the one given
+     *         NOT_FOUND - if the user or the house do not exist in the database
+     */
+    public ResponseEntity<House> userLeavingHouse(String username, int houseNumber) {
+        Optional<House> house = houseRepository.findById(houseNumber);
+        Optional<User> user = userRepository.findById(username);
+
+        if (user.isPresent() && house.isPresent()) {
+            if (user.get().getHouse() != null) {
+                if (user.get().getHouse().getHouseNr() == houseNumber) {
+
+                    user.get().setHouse(null);
+
+                    userRepository.save(user.get());
+
+                    if (house.get().getUsers() == null) {
+                        deleteHouse(houseNumber);
+                    }
+
+                    return new ResponseEntity("You successfully removed " + username
+                        + " from house number " + houseNumber + "!", HttpStatus.OK);
+                }
+
+                return new ResponseEntity("You can not remove a user from a different household!",
+                    HttpStatus.FORBIDDEN);
+            }
+
+            return new ResponseEntity("The user does not have a house!",
+                HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity("The user or the house were not found, please check again!",
+            HttpStatus.NOT_FOUND);
     }
 }
