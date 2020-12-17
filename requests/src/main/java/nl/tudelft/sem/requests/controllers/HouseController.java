@@ -112,7 +112,8 @@ public class HouseController {
      * @return status if the update was successful or not
      */
     @PutMapping("/updateHouse/{houseNr}")
-    public String updateHouse(@RequestBody House houseWithNewInfo, @PathVariable int houseNr) {
+    public ResponseEntity<String> updateHouse(@RequestBody House houseWithNewInfo,
+                                              @PathVariable int houseNr) {
         Optional<House> house = houseRepository.findById(houseNr);
 
         if (house.isPresent()) {
@@ -121,17 +122,17 @@ public class HouseController {
             house.get().setRequests(houseWithNewInfo.getRequests());
             house.get().setUsers(houseWithNewInfo.getUsers());
 
-            House newHouse;
             try {
-                newHouse = houseRepository.save(house.get());
+                houseRepository.save(house.get());
             } catch (Exception e) {
-                return "House couldn't be updated!";
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("House couldn't be updated!");
             }
 
-            return "House updated successfully!";
+            return ResponseEntity.ok().body("House updated successfully!");
         }
 
-        return "House not found!";
+        return ResponseEntity.notFound().build();
     }
 
     /**

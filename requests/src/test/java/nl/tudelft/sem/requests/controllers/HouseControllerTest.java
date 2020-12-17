@@ -54,7 +54,6 @@ public class HouseControllerTest {
         assertEquals(houses.get(0), result.get(0));
     }
 
-
     @Test
     public void testGetHouseById() {
         final Optional<House> houses = Optional.of(new House(1, "CoolHouse"));
@@ -71,6 +70,8 @@ public class HouseControllerTest {
         houseController.addNewHouse(newHouse, "fabian");
         verify(houseRepository, times(1)).save(newHouse);
     }
+
+
 
     @Test
     public void testDeleteHouse() {
