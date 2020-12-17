@@ -1,7 +1,16 @@
 package nl.tudelft.sem.auth.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import javax.validation.Valid;
-import nl.tudelft.sem.auth.entities.User;
+import nl.tudelft.sem.auth.entities.UserRegister;
+import nl.tudelft.sem.auth.entities.UserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,27 +26,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class UserController {
 
     @Autowired
-    JdbcUserDetailsManager jdbcUserDetailsManager;
+    private transient JdbcUserDetailsManager jdbcUserDetailsManager;
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private transient PasswordEncoder passwordEncoder;
 
-    public JdbcUserDetailsManager getJdbcUserDetailsManager() {
-        return jdbcUserDetailsManager;
-    }
-
-    public void setJdbcUserDetailsManager(
-        JdbcUserDetailsManager jdbcUserDetailsManager) {
-        this.jdbcUserDetailsManager = jdbcUserDetailsManager;
-    }
-
-    public PasswordEncoder getPasswordEncoder() {
-        return passwordEncoder;
-    }
-
-    public void setPasswordEncoder(
-        PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Autowired
+    private transient EurekaClient discoveryClient;
 
     /**
      * POST Mapping for registration of users.
@@ -47,7 +41,7 @@ public class UserController {
      * @return A response entity depending on whether the operation was successful.
      */
     @PostMapping(value = "auth/register", consumes = {"application/json"})
-    public ResponseEntity<?> register(final @Valid @RequestBody User user,
+    public ResponseEntity<?> register(final @Valid @RequestBody UserRegister user,
                                       final UriComponentsBuilder b) {
 
         final String username = user.getUsername();
@@ -55,14 +49,61 @@ public class UserController {
             return new ResponseEntity<>("User already exists.", HttpStatus.CONFLICT);
         }
 
-        final UriComponents uri = b.path("register/{user_name}").buildAndExpand(username);
-
         jdbcUserDetailsManager.createUser(org.springframework.security.core.userdetails.User
             .withUsername(user.getUsername())
             .password(passwordEncoder.encode(user.getPassword()))
             .roles("USER")
             .build());
 
+        // make a POST request to the requests microservice to add the user
+
+        // need an object mapper to JSON encode the body of the POST request
+        ObjectMapper mapper = new ObjectMapper();
+
+        // create a JSON string to send as a request
+        UserRequest userRequest = new UserRequest(user.getUsername(), user.getEmail());
+        String userRequestJson = "";
+        nop(userRequestJson); // fixes a "dataflow anomaly" PMD warning
+        try {
+            userRequestJson = mapper.writeValueAsString(userRequest);
+            nop(userRequestJson); // fixes a "dataflow anomaly" PMD warning
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                    .body("Could not serialize User.");
+        }
+
+        // get the uri of the requests microservice from eureka
+        InstanceInfo requestsInstance = discoveryClient.getNextServerFromEureka("REQUESTS", false);
+        String requestsUri = requestsInstance.getHomePageUrl();
+
+        // build a new POST request
+        HttpRequest addNewUserReq = HttpRequest.newBuilder()
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(userRequestJson))
+                .uri(URI.create(requestsUri + "addNewUser/")).build();
+
+        HttpResponse<String> response = null;
+        HttpClient client = HttpClient.newBuilder().build();
+        try {
+            response = client.send(addNewUserReq, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        // if the microservice returns anything different from 201, report to the client
+        if (response.statusCode() != HttpStatus.CREATED.value()) {
+            System.out.println("Status: " + response.statusCode());
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY)
+                    .body("Requests microservice returned: "
+                            + HttpStatus.resolve(response.statusCode()));
+        }
+
+        final UriComponents uri = b.path("register/{user_name}").buildAndExpand(username);
         return ResponseEntity.created(uri.toUri()).build();
     }
+
+    // no operation method that fixes a "dataflow anomaly" PMD warning
+    private static void nop(String s) {}
 }
