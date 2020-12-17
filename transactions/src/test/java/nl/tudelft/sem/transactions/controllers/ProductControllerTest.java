@@ -57,7 +57,15 @@ class ProductControllerTest {
         Assertions.assertFalse(productController.deleteProduct(-128));
     }
 
-  /*  @Test
+    /*@Test
+    void deleteProductTest(){
+        final List<Product> products = Arrays.asList(new Product("Butter",5,5,"kendra"));
+        when(productRepository.findAll()).thenReturn(products);
+        boolean result = productController.deleteProduct(products.get(0).getProductId());
+
+        assertEquals(true, result);
+    }
+    @Test
     void editProduct() {
         productController.editProduct(product);
         Assertions.assertEquals("Milk", this.product.getProductName());
