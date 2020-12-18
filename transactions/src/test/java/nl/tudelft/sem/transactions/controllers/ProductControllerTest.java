@@ -1,25 +1,19 @@
 package nl.tudelft.sem.transactions.controllers;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
+import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -155,5 +149,17 @@ class ProductControllerTest {
         verify(productController).deleteExpired(7);
         assertFalse(result);
     }
+
+    @Test
+    public void setExpired1(){
+        when(productRepository.findByProductId(7L)).thenReturn(null);
+        ResponseEntity expected =ResponseEntity.badRequest().build();
+        ResponseEntity result = productController.setExpired("kendra", product);
+
+        verify(productController).setExpired("kendra", product);
+
+        assertEquals(expected, result);
+    }
+
 
 }
