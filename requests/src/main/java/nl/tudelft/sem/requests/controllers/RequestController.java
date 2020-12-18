@@ -2,6 +2,7 @@ package nl.tudelft.sem.requests.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
 import nl.tudelft.sem.requests.entities.User;
@@ -74,26 +75,31 @@ public class RequestController {
     }
 
     /**
-     * Updates a Request, searched by the requestId. - Without HTTP response
+     * Updates a Request, searched by the requestId.
      *
      * @param requestWithNewInfo - the Request containing new data
      * @param requestId          - the requestId of the Request that is going to be changed
-     * @return status if the update was successful or not
+     * @return OK                    - the request was updated successfully
+     *         NOT_FOUND             - the request was not found
+     *         INTERNAL_SERVER_ERROR - the request couldn't be updated because of a server error
      */
     @PutMapping("/updateRequest/{requestId}")
-    public String updateRequest(@RequestBody Request requestWithNewInfo,
-                                @PathVariable RequestId requestId) {
+    public ResponseEntity<Request> updateRequest(@RequestBody Request requestWithNewInfo,
+                                               @PathVariable RequestId requestId) {
         Optional<Request> request = requestRepository.findById(requestId);
 
         if (request.isPresent()) {
             try {
                 requestRepository.save(requestWithNewInfo);
             } catch (Exception e) {
-                return "Request couldn't be updated!";
+                return new ResponseEntity("Request couldn't be updated!",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return "Request updated successfully!";
+
+            return new ResponseEntity("Request updated successfully!", HttpStatus.OK);
         }
-        return "Request not found!";
+
+        return new ResponseEntity("Request not found!", HttpStatus.NOT_FOUND);
     }
 
     /**
