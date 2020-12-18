@@ -1,65 +1,103 @@
 package nl.tudelft.sem.transactions.controllers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
+import java.util.List;
+import java.util.Optional;
+import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
-import org.junit.Assert;
+import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
 
-
-
-@SuppressWarnings("PMD")
 class TransactionControllerTest {
-    private Product product;
-    private final Transactions transaction = new Transactions();
+    @Mock
+    private transient TransactionsRepository transactionsRepository;
 
+    @Mock
+    private transient MicroserviceCommunicator microserviceCommunicator;
+
+    @InjectMocks
+    private transient TransactionController transactionController;
+
+    private transient Transactions transaction;
 
     @BeforeEach
-    public void setup() {
-        product = new Product("bread", (float) 1.50, 10, "Kristen");
-        int portionsConsumed = 1;
-        String username = "Stoyan";
-        transaction.setPortionsConsumed(portionsConsumed);
+    void setUp() {
+        transactionController = spy(TransactionController.class);
+        MockitoAnnotations.initMocks(this);
+        transaction = new Transactions();
+        transaction.setTransactionId(1L);
+        transaction.setPortionsConsumed(2);
+        transaction.setUsername("Bob");
+        Product product = new Product();
+        product.setProductId(4);
         transaction.setProduct(product);
-        transaction.setTransactionId(1);
-        transaction.setUsername(username);
     }
 
     @Test
-    public void constructorTest() {
-        assertNotNull(transaction);
+    void editTransaction() {
+        doReturn(1).when(transactionsRepository)
+            .updateExistingTransaction(4, "Bob", 2, 1L);
+
+        boolean result = transactionController.editTransactions(transaction);
+
+        verify(transactionsRepository)
+            .updateExistingTransaction(4, "Bob", 2, 1L);
+        assertTrue(result);
     }
 
     @Test
-    public void getPortions_consumed() {
+    void deleteTransaction() {
+        doReturn(Optional.of(transaction)).when(transactionsRepository).findById(1L);
+        doNothing().when(transactionsRepository).delete(transaction);
 
-        assertEquals(1, transaction.getPortionsConsumed());
+        transactionController.deleteTransaction(1L);
+
+        verify(transactionsRepository).findById(1L);
+        verify(transactionsRepository).delete(transaction);
     }
 
     @Test
-    public void getProductId() {
+    void getAllTransactions() {
+        List<Transactions> transactions = List.of(transaction);
+        doReturn(transactions).when(transactionsRepository).findAll();
 
-        assertEquals(product.getProductId(), transaction.getProductId());
+        List<Transactions> result = transactionController.getAllTransactions();
+
+        verify(transactionsRepository).findAll();
+
+        assertEquals(transactions, result);
     }
 
     @Test
-    public void getUsername() {
+    void addNewTransaction() {
 
-        assertEquals("Stoyan", transaction.getUsername());
+        boolean result = transactionController.addNewTransaction(transaction);
+
+        verify(transactionsRepository).save(transaction);
+
+        assertTrue(result);
     }
 
     @Test
-    public void getProduct() {
+    void addNewTransactionFalse() {
+        doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
+            .save(transaction);
 
-        assertEquals(product.getExpired(), transaction.getProduct().getExpired());
-        assertEquals(product.getPortionsLeft(), transaction.getProduct().getPortionsLeft());
-        assertEquals(product.getProductName(), transaction.getProduct().getProductName());
-        Assert.assertEquals(product.getPrice(), transaction.getProduct().getPrice(), 0.005f);
-        assertEquals(product.getTotalPortions(), transaction.getProduct().getTotalPortions());
-        assertEquals(product.getUsername(), transaction.getProduct().getUsername());
+        assertFalse(transactionController.addNewTransaction(transaction));
     }
 
 }
