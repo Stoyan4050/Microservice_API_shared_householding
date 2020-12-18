@@ -3,6 +3,9 @@ package nl.tudelft.sem.requests.entities;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +38,6 @@ public class RequestTest {
         when(requestIdMock.getHouseNr()).thenReturn(5);
         when(requestIdMock.getUsername()).thenReturn("UserName");
 
-
     }
 
     @BeforeEach
@@ -45,16 +47,24 @@ public class RequestTest {
 
     @Test
     public void constructorEqualsTest() {
-
         Assertions.assertEquals(requestUnderTest,
                 new Request(requestIdMock, mockHouse, mockUser, false));
     }
 
     @Test
     public void constructorNotEqualsTest() {
-
         Assertions.assertNotEquals(requestUnderTest,
                 new Request(requestIdMock, mockHouse, mockUser, true));
+    }
+
+    @Test
+    public void constructorNotEqualsObjectTest() {
+        Assertions.assertFalse(requestUnderTest.equals(new House(1, "sleepy")));
+    }
+
+    @Test
+    public void constructorEqualsSameObjectTest() {
+        Assertions.assertTrue(requestUnderTest.equals(requestUnderTest));
     }
 
     @Test
@@ -101,6 +111,19 @@ public class RequestTest {
         requestUnderTest.setApproved(true);
         final boolean result = requestUnderTest.isApproved(); //true in this case
         Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void testHashcode() {
+        Request request1 = new Request(requestIdMock, new House(1, "CoolHouse"),
+                            new User("sleepy"));
+        Request request2 = new Request(requestIdMock, new House(1, "CoolHouse"),
+                            new User("sleepy"));
+
+        Map<Request, String> map = new HashMap<>();
+        map.put(request1, "dummy");
+        
+        Assertions.assertEquals("dummy", map.get(request2));
     }
 
 }
