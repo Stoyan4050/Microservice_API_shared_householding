@@ -1,7 +1,7 @@
 package nl.tudelft.sem.requests.entities;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -13,6 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 /**
  * Class representing the User entity in the database - User table.
@@ -28,6 +30,7 @@ public class User implements java.io.Serializable {
     @Column(name = "username", unique = true, nullable = false, length = 30)
     private String username;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_nr")
     private House house;
@@ -38,43 +41,34 @@ public class User implements java.io.Serializable {
     @Column(name = "email", length = 1000)
     private String email;
 
+    @Cascade(CascadeType.DELETE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private Set<Request> requests = new HashSet<Request>(0);
 
-
-    // Requirement by Spring
-    public User() {
-    }
-
-    /**
-     * Constructor for the User class.
-     *
-     * @param username - the username of the user
-     */
     public User(String username) {
         this.username = username;
     }
 
     /**
-     * Constructor for the User class.
+     * Constructor for creating user.
      *
-     * @param username     - username of a user
-     * @param house        - house the user belongs to
-     * @param totalCredits - total number of credits
-     * @param email        - email of user
-     * @param requests     - the requests of the user
+     * @param username     username of the user
+     * @param house        house in which is the user
+     * @param totalCredits credits of the user
+     * @param email        email of the user
+     * @param requests     all of the requests of the use for joining house
      */
-    @JsonCreator
-    public User(@JsonProperty("username") String username,
-                @JsonProperty("house") House house,
-                @JsonProperty("totalCredits") float totalCredits,
-                @JsonProperty("email") String email,
-                @JsonProperty("requests") Set<Request> requests) {
+    public User(String username, House house,
+                float totalCredits, String email, Set<Request> requests) {
         this.username = username;
         this.house = house;
         this.totalCredits = totalCredits;
         this.email = email;
         this.requests = requests;
+    }
+
+    // Requirement by Spring
+    public User() {
     }
 
     public String getUsername() {
@@ -85,6 +79,7 @@ public class User implements java.io.Serializable {
         this.username = username;
     }
 
+    @JsonBackReference("u1")
     public House getHouse() {
         return this.house;
     }
@@ -109,6 +104,7 @@ public class User implements java.io.Serializable {
         this.email = email;
     }
 
+    @JsonIgnore
     public Set<Request> getRequests() {
         return this.requests;
     }
@@ -129,14 +125,14 @@ public class User implements java.io.Serializable {
         User user = (User) o;
 
         return Float.compare(user.totalCredits, totalCredits) == 0
-                && Objects.equals(username, user.username)
-                && Objects.equals(house, user.house)
-                && Objects.equals(email, user.email)
-                && Objects.equals(requests, user.requests);
+            && Objects.equals(username, user.username)
+            && Objects.equals(house, user.house)
+            && Objects.equals(email, user.email)
+            && Objects.equals(requests, user.requests);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, house, totalCredits, email, requests);
+        return Objects.hash(username, totalCredits, email);
     }
 }

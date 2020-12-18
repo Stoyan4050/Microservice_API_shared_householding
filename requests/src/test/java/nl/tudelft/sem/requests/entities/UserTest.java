@@ -32,16 +32,19 @@ public class UserTest {
 
     @Test
     public void constructorEqualsTest() {
-
         Assertions.assertEquals(userUnderTest,
-                new User("userName", mockHouse, 0.0f, "email", Set.of(new Request())));
+            new User("userName", mockHouse, 0.0f, "email", Set.of(new Request())));
     }
 
     @Test
     public void constructorNotEqualsTest() {
-
         Assertions.assertNotEquals(userUnderTest,
-                new User("userName2", mockHouse, 0.1f, "emaill", Set.of(new Request())));
+            new User("userName2", mockHouse, 0.1f, "emaill", Set.of(new Request())));
+    }
+
+    @Test
+    public void constructorNotEqualsObjectTest() {
+        Assertions.assertFalse(userUnderTest.equals(new House(1, "sleepy")));
     }
 
     @Test
@@ -99,6 +102,5 @@ public class UserTest {
         final boolean result = userUnderTest.getRequests().equals(requests);
         Assertions.assertTrue(result);
     }
-
 
 }

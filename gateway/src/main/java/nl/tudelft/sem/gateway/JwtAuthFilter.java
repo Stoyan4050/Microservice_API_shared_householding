@@ -28,7 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
         // auth header
         String header = request.getHeader(jwtConf.getHeader());
@@ -43,9 +43,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             // token validation
             Claims claims = Jwts.parser()
-                    .setSigningKey(jwtConf.getSecret().getBytes())
-                    .parseClaimsJws(token)
-                    .getBody();
+                .setSigningKey(jwtConf.getSecret().getBytes())
+                .parseClaimsJws(token)
+                .getBody();
 
             String username = claims.getSubject();
             if (username != null) {
@@ -54,11 +54,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 // TODO don't need authorities
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        username, null,
-                        authorities
-                                .stream()
-                                .map(SimpleGrantedAuthority::new)
-                                .collect(Collectors.toList())
+                    username, null,
+                    authorities
+                        .stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList())
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);

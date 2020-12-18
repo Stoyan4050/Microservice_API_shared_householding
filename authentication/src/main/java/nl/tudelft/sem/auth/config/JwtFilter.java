@@ -11,7 +11,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import nl.tudelft.sem.auth.entities.User;
+import nl.tudelft.sem.auth.entities.UserCredentials;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -55,7 +55,8 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
                                                 HttpServletResponse response) {
         try {
             // Obtain credentials
-            User user = new ObjectMapper().readValue(request.getInputStream(), User.class);
+            UserCredentials user = new ObjectMapper()
+                .readValue(request.getInputStream(), UserCredentials.class);
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 user.getUsername(), user.getPassword(), Collections.emptyList());

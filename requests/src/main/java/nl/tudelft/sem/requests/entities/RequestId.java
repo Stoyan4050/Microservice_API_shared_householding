@@ -28,8 +28,8 @@ public class RequestId implements java.io.Serializable {
     /**
      * Constructor for RequestId class.
      *
-     * @param houseNr   - house number
-     * @param username  - username
+     * @param houseNr  - house number
+     * @param username - username
      */
     @JsonCreator
     public RequestId(@JsonProperty("houseNr") int houseNr,
@@ -66,7 +66,7 @@ public class RequestId implements java.io.Serializable {
         RequestId requestId = (RequestId) o;
 
         return houseNr == requestId.houseNr
-                && Objects.equals(username, requestId.username);
+            && Objects.equals(username, requestId.username);
     }
 
     @Override

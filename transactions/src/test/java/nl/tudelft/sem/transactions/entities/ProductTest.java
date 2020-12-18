@@ -17,12 +17,12 @@ class ProductTest {
         product = new Product();
 
         t1 = new Transactions();
-        t1.setProduct(product);
+        t1.setProductFk(product);
         t1.setPortionsConsumed(4);
         t1.setUsername("Alice");
 
         t2 = new Transactions();
-        t2.setProduct(product);
+        t2.setProductFk(product);
         t2.setPortionsConsumed(1);
         t2.setUsername("Alice");
 

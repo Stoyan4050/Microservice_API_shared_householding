@@ -20,8 +20,8 @@ public class Transactions {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "transaction_id")
     private long transactionId;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JoinColumn(name = "product_id")
     private Product productFk;
@@ -41,10 +41,6 @@ public class Transactions {
 
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
-    }
-
-    public Product getProduct() {
-        return this.productFk;
     }
 
     public void setProduct(Product product) {

@@ -1,7 +1,6 @@
 package nl.tudelft.sem.requests.entities;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.util.Objects;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -24,12 +23,12 @@ public class Request implements java.io.Serializable {
 
     @EmbeddedId
     @AttributeOverrides({@AttributeOverride(name = "houseNr",
-                    column = @Column(name = "house_nr", nullable = false)),
-            @AttributeOverride(name = "username",
-                    column = @Column(name = "username", nullable = false, length = 25))
+        column = @Column(name = "house_nr", nullable = false)),
+        @AttributeOverride(name = "username",
+            column = @Column(name = "username", nullable = false, length = 25))
     })
     private RequestId id;
-        
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", nullable = false, insertable = false, updatable = false)
@@ -42,41 +41,23 @@ public class Request implements java.io.Serializable {
     @Column(name = "approved")
     private boolean approved;
 
+    /**
+     * Constructor for requests.
+     *
+     * @param id       request id.
+     * @param user     the user which request will be send.
+     * @param house    the house the user wants to join.
+     * @param approved check if the request is approved.
+     */
+    public Request(RequestId id, House house, User user, boolean approved) {
+        this.id = id;
+        this.user = user;
+        this.house = house;
+        this.approved = approved;
+    }
 
     // Requirement by Spring
     public Request() {
-    }
-
-    /**
-     * Constructor for the Request entity.
-     *
-     * @param id    - the request id
-     * @param house - the house object associated with the request
-     * @param user  - the user object associated with the request
-     */
-    public Request(RequestId id, House house, User user) {
-        this.id = id;
-        this.house = house;
-        this.user = user;
-    }
-
-    /**
-     * Constructor for the Request entity.
-     *
-     * @param id       - the request id
-     * @param house    - the house object associated with the request
-     * @param user     - the user object associated with the request
-     * @param approved - the state of the request
-     */
-    @JsonCreator
-    public Request(@JsonProperty("id") RequestId id,
-                   @JsonProperty("house") House house,
-                   @JsonProperty("user") User user,
-                   @JsonProperty("approved") boolean approved) {
-        this.id = id;
-        this.house = house;
-        this.user = user;
-        this.approved = approved;
     }
 
     public RequestId getId() {
@@ -87,6 +68,7 @@ public class Request implements java.io.Serializable {
         this.id = id;
     }
 
+    @JsonBackReference("r1")
     public House getHouse() {
         return this.house;
     }
@@ -95,6 +77,7 @@ public class Request implements java.io.Serializable {
         this.house = house;
     }
 
+    @JsonBackReference("r2")
     public User getUser() {
         return this.user;
     }
@@ -124,13 +107,13 @@ public class Request implements java.io.Serializable {
         Request request = (Request) o;
 
         return approved == request.approved
-                && Objects.equals(id, request.id)
-                && Objects.equals(user, request.user)
-                && Objects.equals(house, request.house);
+            && Objects.equals(id, request.id)
+            && Objects.equals(user, request.user)
+            && Objects.equals(house, request.house);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, user, house, approved);
+        return Objects.hash(id, approved);
     }
 }

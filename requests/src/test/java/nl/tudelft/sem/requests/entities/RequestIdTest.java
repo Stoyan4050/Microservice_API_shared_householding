@@ -2,7 +2,10 @@ package nl.tudelft.sem.requests.entities;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,12 +19,16 @@ public class RequestIdTest {
 
     @BeforeEach
     public void setUp() {
+        initMocks(this);
+    }
+
+    @BeforeEach
+    public void setUpAll() {
         requestIdUnderTest = new RequestId(1, "username");
     }
 
     @Test
     public void testEqualsFalse() {
-
         RequestId toCompare = new RequestId(1, "anotherUsername");
         final boolean result = requestIdUnderTest.equals(toCompare);
         assertFalse(result);
@@ -29,10 +36,19 @@ public class RequestIdTest {
 
     @Test
     public void testEqualsTrue() {
-
         RequestId toCompare = new RequestId(1, "username");
         final boolean result = requestIdUnderTest.equals(toCompare);
         assertTrue(result);
+    }
+
+    @Test
+    public void constructorNotEqualsObjectTest() {
+        Assertions.assertFalse(requestIdUnderTest.equals(new House(1, "sleepy")));
+    }
+
+    @Test
+    public void constructorEqualsSameObjectTest() {
+        Assertions.assertTrue(requestIdUnderTest.equals(requestIdUnderTest));
     }
 
     @Test
@@ -59,6 +75,16 @@ public class RequestIdTest {
         requestIdUnderTest.setUsername("username2");
         final boolean result = requestIdUnderTest.getUsername().equals("username2");
         Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void testHashcode() {
+        RequestId requestId1 = new RequestId();
+        RequestId requestId2 = new RequestId();
+        Map<RequestId, String> map = new HashMap<>();
+        map.put(requestId1, "dummy");
+
+        Assertions.assertEquals("dummy", map.get(requestId2));
     }
 
 }

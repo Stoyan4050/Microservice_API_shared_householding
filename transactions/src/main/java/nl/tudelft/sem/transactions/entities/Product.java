@@ -1,5 +1,6 @@
 package nl.tudelft.sem.transactions.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -23,7 +24,6 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     // @GenericGenerator(name = "idGenerator", strategy = "increment")
     private long productId;
-    
     @Column(name = "product_name")
     private String productName;
 
@@ -122,6 +122,7 @@ public class Product {
         this.expired = expired;
     }
 
+    @JsonIgnore
     public List<Transactions> getTransactionsList() {
         return transactionsList;
     }

@@ -1,7 +1,6 @@
 package nl.tudelft.sem.requests.entities;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -13,6 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 /**
  * Class representing the House entity in the database - House table.
@@ -33,44 +34,35 @@ public class House implements java.io.Serializable {
     @Column(name = "name", length = 25)
     private String name;
 
+    @Cascade(CascadeType.DELETE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
-    private Set<Request> requests = new HashSet<Request>(0);
+    private Set<Request> requests = new HashSet<>(0);
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
-    private Set<User> users = new HashSet<User>(0);
+    private Set<User> users = new HashSet<>(0);
 
-    // Requirement by Spring
-    public House() {
-    }
-
-    /**
-     * Constructor for the House entity.
-     *
-     * @param houseNr - house number
-     * @param name    - name of the house
-     */
     public House(int houseNr, String name) {
         this.houseNr = houseNr;
         this.name = name;
     }
 
     /**
-     * Constructor for the House entity.
+     * Constructor for a house.
      *
-     * @param houseNr  - house number
-     * @param name     - name of the house
-     * @param requests - requests of the house
-     * @param users    - users of the house
+     * @param houseNr  the number of the house
+     * @param name     name of the house
+     * @param requests all of the requests for joining this house
+     * @param users    all of the users living in this house
      */
-    @JsonCreator
-    public House(@JsonProperty("houseNr") int houseNr,
-                 @JsonProperty("name") String name,
-                 @JsonProperty("requests") Set<Request> requests,
-                 @JsonProperty("users") Set<User> users) {
+    public House(int houseNr, String name, Set<Request> requests, Set<User> users) {
         this.houseNr = houseNr;
         this.name = name;
         this.requests = requests;
         this.users = users;
+    }
+
+    // Requirement by Spring
+    public House() {
     }
 
     public int getHouseNr() {
@@ -97,6 +89,7 @@ public class House implements java.io.Serializable {
         this.requests = requests;
     }
 
+    @JsonIgnore
     public Set<User> getUsers() {
         return this.users;
     }
@@ -115,7 +108,7 @@ public class House implements java.io.Serializable {
         }
         House house = (House) o;
         return houseNr == house.houseNr
-                && name.equals(house.name);
+            && name.equals(house.name);
     }
 
     @Override

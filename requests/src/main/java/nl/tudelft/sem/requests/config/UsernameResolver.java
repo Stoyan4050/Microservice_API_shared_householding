@@ -21,7 +21,7 @@ public class UsernameResolver implements HandlerMethodArgumentResolver {
 
     /**
      * Resolve the arguments on controllers that use the @Username annotation.
-
+     *
      * @param webRequest The HTTP request containing the headers and the JWT token.
      * @return Username extracted from a JWT token in the request.
      */
@@ -33,9 +33,9 @@ public class UsernameResolver implements HandlerMethodArgumentResolver {
         String header = webRequest.getHeader(jwtConf.getHeader());
         String token = header.replace(jwtConf.getPrefix(), "");
         Claims claims = Jwts.parser()
-                .setSigningKey(jwtConf.getSecret().getBytes())
-                .parseClaimsJws(token)
-                .getBody();
+            .setSigningKey(jwtConf.getSecret().getBytes())
+            .parseClaimsJws(token)
+            .getBody();
 
         String username = claims.getSubject();
         return username;
