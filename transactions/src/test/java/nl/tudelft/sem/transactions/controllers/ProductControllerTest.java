@@ -1,5 +1,12 @@
 package nl.tudelft.sem.transactions.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,12 +14,10 @@ import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -59,7 +64,7 @@ class ProductControllerTest {
         verify(productRepository).findAll();
         verify(productController).getUserProducts("kendra");
 
-        assertEquals(HttpStatus.OK,result.getStatusCode());
+        assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(expected, result);
     }
 
@@ -73,7 +78,7 @@ class ProductControllerTest {
         verify(productRepository).findAll();
         verify(productController).getUserProducts("kendra");
 
-        assertEquals(HttpStatus.NOT_FOUND,result.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
     //null prod
@@ -85,10 +90,10 @@ class ProductControllerTest {
 
         verify(productRepository, times(0)).deleteById(1L);
 
-        ResponseEntity result = productController.deleteProduct("kendra",7);
-        ResponseEntity expected =new ResponseEntity(HttpStatus.NOT_FOUND);
+        ResponseEntity result = productController.deleteProduct("kendra", 7);
+        ResponseEntity expected = new ResponseEntity(HttpStatus.NOT_FOUND);
 
-        assertEquals(result.getStatusCode(),expected.getStatusCode());
+        assertEquals(result.getStatusCode(), expected.getStatusCode());
 
 
     }
@@ -99,31 +104,32 @@ class ProductControllerTest {
         product.setProductId(7);
         product.setUsername("kendra");
 
-        ResponseEntity result = productController.deleteProduct("kendra",7);
+        ResponseEntity result = productController.deleteProduct("kendra", 7);
 
-    verify(productController).deleteProduct("kendra",7);
-        assertEquals(result.getStatusCode(),HttpStatus.OK);
+        verify(productController).deleteProduct("kendra", 7);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
 
     }
 
     @Test
-    public void deleteProduct3(){
+    public void deleteProduct3() {
         product.setProductId(7);
         when(productRepository.findById(7L)).thenReturn(Optional.empty());
-        ResponseEntity result = productController.deleteProduct("kendra",7);
+        ResponseEntity result = productController.deleteProduct("kendra", 7);
         //verify(productController).deleteProduct("kendra",7);
-        assertEquals(result.getStatusCode(),HttpStatus.NOT_FOUND);
+        assertEquals(result.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
     @Test
-    public void deleteProduct4(){
+    public void deleteProduct4() {
         when(productRepository.findById(7L)).thenReturn(Optional.ofNullable(product));
         product.setProductId(7);
         product.setUsername("kendra");
         doThrow(DataIntegrityViolationException.class).when(productRepository).delete(product);
-        ResponseEntity result = productController.deleteProduct("kendra",7);
-        ResponseEntity expected = ResponseEntity.badRequest().body("The product couldn't be deleted");
-        assertEquals(expected.getStatusCode(),result.getStatusCode());
+        ResponseEntity result = productController.deleteProduct("kendra", 7);
+        ResponseEntity expected = ResponseEntity.badRequest()
+                .body("The product couldn't be deleted");
+        assertEquals(expected.getStatusCode(), result.getStatusCode());
     }
 
     @Test
@@ -159,11 +165,11 @@ class ProductControllerTest {
     @Test
     public void testUpdateProduct() {
         when(productRepository.findById(7L)).thenReturn(Optional.ofNullable(product));
-        ResponseEntity result = productController.updateProduct("kendra",product);
+        ResponseEntity result = productController.updateProduct("kendra", product);
 
         verify(productController)
-               .updateProduct("kendra",product);
-        assertEquals(result.getStatusCode(),HttpStatus.NOT_FOUND);
+               .updateProduct("kendra", product);
+        assertEquals(result.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -172,7 +178,7 @@ class ProductControllerTest {
         when(productRepository.findById(7L)).thenReturn(Optional.ofNullable(product));
         ResponseEntity result = productController.deleteExpired(7);
         verify(productController).deleteExpired(7);
-        assertEquals(result.getStatusCode(),HttpStatus.OK);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
 
     @Test
@@ -182,31 +188,32 @@ class ProductControllerTest {
 
         ResponseEntity result = productController.deleteExpired(7);
         verify(productController).deleteExpired(7);
-        assertEquals(result.getStatusCode(),HttpStatus.BAD_REQUEST);
+        assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    public void deleteExpired3(){
+    public void deleteExpired3() {
         product.setExpired(1);
         when(productRepository.findById(7L)).thenReturn(Optional.ofNullable(product));
         doThrow(DataIntegrityViolationException.class).when(productRepository).delete(product);
         ResponseEntity result = productController.deleteExpired(7);
-        ResponseEntity expected = ResponseEntity.badRequest().body("The product couldn't be deleted");
+        ResponseEntity expected = ResponseEntity
+                .badRequest().body("The product couldn't be deleted");
         verify(productController).deleteExpired(7);
         assertEquals(expected, result);
     }
 
     @Test
-    public void deleteExpired4(){
+    public void deleteExpired4() {
         when(productRepository.findById(7L)).thenReturn(Optional.empty());
         ResponseEntity result = productController.deleteExpired(7);
         ResponseEntity expected = ResponseEntity.notFound().build();
         verify(productController).deleteExpired(7);
-        assertEquals(expected,result);
+        assertEquals(expected, result);
     }
 
     @Test
-    public void setExpired1(){
+    public void setExpired1() {
         when(productRepository.findByProductId(7L)).thenReturn(null);
         ResponseEntity expected = ResponseEntity.badRequest().build();
         ResponseEntity result = productController.setExpired("kendra", 7);
@@ -216,13 +223,13 @@ class ProductControllerTest {
     }
 
     @Test
-    public void setExpired2(){
+    public void setExpired2() {
         when(productRepository.updateExistingProduct("milk",
-                "kendra",7,5,5,0,7))
+                "kendra", 7, 5, 5, 0, 7))
                 .thenThrow(DataIntegrityViolationException.class);
         product.setProductId(7);
-        ResponseEntity result = productController.setExpired("kendra",7);
-        assertEquals(HttpStatus.BAD_REQUEST,result.getStatusCode());
+        ResponseEntity result = productController.setExpired("kendra", 7);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
     }
 
 

@@ -3,14 +3,13 @@ package nl.tudelft.sem.requests.entities;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-
 import java.util.HashMap;
 import java.util.Map;
-import org.bouncycastle.cert.ocsp.Req;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+
 
 /**
  * Tests for the Request entity class.
