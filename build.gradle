@@ -36,6 +36,9 @@ subprojects {
 	sourceCompatibility = 11
 	targetCompatibility = 11
 
+	jacoco {
+		toolVersion = "0.8.6"
+	}
 
 	test {
 		useJUnitPlatform()
@@ -66,9 +69,13 @@ subprojects {
 	checkstyle {
 		toolVersion "8.37"
 		configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+		checkstyleMain.enabled = false // each microservice should test for checkstyle issues
+		checkstyleTest.enabled = false // each microservice should test for checkstyle issues
 	}
 
 	pmd {
 		incrementalAnalysis = true
+		pmdMain.enabled = false // each microservice should test for pmd issues
+		pmdTest.enabled = false // each microservice should test for pmd issues
 	}
 }

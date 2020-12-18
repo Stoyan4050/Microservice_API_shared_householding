@@ -62,14 +62,15 @@ public class HouseControllerTest {
     @Test
     public void testGetHouseById() {
         // set up the house
-        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
-        when(houseRepository.findById(1)).thenReturn(house);
+        final Optional<House> houses = Optional.of(new House(1, "CoolHouse"));
+        when(houseRepository.findById(1)).thenReturn(houses);
 
         // run the test
-        final Optional<House> result = houseController.getHouseByHouseNumber(1, "user");
+        final ResponseEntity<House> result = houseController.getHouseByHouseNumber(1);
 
         // verify the results
-        assertEquals(house, result);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
+        assertEquals(houses.get(), result.getBody());
     }
 
     @Test
@@ -96,10 +97,10 @@ public class HouseControllerTest {
         when(houseRepository.findById(1)).thenReturn(Optional.of(house));
 
         // run the test and verify the results
-        final ResponseEntity<House> result = houseController.updateHouse(houseWithNewInfo);
+        final ResponseEntity<String> result = houseController.updateHouse(houseWithNewInfo);
         verify(houseRepository, times(1)).save(houseWithNewInfo);
 
-        final ResponseEntity<House> expected = new ResponseEntity("House updated successfully!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("House updated successfully!",
             HttpStatus.OK);
 
         assertEquals(expected, result);
@@ -138,9 +139,9 @@ public class HouseControllerTest {
         //when(houseRepository.findById(1)).thenReturn(Optional.of(house));
 
         // run the test
-        final ResponseEntity<House> result = houseController.updateHouse(houseWithNewInfo);
+        final ResponseEntity<String> result = houseController.updateHouse(houseWithNewInfo);
 
-        final ResponseEntity<House> expected = new ResponseEntity("House not found!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("House not found!",
             HttpStatus.NOT_FOUND);
 
         // verify the results
@@ -187,13 +188,13 @@ public class HouseControllerTest {
         when(houseRepository.findById(1)).thenReturn(house);
 
         // run the test
-        List<User> result = houseController.getAllUsersFromHouse(1);
+        ResponseEntity<List<User>> result = houseController.getAllUsersFromHouse(1);
 
-        List<User> expected = new ArrayList<>();
-        expected.add(user);
+        List<User> expected = List.of(user);
 
         // verify the results
-        assertEquals(expected, result);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
+        assertEquals(expected, result.getBody());
     }
 
     @Test
@@ -223,6 +224,7 @@ public class HouseControllerTest {
 
         // run the test and verify the results
         houseController.userJoiningHouse("Mocha", 1);
+        house.get().getUsers().add(user2);
         verify(userRepository, times(1)).save(user2);
 
         assertEquals(user2.getHouse().getHouseNr(), 1);
@@ -249,9 +251,9 @@ public class HouseControllerTest {
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
 
         // run the test
-        final ResponseEntity<House> result = houseController.userLeavingHouse("Mocha", 1);
+        final ResponseEntity<String> result = houseController.userLeavingHouse("Mocha", 1);
 
-        final ResponseEntity<House> expected = new ResponseEntity("You successfully removed "
+        final ResponseEntity<String> expected = new ResponseEntity<>("You successfully removed "
             + "Mocha from house number 1!", HttpStatus.OK);
 
         // verify the results
@@ -274,9 +276,9 @@ public class HouseControllerTest {
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user));
 
         // run the test
-        final ResponseEntity<House> result = houseController.userLeavingHouse("Mocha", 1);
+        final ResponseEntity<String> result = houseController.userLeavingHouse("Mocha", 1);
 
-        final ResponseEntity<House> expected = new ResponseEntity("You successfully removed "
+        final ResponseEntity<String> expected = new ResponseEntity<>("You successfully removed "
             + "Mocha from house number 1!", HttpStatus.OK);
 
         // verify the results
@@ -317,9 +319,9 @@ public class HouseControllerTest {
         when(userRepository.findById("Hungry")).thenReturn(Optional.of(user3));
 
         // run the test
-        final ResponseEntity<House> result = houseController.userLeavingHouse("Hungry", 1);
+        final ResponseEntity<String> result = houseController.userLeavingHouse("Hungry", 1);
 
-        final ResponseEntity<House> expected = new ResponseEntity("You can not remove a user"
+        final ResponseEntity<String> expected = new ResponseEntity<>("You can not remove a user"
             + " from a different household!", HttpStatus.FORBIDDEN);
 
         // verify the results
@@ -345,9 +347,9 @@ public class HouseControllerTest {
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
 
         // run the test
-        final ResponseEntity<House> result = houseController.userLeavingHouse("Mocha", 1);
+        final ResponseEntity<String> result = houseController.userLeavingHouse("Mocha", 1);
 
-        final ResponseEntity<House> expected = new ResponseEntity("The user does not "
+        final ResponseEntity<String> expected = new ResponseEntity<>("The user does not "
             + "have a house!", HttpStatus.FORBIDDEN);
 
         // verify the results
@@ -374,9 +376,9 @@ public class HouseControllerTest {
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
 
         // run the test
-        final ResponseEntity<House> result = houseController.userLeavingHouse("Mocha", 2);
+        final ResponseEntity<String> result = houseController.userLeavingHouse("Mocha", 2);
 
-        final ResponseEntity<House> expected = new ResponseEntity("The user or the house "
+        final ResponseEntity<String> expected = new ResponseEntity<>("The user or the house "
             + "were not found, please check again!", HttpStatus.NOT_FOUND);
 
         // verify the results

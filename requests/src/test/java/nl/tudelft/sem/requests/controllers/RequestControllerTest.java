@@ -71,16 +71,17 @@ public class RequestControllerTest {
     @Test
     public void testGetRequestById() {
         // set up the request
-        final Optional<Request> request = Optional.of(new Request(requestIdMock,
-                new House(1, "namee"), new User("usernamee"), true));
-        when(requestRepository.findById(requestIdMock)).thenReturn(request);
+        final Request request = new Request(requestIdMock,
+                new House(1, "namee"), new User("usernamee"), true);
+        when(requestRepository.findById(requestIdMock)).thenReturn(Optional.of(request));
 
         // run the test
-        final Optional<Request> result = requestController.getRequestById(requestIdMock);
+        final ResponseEntity<Request> result = requestController.getRequestById(requestIdMock);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
 
         // verify the results
         verify(requestRepository).findById(requestIdMock);
-        assertEquals(request, result);
+        assertEquals(request, result.getBody());
     }
 
     @Test
@@ -142,11 +143,11 @@ public class RequestControllerTest {
         when(requestRepository.findById(requestId2)).thenReturn(Optional.of(requestWithNewInfo));
 
         // run the test and verify the results
-        final ResponseEntity<Request> result = requestController.updateRequest(requestWithNewInfo);
+        final ResponseEntity<String> result = requestController.updateRequest(requestWithNewInfo);
         verify(requestRepository, times(1)).save(requestWithNewInfo);
 
-        final ResponseEntity<Request> expected = new ResponseEntity("Request updated successfully!",
-            HttpStatus.OK);
+        final ResponseEntity<String> expected = new ResponseEntity<>(
+                "Request updated successfully!", HttpStatus.OK);
 
         assertEquals(expected, result);
     }
@@ -192,9 +193,9 @@ public class RequestControllerTest {
         //when(requestRepository.findById(requestId2)).thenReturn(Optional.of(requestWithNewInfo));
 
         // run the test
-        final ResponseEntity<Request> result = requestController.updateRequest(requestWithNewInfo);
+        final ResponseEntity<String> result = requestController.updateRequest(requestWithNewInfo);
 
-        final ResponseEntity<Request> expected = new ResponseEntity("Request not found!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("Request not found!",
             HttpStatus.NOT_FOUND);
 
         // verify the results
@@ -239,11 +240,11 @@ public class RequestControllerTest {
         when(requestRepository.findById(requestId)).thenReturn(request);
 
         // run the test and verify the results
-        final ResponseEntity<Request> result = requestController.membersAcceptingRequest("Ina",
+        final ResponseEntity<String> result = requestController.membersAcceptingRequest("Ina",
             1, "Mocha");
         verify(requestRepository).existsById(requestId);
 
-        final ResponseEntity<Request> expected = new ResponseEntity("You have successfully "
+        final ResponseEntity<String> expected = new ResponseEntity<>("You have successfully "
             + "accepted the user: " + request.get().getUser().getUsername(), HttpStatus.OK);
 
         assertEquals(expected, result);
@@ -290,11 +291,11 @@ public class RequestControllerTest {
         when(requestRepository.findById(requestId)).thenReturn(request);
 
         // run the test and verify the results
-        final ResponseEntity<Request> result = requestController.membersAcceptingRequest("Ina",
+        final ResponseEntity<String> result = requestController.membersAcceptingRequest("Ina",
             1, "Sleepy");
         verify(requestRepository).existsById(requestId);
 
-        final ResponseEntity<Request> expected = new ResponseEntity("You can't accept a user"
+        final ResponseEntity<String> expected = new ResponseEntity<>("You can't accept a user"
             + " from other household!", HttpStatus.FORBIDDEN);
 
         assertEquals(expected, result);
@@ -329,11 +330,11 @@ public class RequestControllerTest {
         when(requestRepository.findById(requestId)).thenReturn(request);
 
         // run the test and verify the results
-        final ResponseEntity<Request> result = requestController.membersAcceptingRequest("Ina",
+        final ResponseEntity<String> result = requestController.membersAcceptingRequest("Ina",
             1, "Sleepy");
         verify(requestRepository).existsById(requestId);
 
-        final ResponseEntity<Request> expected = new ResponseEntity("The user is not found!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("The user is not found!",
             HttpStatus.NOT_FOUND);
 
         assertEquals(expected, result);
@@ -368,10 +369,10 @@ public class RequestControllerTest {
         when(requestRepository.findById(requestId)).thenReturn(request);
 
         // run the test
-        final ResponseEntity<Request> result = requestController.membersAcceptingRequest("Sleepy",
+        final ResponseEntity<String> result = requestController.membersAcceptingRequest("Sleepy",
             1, "Mocha");
 
-        final ResponseEntity<Request> expected = new ResponseEntity("The request is not found!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("The request is not found!",
             HttpStatus.NOT_FOUND);
 
         // verify the results

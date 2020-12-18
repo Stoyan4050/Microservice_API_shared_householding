@@ -1,5 +1,7 @@
 package nl.tudelft.sem.transactions.repositories;
 
+import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import nl.tudelft.sem.transactions.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,10 +21,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     int updateExistingProduct(String productName, String username, float price,
                               int totalPortions, int portionsLeft,
                               int expired, long productId);
-    
+
     @Query(value = "DELETE FROM product WHERE productId = ?1", nativeQuery = true)
     @Modifying
     @Transactional
     int deleteProductById(long productId);
+
+    Optional<Product> findByProductId(long productId);
+
+    List<Product> findByUsername(String username);
+    
 }
 

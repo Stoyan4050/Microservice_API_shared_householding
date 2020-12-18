@@ -1,15 +1,15 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+
 
 /**
  * The controller class for User.
@@ -62,9 +64,10 @@ public class UserController {
      *
      * @param user user to be added
      */
-    @PostMapping(value = "/addNewUser", consumes = "application/json")
-    public void addNewUser(@RequestBody User user) {
+    @PostMapping("/addNewUser")
+    public ResponseEntity<?> addNewUser(@RequestBody User user) {
         userRepository.save(user);
+        return ResponseEntity.created(URI.create("/addNewUser")).build();
     }
 
 
@@ -76,22 +79,23 @@ public class UserController {
      *         NOT_FOUND             - the user was not found
      *         INTERNAL_SERVER_ERROR - the user couldn't be updated because of a server error
      */
-    @PutMapping("/updateUser/{username}")
-    public ResponseEntity<User> updateUser(@RequestBody User userWithNewInfo) {
-        Optional<User> user = userRepository.findById(userWithNewInfo.getUsername());
+    @PutMapping("/updateUser")
+    public ResponseEntity<String> updateUser(@RequestBody User userWithNewInfo,
+                                             @Username String username) {
+        Optional<User> user = userRepository.findById(username);
 
         if (user.isPresent()) {
             try {
                 userRepository.save(userWithNewInfo);
             } catch (Exception e) {
-                return new ResponseEntity("User couldn't be updated!",
+                return new ResponseEntity<>("User couldn't be updated!",
                     HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity("User updated successfully!", HttpStatus.OK);
+            return new ResponseEntity<>("User updated successfully!", HttpStatus.OK);
         }
 
-        return new ResponseEntity("User not found!", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("User not found!", HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -99,8 +103,8 @@ public class UserController {
      *
      * @param username username of the user to delete from the database
      */
-    @DeleteMapping("/deleteUser/{username}")
-    public void deleteUser(@PathVariable String username) {
+    @DeleteMapping("/deleteUser")
+    public void deleteUser(@Username String username) {
         Optional<User> user = userRepository.findById(username);
         if (user.isPresent()) {
             userRepository.deleteById(username);
@@ -117,8 +121,8 @@ public class UserController {
      * @return OK - if the userBalance > -50
      *         FORBIDDEN - if the userBalance <= -50
      */
-    @GetMapping("/getCreditsStatusForGroceries/{username}")
-    public ResponseEntity<User> getCreditsStatusForGroceries(@PathVariable String username) {
+    @GetMapping("/getCreditsStatusForGroceries")
+    public ResponseEntity<String> getCreditsStatusForGroceries(@Username String username) {
         Optional<User> user = userRepository.findById(username);
 
         if (user.isPresent()) {
@@ -126,7 +130,7 @@ public class UserController {
                 return new ResponseEntity<>(HttpStatus.OK);
             }
 
-            return new ResponseEntity("Your credits are less than -50! You should buy groceries.",
+            return new ResponseEntity<>("Your credits are less than -50! You should buy groceries.",
                 HttpStatus.FORBIDDEN);
         }
 
@@ -141,7 +145,7 @@ public class UserController {
     */
     @PostMapping("/editUserCredits")
     public @ResponseBody
-    boolean editUserCredits(@RequestParam String username,
+    ResponseEntity<?> editUserCredits(@RequestParam String username,
                              @RequestParam float credits,
                              @RequestParam boolean add) {
         // @ResponseBody means the returned String is the response, not a view name
@@ -150,17 +154,54 @@ public class UserController {
             credits = credits * (-1);
         }
     
-        User currentUser = userRepository.getOne(username);
+        User currentUser = userRepository.findByUsername(username);
+        System.out.println(currentUser.toString());
         try {
             if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
                     currentUser.getEmail(),
                     currentUser.getTotalCredits() + credits,
                     currentUser.getUsername()) == 1) { //NOPMD
-                return true;
+                //return ResponseEntity.created(URI.create("/editUserCredits")).build();
+                return ResponseEntity.created(URI.create("/editUserCredits")).build();
             }
-            return false;
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            return false;
+            return ResponseEntity.badRequest().build();
         }
+    }
+
+    /**Method for splitting credits, when users are eating together.
+     *
+     * @param usernames usernames of the users eating together*
+     * @param credits amount of credits to be split
+     *
+     * @return true if the credits were subtracted from each user
+     */
+    @PostMapping("/splitCredits")
+    public @ResponseBody
+    boolean splitUserCredits(@RequestBody List<String> usernames, @RequestParam float credits) {
+        
+        List<User> users = new ArrayList<>();
+        for (String username : usernames) {
+            users.add(userRepository.findByUsername(username));
+        }
+        
+        for (User user : users) {
+            float currentCredits = user.getTotalCredits();
+            currentCredits = currentCredits - credits;
+            user.setTotalCredits(currentCredits);
+    
+            try {
+                if (userRepository.updateUserCredits(user.getHouse().getHouseNr(),
+                        user.getEmail(),
+                        currentCredits,
+                        user.getUsername()) == 1) { //NOPMD
+                    continue;
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -1,8 +1,10 @@
 package nl.tudelft.sem.transactions.controllers;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.config.JwtConf;
 import nl.tudelft.sem.transactions.config.Username;
 import nl.tudelft.sem.transactions.entities.Product;
@@ -10,15 +12,17 @@ import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 
 
 @EnableJpaRepositories("nl.tudelft.sem.template.repositories")
@@ -36,8 +40,7 @@ public class ProductController {
         return productRepository;
     }
 
-    public void setProductRepository(
-        ProductRepository productRepository) {
+    public void setProductRepository(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
@@ -54,13 +57,19 @@ public class ProductController {
      *
      * @param product - the new product to be added in the fridge
      */
-    @PostMapping("/addProduct")
-    boolean addProduct(@RequestBody Product product) {
+    @PostMapping("/addNewProduct")
+    ResponseEntity<?> addNewProduct(@RequestBody Product product) {
+        float credits = product.getPrice();
+        credits = Math.round(credits * 100) / 100;
+
         try {
             productRepository.save(product);
-            return true;
+            MicroserviceCommunicator.sendRequestForChangingCredits(product.getUsername(),
+                    credits, true);
+
+            return ResponseEntity.created(URI.create("/addProduct")).build();
         } catch (DataIntegrityViolationException e) {
-            return false;
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -72,9 +81,9 @@ public class ProductController {
      * @param username - the username of the person whose products we are searching for
      * @return - a list of products that were added by the user with the indicated username
      */
-    @GetMapping("getUserProducts/{username}")
+    @GetMapping("/getUserProducts")
     @ResponseBody
-    public List<Product> getUserProducts(@PathVariable String username) {
+    public ResponseEntity<List<Product>> getUserProducts(@Username String username) {
         List<Product> allProducts = productRepository.findAll();
         List<Product> products = new ArrayList<>();
         for (Product p : allProducts) {
@@ -83,7 +92,12 @@ public class ProductController {
             }
 
         }
-        return products;
+        // return not found if user has no products or there's no user in database
+        if (products.size() == 0) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(products, HttpStatus.OK);
+        }
     }
     
     /**
@@ -104,25 +118,32 @@ public class ProductController {
     /**
      * Edits a product.
      *
-     * @param product - product to be edited in the database
+     * @param productWithNewInfo - product to be got by Id
      * @return true if product successfully edited, false otherwise
      */
-    @RequestMapping("/editProduct") // Map ONLY POST Requests
+    @PutMapping("/updateProduct") // Map ONLY POST Requests
     public @ResponseBody
-    boolean editProduct(@RequestBody Product product) {
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
-        try {
-            return productRepository.updateExistingProduct(product.getProductName(),
-                product.getUsername(),
-                product.getPrice(),
-                product.getTotalPortions(),
-                product.getPortionsLeft(),
-                product.getExpired(),
-                product.getProductId()) == 1;
-        } catch (Exception e) {
-            return false;
+    ResponseEntity<String> updateProduct(@Username String username,
+                                         @RequestBody Product productWithNewInfo) {
+        Optional<Product> product = productRepository.findById(productWithNewInfo.getProductId());
+
+        if (product.isPresent()) {
+            try {
+                if (!product.get().getUsername().equals(username)) {
+                    return new ResponseEntity<>("It's not your product!",
+                            HttpStatus.FORBIDDEN);
+                }
+                productRepository.save(productWithNewInfo);
+            } catch (Exception e) {
+                return new ResponseEntity<>("Product couldn't be updated!",
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return new ResponseEntity<>("Product updated successfully!", HttpStatus.OK);
         }
+
+        return new ResponseEntity<>("Product not found!", HttpStatus.NOT_FOUND);
+
     }
 
     /**
@@ -131,13 +152,24 @@ public class ProductController {
      * @param productId - id of a product
      * @return true if product successfully deleted, false otherwise
      */
-    @DeleteMapping("/deleteProduct")
+    @DeleteMapping("/deleteProduct/{productId}")
     public @ResponseBody
-    boolean deleteProduct(@RequestParam int productId) {
-        try {
-            return productRepository.deleteProductById(productId) != 0;
-        } catch (Exception e) {
-            return false;
+    ResponseEntity<String> deleteProduct(@Username String username, @PathVariable long productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            try {
+                if (!product.getUsername().equals(username)) {
+                    return new ResponseEntity<>("It's not your product!",
+                            HttpStatus.FORBIDDEN);
+                }
+                productRepository.delete(product);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("The product couldn't be deleted");
+            }
+            return ResponseEntity.ok().body("Product successfully deleted.");
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -145,59 +177,85 @@ public class ProductController {
      * This method allows the user to change the status of
      * an object to expired once it has gone bad.
      *
-     * @param product - the product of which the expired field must be changed
+     * @param productId - the product of which the expired field must be changed
      * @return - true in case the expired field was changed, fale otherwise.
      */
-    @PostMapping("/setExpired")
+    @PostMapping("/setExpired/{productId}")
     public @ResponseBody
-    boolean setExpired(@RequestBody Product product) {
-        try {
-            product.setExpired(1);
-            return true;
-        } catch (Exception e) {
-            return false;
+    ResponseEntity<?> setExpired(@Username String username, @PathVariable long productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            try {
+                float price = product.getPrice();
+                float pricePerPortion = price / product.getTotalPortions();
+                price = pricePerPortion * product.getPortionsLeft();
+
+                MicroserviceCommunicator.subtractCreditsWhenExpired(username, price);
+
+                productRepository.updateExistingProduct(product.getProductName(),
+                        product.getUsername(), product.getPrice(),
+                        product.getTotalPortions(), product.getPortionsLeft(),
+                        1, product.getProductId());
+                return ResponseEntity.created(URI.create("/setExpired")).build();
+
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().build();
+            }
         }
+        return ResponseEntity.badRequest().build();
     }
-
-    /**
-     * This method allows a user to check whether a product was marked as expired.
-     *
-     * @param product - the product whose expired field must be checked
-     * @return - this method returns true if the product is indeed expired and it returns false otherwise.
-     */
-    @GetMapping("/isExpired")
-    public @ResponseBody
-    boolean isExpired(@RequestParam Product product) {
-        if (product.getExpired() == 0) {
-            return false;
-        }
-        return true;
-    }
-
-
+    
     /**
      * This method deletes all the products which are expired but are still in the database.
      *
      * @return - true if the products were successfully deleted, false otherwise
      */
-    @DeleteMapping("deleteExpired")
+    @DeleteMapping("/deleteExpired/{productId}")
     public @ResponseBody
-    boolean deleteExpired(@RequestParam long productId) {
-        try {
-            Optional<Product> p = productRepository.findById(productId);
-            Product product = p.get();
-            if (product.getExpired() == 0) {
-                System.out.println("The product is not expired");
-                return false;
-            } else {
-                productRepository.delete(product);
-                return true;
+    ResponseEntity<String> deleteExpired(@PathVariable long productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+
+            Product product = optionalProduct.get();
+            try {
+                if (product.getExpired() == 0) {
+                    return ResponseEntity.badRequest().body("The product is not expired");
+
+                } else {
+                    productRepository.delete(product);
+                    return ResponseEntity.ok().body("Product successfully deleted");
+                }
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("The product couldn't be deleted");
             }
-        } catch (Exception e) {
-            return false;
         }
+        return ResponseEntity.notFound().build();
     }
 
-
+    /**Get products of a house fridge.
+     *
+     * @param houseNr house number
+     * @return list of products
+     */
+    @GetMapping("/getProductsByHouse/{houseNr}")
+    @ResponseBody
+    public List<Product> getProductsByHouse(@PathVariable int houseNr) {
+        //List<Product> allProducts = productRepository.findAll();
+        List<String> usernames = MicroserviceCommunicator.sendRequestForUsersOfHouse(houseNr);
+        
+        if (usernames == null) {
+            return null;
+        }
+        List<Product> products = new ArrayList<>();
+    
+        for (String username : usernames) {
+            //if (usernames.contains(p.getUsername())) {
+            //  products.add(p);
+            //}
+            products.addAll(productRepository.findByUsername(username));
+        }
+        return products;
+    }
 }
 

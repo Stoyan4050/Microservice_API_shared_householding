@@ -1,8 +1,9 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.requests.entities.House;
+import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
 import nl.tudelft.sem.requests.entities.User;
@@ -11,7 +12,6 @@ import nl.tudelft.sem.requests.repositories.RequestRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,10 +57,12 @@ public class RequestController {
      * @param requestId - the ID of the request to return
      * @return The request corresponding with that ID
      */
-    @GetMapping("getRequest/{requestId}")
+    @PostMapping("/getRequest")
     @ResponseBody
-    public Optional<Request> getRequestById(@PathVariable RequestId requestId) {
-        return requestRepository.findById(requestId);
+    public ResponseEntity<Request> getRequestById(@RequestBody RequestId requestId) {
+        return requestRepository.findById(requestId)
+                .map(request -> ResponseEntity.ok().body(request))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -68,9 +70,10 @@ public class RequestController {
      *
      * @param newRequest - the Request to add to the database
      */
-    @PostMapping(value = "/addNewRequest", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void addRequest(@RequestBody Request newRequest) {
-        requestRepository.save(newRequest);
+    @PostMapping("/addNewRequest")
+    public ResponseEntity<?> addRequest(@RequestBody Request newRequest) {
+        return ResponseEntity.created(URI.create("/addNewRequest"))
+                .body(requestRepository.save(newRequest));
     }
 
     /**
@@ -82,21 +85,21 @@ public class RequestController {
      *         INTERNAL_SERVER_ERROR - the request couldn't be updated because of a server error
      */
     @PutMapping("/updateRequest")
-    public ResponseEntity<Request> updateRequest(@RequestBody Request requestWithNewInfo) {
+    public ResponseEntity<String> updateRequest(@RequestBody Request requestWithNewInfo) {
         Optional<Request> request = requestRepository.findById(requestWithNewInfo.getId());
 
         if (request.isPresent()) {
             try {
                 requestRepository.save(requestWithNewInfo);
             } catch (Exception e) {
-                return new ResponseEntity("Request couldn't be updated!",
+                return new ResponseEntity<>("Request couldn't be updated!",
                     HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return new ResponseEntity("Request updated successfully!", HttpStatus.OK);
+            return new ResponseEntity<>("Request updated successfully!", HttpStatus.OK);
         }
 
-        return new ResponseEntity("Request not found!", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Request not found!", HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -104,10 +107,11 @@ public class RequestController {
      *
      * @param requestId - the ID of the request to delete from the database
      */
-    @DeleteMapping("deleteRequest/{requestId}")
+    @DeleteMapping("/deleteRequest")
     @ResponseBody
-    public void deleteRequest(@PathVariable RequestId requestId) {
+    public ResponseEntity<?> deleteRequest(@RequestBody RequestId requestId) {
         requestRepository.deleteById(requestId);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -118,10 +122,10 @@ public class RequestController {
      *         OK        - if the user was successfully updated
      */
     @PostMapping("/membersAcceptedRequest")
-    public ResponseEntity<Request> membersAcceptingRequest(
+    public ResponseEntity<String> membersAcceptingRequest(
                     @RequestParam(name = "username") String username,
                     @RequestParam(name = "houseNumber") int houseNumber,
-                    @RequestParam(name = "myUsername") String myUsername) {
+                    @Username String myUsername) {
 
         RequestId id = new RequestId(houseNumber, username);
 
@@ -129,17 +133,17 @@ public class RequestController {
 
 
         if (!requestRepository.existsById(id)) {
-            return new ResponseEntity("The request is not found!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("The request is not found!", HttpStatus.NOT_FOUND);
         }
 
         Optional<User> currentUser = userController.getUserByUsername(myUsername);
 
         if (!currentUser.isPresent()) {
-            return new ResponseEntity("The user is not found!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("The user is not found!", HttpStatus.NOT_FOUND);
         }
 
         if (currentUser.get().getHouse().getHouseNr() != houseNumber) {
-            return new ResponseEntity("You can't accept a user from other household!",
+            return new ResponseEntity<>("You can't accept a user from other household!",
                     HttpStatus.FORBIDDEN);
         }
 
@@ -156,7 +160,7 @@ public class RequestController {
 
         updateRequest(currentRequest.get());
 
-        return new ResponseEntity("You have successfully accepted the user: "
+        return new ResponseEntity<>("You have successfully accepted the user: "
                 + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
     }
 

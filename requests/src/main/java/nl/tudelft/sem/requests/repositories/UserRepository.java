@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
-	
     @Query(value = "UPDATE user "
 					   + "SET house_nr = ?1, email = ?2, total_credits = ?3 "
 					   + "WHERE username = ?4", nativeQuery = true)
@@ -20,4 +19,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Transactional
     int updateUserCredits(int houseNumber, String email,
 					  float totalCredits, String username);
+
+    User findByUsername(String username);
 }
+

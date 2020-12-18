@@ -90,10 +90,11 @@ public class UserControllerTest {
         when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
         // run the test and verify the results
-        final ResponseEntity<User> result = userController.updateUser(userWithNewInfo);
+        final ResponseEntity<String> result = userController.updateUser(
+                userWithNewInfo, userWithNewInfo.getUsername());
         verify(userRepository, times(1)).save(userWithNewInfo);
 
-        final ResponseEntity<User> expected = new ResponseEntity("User updated successfully!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("User updated successfully!",
                     HttpStatus.OK);
 
         assertEquals(expected, result);
@@ -111,9 +112,10 @@ public class UserControllerTest {
         //when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
         // run the test
-        final ResponseEntity<User> result = userController.updateUser(userWithNewInfo);
+        final ResponseEntity<String> result = userController.updateUser(
+                userWithNewInfo, userWithNewInfo.getUsername());
 
-        final ResponseEntity<User> expected = new ResponseEntity("User not found!",
+        final ResponseEntity<String> expected = new ResponseEntity("User not found!",
                     HttpStatus.NOT_FOUND);
 
         // verify the results
@@ -158,7 +160,8 @@ public class UserControllerTest {
         userRepository.save(user);
 
         // run the test
-        final ResponseEntity<User> result = userController.getCreditsStatusForGroceries("username");
+        final ResponseEntity<String> result = userController.getCreditsStatusForGroceries(
+                "username");
 
         // verify the results
         assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
@@ -173,7 +176,7 @@ public class UserControllerTest {
         userRepository.save(user);
 
         // run the test
-        final ResponseEntity<User> result = userController.getCreditsStatusForGroceries("a");
+        final ResponseEntity<String> result = userController.getCreditsStatusForGroceries("a");
 
         // verify the results
         assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
