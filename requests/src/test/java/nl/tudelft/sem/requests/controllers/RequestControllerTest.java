@@ -379,6 +379,37 @@ public class RequestControllerTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    public void testMembersAcceptingRequestWhenHouseIsNull() {
+        //setting the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("user1");
+        final User user2 = new User("user2");
+        user1.setHouse(null);
+        user2.setHouse(null);
+
+        //setting the request
+        final RequestId requestId = new RequestId(1, user1.getUsername());
+        final Optional<Request> request = Optional.of(new Request(requestId, house.get(),
+                user1, false));
+
+        when(houseRepository.findById(1)).thenReturn(house);
+        when(userRepository.findById(user1.getUsername())).thenReturn(Optional.of(user1));
+        when(userRepository.findById(user2.getUsername())).thenReturn(Optional.of(user2));
+        when(requestRepository.existsById(requestId)).thenReturn(true);
+        when(requestRepository.findById(requestId)).thenReturn(request);
+
+        // run the test
+        final ResponseEntity<String> result = requestController.membersAcceptingRequest(user1.getUsername(),
+                1, user2.getUsername());
+
+        final ResponseEntity<String> expected = new ResponseEntity<>(
+                "You can't accept a user from other household!",
+                HttpStatus.FORBIDDEN);
+
+        // verify the results
+        assertEquals(expected, result);
+    }
 }
 
 
