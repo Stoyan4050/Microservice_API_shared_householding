@@ -13,12 +13,10 @@ public class TransactionsSplitCredits {
      */
     public TransactionsSplitCredits(List<String> usernames, Transactions transactionsSplit) {
         this.usernames = usernames;
-	this.transactionsSplit = transactionsSplit;
-	
+	    this.transactionsSplit = transactionsSplit;
     }
     
     public TransactionsSplitCredits() {
-    
     }
 
     public List<String> getUsernames() {
@@ -33,7 +31,7 @@ public class TransactionsSplitCredits {
 	return transactionsSplit;
     }
 
-    public void setTransactions(Transactions transactionsSplit) {
+    public void setTransactionsSplit(Transactions transactionsSplit) {
 	this.transactionsSplit = transactionsSplit;
     }
 }
