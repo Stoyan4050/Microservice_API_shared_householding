@@ -91,7 +91,7 @@ public class UserControllerTest {
 
         // run the test and verify the results
         final ResponseEntity<User> result = userController.updateUser(userWithNewInfo);
-        verify(userRepository, times(1)).save(user);
+        verify(userRepository, times(1)).save(userWithNewInfo);
 
         final ResponseEntity<User> expected = new ResponseEntity("User updated successfully!",
                     HttpStatus.OK);
