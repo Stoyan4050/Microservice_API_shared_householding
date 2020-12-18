@@ -418,4 +418,95 @@ public class HouseControllerTest {
         assertEquals("201 CREATED",result.getStatusCode().toString());
         assertEquals(strings,result.getBody());
     }
+
+    @Test
+    public void testSplitCreditsWhenExpiredOk() {
+        // set up the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Sleepy", house.get(),
+            5.0f, "email1", Set.of(new Request()));
+        final User user2 = new User("Malwina", house.get(),
+            15.0f, "email2", Set.of(new Request()));
+        final User user3 = new User("Mocha", house.get(),
+            10.0f, "email3", Set.of(new Request()));
+
+        // add the users
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+        users.add(user2);
+        users.add(user3);
+        house.get().setUsers(users);
+
+        when(houseRepository.findByHouseNr(1)).thenReturn(house.get());
+        when(userRepository.findByUsername("Sleepy")).thenReturn(user1);
+        when(userRepository.findByUsername("Malwina")).thenReturn(user2);
+        when(userRepository.findByUsername("Mocha")).thenReturn(user3);
+        when(userRepository.updateUserCredits(1, "email1", 0, "Sleepy")).thenReturn(1);
+        when(userRepository.updateUserCredits(1, "email2", 10, "Malwina")).thenReturn(1);
+        when(userRepository.updateUserCredits(1, "email3", 5, "Mocha")).thenReturn(1);
+
+        // run the test
+        final ResponseEntity<?> result = houseController.splitCreditsWhenExpired("Sleepy", 15);
+
+        final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.CREATED);
+
+        // verify the results
+        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+    }
+
+    @Test
+    public void testSplitCreditsWhenExpiredEmptyHouse() {
+        // set up the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Sleepy", house.get(),
+            5.0f, "email1", Set.of(new Request()));
+        final User user2 = new User("Malwina", house.get(),
+            15.0f, "email2", Set.of(new Request()));
+        final User user3 = new User("Mocha", house.get(),
+            10.0f, "email3", Set.of(new Request()));
+
+        when(houseRepository.findByHouseNr(1)).thenReturn(house.get());
+        when(userRepository.findByUsername("Sleepy")).thenReturn(user1);
+        when(userRepository.findByUsername("Malwina")).thenReturn(user2);
+        when(userRepository.findByUsername("Mocha")).thenReturn(user3);
+        when(userRepository.updateUserCredits(1, "email1", 0, "Sleepy")).thenReturn(1);
+        when(userRepository.updateUserCredits(1, "email2", 10, "Malwina")).thenReturn(1);
+        when(userRepository.updateUserCredits(1, "email3", 5, "Mocha")).thenReturn(1);
+
+        // run the test
+        final ResponseEntity<?> result = houseController.splitCreditsWhenExpired("Sleepy", 15);
+
+        final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        // verify the results
+        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+    }
+
+    @Test
+    public void testSplitCreditsWhenExpiredBadUpdate() {
+        // set up the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Sleepy", house.get(),
+            5.0f, "email1", Set.of(new Request()));
+        final User user2 = new User("Malwina", house.get(),
+            15.0f, "email2", Set.of(new Request()));
+        final User user3 = new User("Mocha", house.get(),
+            10.0f, "email3", Set.of(new Request()));
+
+        when(houseRepository.findByHouseNr(1)).thenReturn(house.get());
+        when(userRepository.findByUsername("Sleepy")).thenReturn(user1);
+        when(userRepository.findByUsername("Malwina")).thenReturn(user2);
+        when(userRepository.findByUsername("Mocha")).thenReturn(user3);
+        when(userRepository.updateUserCredits(1, "email1", 0, "Sleepy")).thenReturn(0);
+        when(userRepository.updateUserCredits(1, "email2", 10, "Malwina")).thenReturn(0);
+        when(userRepository.updateUserCredits(1, "email3", 5, "Mocha")).thenReturn(0);
+
+        // run the test
+        final ResponseEntity<?> result = houseController.splitCreditsWhenExpired("Sleepy", 15);
+
+        final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        // verify the results
+        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+    }
 }
