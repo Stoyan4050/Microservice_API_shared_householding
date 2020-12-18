@@ -180,14 +180,17 @@ public class UserControllerTest {
         final User user = new User("username", new House(1, "name"),
                 5.0f, "email", Set.of(new Request()));
 
-        userRepository.save(user);
+        //userRepository.save(user);
+        when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
         // run the test
         final ResponseEntity<String> result = userController.getCreditsStatusForGroceries(
                 "username");
 
+        final ResponseEntity<String> expected = new ResponseEntity<>(HttpStatus.OK);
+
         // verify the results
-        assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -196,12 +199,34 @@ public class UserControllerTest {
         final User user = new User("a", new House(1, "name"),
                 -60.0f, "email", Set.of(new Request()));
 
-        userRepository.save(user);
+        //userRepository.save(user);
+        when(userRepository.findById("a")).thenReturn(Optional.of(user));
 
         // run the test
         final ResponseEntity<String> result = userController.getCreditsStatusForGroceries("a");
 
+        final ResponseEntity<String> expected = new ResponseEntity<>("Your credits are "
+            + "less than -50! You should buy groceries.", HttpStatus.FORBIDDEN);
+
         // verify the results
-        assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetCreditsStatusForGroceriesNotFound() {
+        // set up the user
+        final User user = new User("a", new House(1, "name"),
+            -60.0f, "email", Set.of(new Request()));
+
+        userRepository.save(user);
+        //when(userRepository.findById("username")).thenReturn(Optional.of(user));
+
+        // run the test
+        final ResponseEntity<String> result = userController.getCreditsStatusForGroceries("a");
+
+        final ResponseEntity<String> expected = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        // verify the results
+        assertEquals(expected, result);
     }
 }
