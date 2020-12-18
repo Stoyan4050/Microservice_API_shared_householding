@@ -197,8 +197,7 @@ public class HouseController {
                     user.get().setHouse(null);
 
                     userRepository.save(user.get());
-
-                    if (house.get().getUsers() == null) {
+                    if (house.get().getUsers().size() == 0) {
                         deleteHouse(houseNumber);
                     }
 
