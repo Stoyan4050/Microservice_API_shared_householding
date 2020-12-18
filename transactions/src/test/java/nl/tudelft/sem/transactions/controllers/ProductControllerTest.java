@@ -88,6 +88,15 @@ class ProductControllerTest {
     }
 
     @Test
+    public void deleteProduct3(){
+        product.setProductId(7);
+        when(productRepository.deleteProductById(7)).thenThrow(DataIntegrityViolationException.class);
+        boolean result = productController.deleteProduct(7);
+        verify(productController).deleteProduct(7);
+        assertFalse(result);
+    }
+
+    @Test
     public void testAddProduct() {
         final Product newProduct = new Product("Butter", 5, 10, "kendra");
 
@@ -159,6 +168,16 @@ class ProductControllerTest {
         verify(productController).setExpired("kendra", product);
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    public void setExpired2(){
+        when(productRepository.updateExistingProduct("milk",
+                "kendra",7,5,5,0,7))
+                .thenThrow(DataIntegrityViolationException.class);
+        product.setProductId(7);
+        ResponseEntity result = productController.setExpired("kendra",product);
+        assertEquals(HttpStatus.BAD_REQUEST,result.getStatusCode());
     }
 
 
