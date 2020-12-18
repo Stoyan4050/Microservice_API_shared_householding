@@ -39,8 +39,12 @@ dependencies {
 	implementation 'junit:junit:4.12'
 	implementation 'org.junit.jupiter:junit-jupiter'
 
-	compile 'org.mockito:mockito-core:3.1.0'
-
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+	testImplementation('org.junit.jupiter:junit-jupiter:5.5.2')
+	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.1.0'
+	testImplementation('org.assertj:assertj-core:3.14.0')
 
 	compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.2'
 	compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-server', version: '2.2.6.RELEASE'

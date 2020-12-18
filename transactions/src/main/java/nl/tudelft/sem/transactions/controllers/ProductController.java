@@ -133,7 +133,7 @@ public class ProductController {
      */
     @DeleteMapping("/deleteProduct")
     public @ResponseBody
-    boolean deleteProduct(@RequestParam int productId) {
+    boolean deleteProduct(@RequestParam long productId) {
         try {
             return productRepository.deleteProductById(productId) != 0;
         } catch (Exception e) {
