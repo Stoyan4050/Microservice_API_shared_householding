@@ -44,6 +44,8 @@ class TransactionControllerTest {
 
     private transient Product product;
 
+    private static final String BOB = "bob";
+
     @BeforeEach
     void setUp() {
         transactionController = spy(TransactionController.class);
@@ -51,7 +53,7 @@ class TransactionControllerTest {
         transaction = new Transactions();
         transaction.setTransactionId(1L);
         transaction.setPortionsConsumed(2);
-        transaction.setUsername("Bob");
+        transaction.setUsername(BOB);
         product = new Product();
         product.setProductId(4);
         transaction.setProductFk(product);
@@ -63,12 +65,12 @@ class TransactionControllerTest {
     void editTransaction() {
         doReturn(transaction).when(transactionsRepository).getOne(1L);
         doReturn(1).when(transactionsRepository)
-            .updateExistingTransaction(4, "Bob", 2, 1L);
+            .updateExistingTransaction(4, BOB, 2, 1L);
 
         boolean result = transactionController.editTransactions(transaction);
 
         verify(transactionsRepository)
-            .updateExistingTransaction(4, "Bob", 2, 1L);
+            .updateExistingTransaction(4, BOB, 2, 1L);
         assertTrue(result);
     }
 
@@ -120,7 +122,7 @@ class TransactionControllerTest {
     void addNewTransactionSplittingCredits() {
         doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
         doReturn(product).when(productRepository).findByProductId(4);
-        doReturn(List.of("Bob")).when(transactionsSplitCredits).getUsernames();
+        doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
 
         boolean result = transactionController
             .addNewTransactionSplittingCredits(transactionsSplitCredits);
@@ -128,5 +130,50 @@ class TransactionControllerTest {
         verify(transactionsRepository).save(transaction);
 
         assertTrue(result);
+    }
+
+    @Test
+    void addNewTransactionSplittingCreditsNullProduct() {
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(null).when(productRepository).findByProductId(4);
+
+        boolean result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+        assertFalse(result);
+    }
+
+    @Test
+    void addNewTransactionSplittingCreditsExpiredProduct() {
+        transaction.getProductFk().setExpired(1);
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(product).when(productRepository).findByProductId(4);
+        boolean result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+        assertFalse(result);
+    }
+
+    @Test
+    void addNewTransactionSplittingCreditsNoPortionsLeft() {
+        transaction.getProductFk().setPortionsLeft(-1);
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(product).when(productRepository).findByProductId(4);
+        boolean result = transactionController
+
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+        assertFalse(result);
+    }
+
+    @Test
+    void addNewTransactionSplittingCreditsDataIntegrityViolation() {
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(product).when(productRepository).findByProductId(4);
+        doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
+        doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
+            .save(transaction);
+
+        boolean result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+
+        assertFalse(result);
     }
 }
