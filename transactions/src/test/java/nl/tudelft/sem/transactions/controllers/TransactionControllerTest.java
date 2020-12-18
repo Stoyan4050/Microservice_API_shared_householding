@@ -100,6 +100,16 @@ class TransactionControllerTest {
     }
 
     @Test
+    void addNewTransactionProductNotPresent() {
+        doReturn(Optional.empty()).when(productRepository).findByProductId(4L);
+
+        ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
+
+        assertEquals(ResponseEntity.notFound().build(),
+            result);
+    }
+
+    @Test
     void addNewTransactionFalse() {
         doReturn(Optional.of(product)).when(productRepository).findByProductId(4L);
 
