@@ -67,6 +67,20 @@ class ProductControllerTest {
     }
 
     @Test
+    public void testDeleteProduct2(){
+        when(productRepository.findById(7l)).thenReturn(Optional.ofNullable(product));
+        doReturn(1).when(productRepository)
+                .deleteProductById(7);
+
+        boolean result = productController.deleteProduct(7);
+
+        verify(productRepository)
+                .deleteProductById(7);
+        assertTrue(result);
+    }
+
+
+    @Test
     public void testAddProduct(){
         final Product newProduct = new Product("Butter",5,10,"kendra");
 
