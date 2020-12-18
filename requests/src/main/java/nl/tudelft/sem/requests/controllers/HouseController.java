@@ -118,7 +118,7 @@ public class HouseController {
 
         if (house.isPresent()) {
             try {
-                houseRepository.save(house.get());
+                houseRepository.save(houseWithNewInfo);
             } catch (Exception e) {
                 return new ResponseEntity("House couldn't be updated!",
                     HttpStatus.INTERNAL_SERVER_ERROR);
