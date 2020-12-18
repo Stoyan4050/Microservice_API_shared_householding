@@ -108,18 +108,19 @@ public class HouseController {
     }
 
     /**
-     * Updates a Request, searched by the houseNr. - Without HTTP response
+     * Updates a House, searched by the houseNr.
      *
-     * @param houseWithNewInfo - the Request containing new data
-     * @param houseNr          - the requestId of the Request that is going to be changed
-     * @return status if the update was successful or not
+     * @param houseWithNewInfo - the House containing new data
+     * @return OK                    - the house was updated successfully
+     *         NOT_FOUND             - the house was not found
+     *         INTERNAL_SERVER_ERROR - the house couldn't be updated because of a server error
      */
-    @PutMapping("/updateHouse/{houseNr}")
-    public ResponseEntity<String> updateHouse(@RequestBody House houseWithNewInfo,
-                                              @PathVariable int houseNr) {
-        Optional<House> house = houseRepository.findById(houseNr);
+    @PutMapping("/updateHouse")
+    public ResponseEntity<String> updateHouse(@RequestBody House houseWithNewInfo) {
+        Optional<House> house = houseRepository.findById(houseWithNewInfo.getHouseNr());
 
         if (house.isPresent()) {
+            // update the house
             house.get().setHouseNr(houseWithNewInfo.getHouseNr());
             house.get().setName(houseWithNewInfo.getName());
             house.get().setRequests(houseWithNewInfo.getRequests());
@@ -128,14 +129,14 @@ public class HouseController {
             try {
                 houseRepository.save(house.get());
             } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("House couldn't be updated!");
+                return new ResponseEntity<>("House couldn't be updated!",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return ResponseEntity.ok().body("House updated successfully!");
+            return new ResponseEntity<>("House updated successfully!", HttpStatus.OK);
         }
 
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity<>("House not found!", HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -173,11 +174,19 @@ public class HouseController {
     public void userJoiningHouse(String username, int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
-        
+
+        // set the new house of the user
         user.get().setHouse(house.get());
         
         UserController userController = new UserController(userRepository);
         userController.updateUser(user.get(), user.get().getUsername());
+        // userController.updateUser(user.get());
+
+        // // add the user to the members
+        // house.get().getUsers().add(user.get());
+
+        // HouseController houseController = new HouseController(houseRepository, userRepository);
+        // houseController.updateHouse(house.get());
         
     }
     
@@ -256,6 +265,48 @@ public class HouseController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+
+    }
+
+    /**
+     * User leaving a house.
+     *
+     * @param username    - the username of the User entering the household
+     * @param houseNumber - the house number of the House to add the user in
+     * @return OK        - the user was successfully remove from the household
+     *         FORBIDDEN - the house number of the user is different from the one given
+     *         NOT_FOUND - if the user or the house do not exist in the database
+     */
+    public ResponseEntity<String> userLeavingHouse(String username, int houseNumber) {
+        Optional<House> house = houseRepository.findById(houseNumber);
+        Optional<User> user = userRepository.findById(username);
+
+        if (user.isPresent() && house.isPresent()) {
+            if (user.get().getHouse() != null) {
+                if (user.get().getHouse().getHouseNr() == houseNumber) {
+
+                    user.get().setHouse(null);
+
+                    userRepository.save(user.get());
+
+                    if (house.get().getUsers() == null) {
+                        deleteHouse(houseNumber);
+                    }
+
+                    return new ResponseEntity<>("You successfully removed " + username
+                        + " from house number " + houseNumber + "!", HttpStatus.OK);
+                }
+
+                return new ResponseEntity<>("You can not remove a user from a different household!",
+                    HttpStatus.FORBIDDEN);
+            }
+
+            return new ResponseEntity<>("The user does not have a house!",
+                HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>("The user or the house were not found, please check again!",
+            HttpStatus.NOT_FOUND);
     }
 }
 

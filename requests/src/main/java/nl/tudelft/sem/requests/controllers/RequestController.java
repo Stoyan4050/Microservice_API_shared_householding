@@ -80,7 +80,9 @@ public class RequestController {
      * Updates a Request, searched by the requestId.
      *
      * @param requestWithNewInfo - the Request containing new data
-     * @return status if the update was successful or not
+     * @return OK                    - the request was updated successfully
+     *         NOT_FOUND             - the request was not found
+     *         INTERNAL_SERVER_ERROR - the request couldn't be updated because of a server error
      */
     @PutMapping("/updateRequest")
     public ResponseEntity<String> updateRequest(@RequestBody Request requestWithNewInfo) {
@@ -90,14 +92,14 @@ public class RequestController {
             try {
                 requestRepository.save(requestWithNewInfo);
             } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Request couldn't be updated!");
+                return new ResponseEntity<>("Request couldn't be updated!",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return ResponseEntity.ok().body("Request updated successfully!");
+            return new ResponseEntity<>("Request updated successfully!", HttpStatus.OK);
         }
 
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity<>("Request not found!", HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -107,7 +109,7 @@ public class RequestController {
      */
     @DeleteMapping("/deleteRequest")
     @ResponseBody
-    public ResponseEntity<?> removeRequest(@RequestBody RequestId requestId) {
+    public ResponseEntity<?> deleteRequest(@RequestBody RequestId requestId) {
         requestRepository.deleteById(requestId);
         return ResponseEntity.ok().build();
     }
@@ -120,7 +122,7 @@ public class RequestController {
      *         OK        - if the user was successfully updated
      */
     @PostMapping("/membersAcceptedRequest")
-    public ResponseEntity<Request> membersAcceptingRequest(
+    public ResponseEntity<String> membersAcceptingRequest(
                     @RequestParam(name = "username") String username,
                     @RequestParam(name = "houseNumber") int houseNumber,
                     @Username String myUsername) {
@@ -131,17 +133,17 @@ public class RequestController {
 
 
         if (!requestRepository.existsById(id)) {
-            return new ResponseEntity("The request is not found!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("The request is not found!", HttpStatus.NOT_FOUND);
         }
 
         Optional<User> currentUser = userController.getUserByUsername(myUsername);
 
         if (!currentUser.isPresent()) {
-            return new ResponseEntity("User not found!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("The user is not found!", HttpStatus.NOT_FOUND);
         }
 
         if (currentUser.get().getHouse().getHouseNr() != houseNumber) {
-            return new ResponseEntity("You can't accept a user from other household!",
+            return new ResponseEntity<>("You can't accept a user from other household!",
                     HttpStatus.FORBIDDEN);
         }
 
@@ -158,7 +160,7 @@ public class RequestController {
 
         updateRequest(currentRequest.get());
 
-        return new ResponseEntity("You have successfully accepted the user: "
+        return new ResponseEntity<>("You have successfully accepted the user: "
                 + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
     }
 
