@@ -2,6 +2,7 @@ package nl.tudelft.sem.requests.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
 import nl.tudelft.sem.requests.entities.User;
@@ -10,9 +11,7 @@ import nl.tudelft.sem.requests.repositories.RequestRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,7 +67,7 @@ public class RequestController {
      *
      * @param newRequest - the Request to add to the database
      */
-    @PostMapping(value = "/addNewRequest", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/addNewRequest")
     public void addRequest(@RequestBody Request newRequest) {
         requestRepository.save(newRequest);
     }
@@ -118,7 +117,7 @@ public class RequestController {
     public ResponseEntity<Request> membersAcceptingRequest(
                     @RequestParam(name = "username") String username,
                     @RequestParam(name = "houseNumber") int houseNumber,
-                    @RequestParam(name = "myUsername") String myUsername) {
+                    @Username String myUsername) {
 
         RequestId id = new RequestId(houseNumber, username);
 

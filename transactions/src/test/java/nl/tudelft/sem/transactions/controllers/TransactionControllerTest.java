@@ -23,7 +23,7 @@ class TransactionControllerTest {
         int portionsConsumed = 1;
         String username = "Stoyan";
         transaction.setPortionsConsumed(portionsConsumed);
-        transaction.setProduct(product);
+        transaction.setProductFk(product);
         transaction.setTransactionId(1);
         transaction.setUsername(username);
     }
@@ -54,12 +54,12 @@ class TransactionControllerTest {
     @Test
     public void getProduct() {
 
-        assertEquals(product.getExpired(), transaction.getProduct().getExpired());
-        assertEquals(product.getPortionsLeft(), transaction.getProduct().getPortionsLeft());
-        assertEquals(product.getProductName(), transaction.getProduct().getProductName());
-        Assert.assertEquals(product.getPrice(), transaction.getProduct().getPrice(), 0.005f);
-        assertEquals(product.getTotalPortions(), transaction.getProduct().getTotalPortions());
-        assertEquals(product.getUsername(), transaction.getProduct().getUsername());
+        assertEquals(product.getExpired(), transaction.getProductFk().getExpired());
+        assertEquals(product.getPortionsLeft(), transaction.getProductFk().getPortionsLeft());
+        assertEquals(product.getProductName(), transaction.getProductFk().getProductName());
+        Assert.assertEquals(product.getPrice(), transaction.getProductFk().getPrice(), 0.005f);
+        assertEquals(product.getTotalPortions(), transaction.getProductFk().getTotalPortions());
+        assertEquals(product.getUsername(), transaction.getProductFk().getUsername());
     }
 
 }

@@ -1,14 +1,14 @@
 package nl.tudelft.sem.auth.entities;
 
-public class User {
+public class UserCredentials {
     private String username;
     private String password;
 
-    public User() {
+    public UserCredentials() {
 
     }
 
-    public User(String username, String password) {
+    public UserCredentials(String username, String password) {
         this.username = username;
         this.password = password;
     }
