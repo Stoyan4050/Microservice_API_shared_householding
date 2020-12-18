@@ -184,7 +184,9 @@ public class HouseController {
      *         FORBIDDEN - the house number of the user is different from the one given
      *         NOT_FOUND - if the user or the house do not exist in the database
      */
-    public ResponseEntity<House> userLeavingHouse(String username, int houseNumber) {
+    @PutMapping("/leaveHouse/{username}/{houseNumber}")
+    public ResponseEntity<House> userLeavingHouse(@PathVariable String username,
+                                                  @PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
 

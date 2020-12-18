@@ -80,7 +80,7 @@ public class UserController {
     public ResponseEntity<User> updateUser(@RequestBody User userWithNewInfo) {
         Optional<User> user = userRepository.findById(userWithNewInfo.getUsername());
 
-        if(user.isPresent()) {
+        if (user.isPresent()) {
             try {
                 userRepository.save(user.get());
             } catch (Exception e) {
