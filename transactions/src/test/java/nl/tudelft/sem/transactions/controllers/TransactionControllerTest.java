@@ -1,65 +1,174 @@
 package nl.tudelft.sem.transactions.controllers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
+import java.util.List;
+import java.util.Optional;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
-import org.junit.Assert;
+import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
+import nl.tudelft.sem.transactions.repositories.ProductRepository;
+import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 
-
-
-@SuppressWarnings("PMD")
 class TransactionControllerTest {
-    private Product product;
-    private final Transactions transaction = new Transactions();
-
+    private static final String BOB = "bob";
+    @Mock
+    private transient TransactionsRepository transactionsRepository;
+    @Mock
+    private transient ProductRepository productRepository;
+    @Mock
+    private transient TransactionsSplitCredits transactionsSplitCredits;
+    @InjectMocks
+    private transient TransactionController transactionController;
+    private transient Transactions transaction;
+    private transient Product product;
 
     @BeforeEach
-    public void setup() {
-        product = new Product("bread", (float) 1.50, 10, "Kristen");
-        int portionsConsumed = 1;
-        String username = "Stoyan";
-        transaction.setPortionsConsumed(portionsConsumed);
+    void setUp() {
+        transactionController = spy(TransactionController.class);
+        MockitoAnnotations.initMocks(this);
+        transaction = new Transactions();
+        transaction.setTransactionId(1L);
+        transaction.setPortionsConsumed(2);
+        transaction.setUsername(BOB);
+        product = new Product();
+        product.setProductId(4);
         transaction.setProductFk(product);
-        transaction.setTransactionId(1);
-        transaction.setUsername(username);
+        product.setExpired(0);
+        product.setPortionsLeft(5);
     }
 
     @Test
-    public void constructorTest() {
-        assertNotNull(transaction);
+    void editTransaction() {
+        doReturn(transaction).when(transactionsRepository).getOne(1L);
+        doReturn(1).when(transactionsRepository)
+            .updateExistingTransaction(4, BOB, 2, 1L);
+
+        boolean result = transactionController.editTransactions(transaction);
+
+        verify(transactionsRepository)
+            .updateExistingTransaction(4, BOB, 2, 1L);
+        assertTrue(result);
     }
 
     @Test
-    public void getPortions_consumed() {
+    void deleteTransaction() {
+        doReturn(Optional.of(transaction)).when(transactionsRepository).findById(1L);
+        doNothing().when(transactionsRepository).delete(transaction);
 
-        assertEquals(1, transaction.getPortionsConsumed());
+        transactionController.deleteTransaction(1L);
+
+        verify(transactionsRepository).findById(1L);
+        verify(transactionsRepository).delete(transaction);
     }
 
     @Test
-    public void getProductId() {
+    void getAllTransactions() {
+        List<Transactions> transactions = List.of(transaction);
+        doReturn(transactions).when(transactionsRepository).findAll();
 
-        assertEquals(product.getProductId(), transaction.getProductId());
+        List<Transactions> result = transactionController.getAllTransactions();
+
+        verify(transactionsRepository).findAll();
+
+        assertEquals(transactions, result);
     }
 
     @Test
-    public void getUsername() {
+    void addNewTransaction() {
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4L);
 
-        assertEquals("Stoyan", transaction.getUsername());
+        ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
+
+        verify(transactionsRepository).save(transaction);
+
+        assertEquals(ResponseEntity.ok().body("Transaction was successfully added"),
+            result);
     }
 
     @Test
-    public void getProduct() {
+    void addNewTransactionFalse() {
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4L);
 
-        assertEquals(product.getExpired(), transaction.getProductFk().getExpired());
-        assertEquals(product.getPortionsLeft(), transaction.getProductFk().getPortionsLeft());
-        assertEquals(product.getProductName(), transaction.getProductFk().getProductName());
-        Assert.assertEquals(product.getPrice(), transaction.getProductFk().getPrice(), 0.005f);
-        assertEquals(product.getTotalPortions(), transaction.getProductFk().getTotalPortions());
-        assertEquals(product.getUsername(), transaction.getProductFk().getUsername());
+        doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
+            .save(transaction);
+
+        ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
+
+        assertEquals(ResponseEntity.badRequest().body("Adding the transaction failed"), result);
     }
 
+    @Test
+    void addNewTransactionSplittingCredits() {
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
+        doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
+
+        ResponseEntity<String> result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+
+        verify(transactionsRepository).save(transaction);
+
+        assertEquals(ResponseEntity.ok().body("Transaction was successfully added"),
+            result);
+    }
+
+    @Test
+    void addNewTransactionSplittingCreditsNullProduct() {
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(Optional.empty()).when(productRepository).findByProductId(4);
+
+        ResponseEntity<String> result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+        assertEquals(ResponseEntity.notFound().build(), result);
+    }
+
+    @Test
+    void addNewTransactionSplittingCreditsExpiredProduct() {
+        transaction.getProductFk().setExpired(1);
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
+        ResponseEntity<String> result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+        assertEquals(ResponseEntity.badRequest().body(
+            "Product is expired or there is no portions left"), result);
+    }
+
+    @Test
+    void addNewTransactionSplittingCreditsNoPortionsLeft() {
+        transaction.getProductFk().setPortionsLeft(-1);
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
+        ResponseEntity<String> result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+        assertEquals(ResponseEntity.badRequest().body(
+            "Product is expired or there is no portions left"), result);
+    }
+
+    @Test
+    void addNewTransactionSplittingCreditsDataIntegrityViolation() {
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
+        doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
+        doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
+            .save(transaction);
+
+        ResponseEntity<String> result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+
+        assertEquals(ResponseEntity.badRequest().body("Adding the transaction failed"), result);
+    }
 }
