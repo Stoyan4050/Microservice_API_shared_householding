@@ -90,8 +90,8 @@ public class UserControllerTest {
         when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
         // run the test and verify the results
-        final ResponseEntity<String> result =
-            userController.updateUser(userWithNewInfo, userWithNewInfo.getUsername());
+        final ResponseEntity<String> result = userController.updateUser(
+                userWithNewInfo, userWithNewInfo.getUsername());
         verify(userRepository, times(1)).save(userWithNewInfo);
 
         final ResponseEntity<String> expected = new ResponseEntity<>("User updated successfully!",
@@ -112,8 +112,8 @@ public class UserControllerTest {
         //when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
         // run the test
-        final ResponseEntity<String> result = userController
-            .updateUser(userWithNewInfo, userWithNewInfo.getUsername());
+        final ResponseEntity<String> result = userController.updateUser(
+                userWithNewInfo, userWithNewInfo.getUsername());
 
         final ResponseEntity<String> expected = new ResponseEntity("User not found!",
                     HttpStatus.NOT_FOUND);
@@ -160,8 +160,8 @@ public class UserControllerTest {
         userRepository.save(user);
 
         // run the test
-        final ResponseEntity<String> result = userController
-            .getCreditsStatusForGroceries("username");
+        final ResponseEntity<String> result = userController.getCreditsStatusForGroceries(
+                "username");
 
         // verify the results
         assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);

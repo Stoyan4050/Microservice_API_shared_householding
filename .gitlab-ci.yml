@@ -2,3 +2,5 @@ include:
   - authentication/.gitlab-ci.yml
   - transactions/.gitlab-ci.yml
   - requests/.gitlab-ci.yml
+  - eureka/.gitlab-ci.yml
+  - gateway/.gitlab-ci.yml

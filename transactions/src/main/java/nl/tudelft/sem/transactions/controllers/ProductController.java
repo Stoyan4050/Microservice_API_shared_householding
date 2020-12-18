@@ -12,15 +12,17 @@ import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 
 
 @EnableJpaRepositories("nl.tudelft.sem.template.repositories")
@@ -38,8 +40,7 @@ public class ProductController {
         return productRepository;
     }
 
-    public void setProductRepository(
-        ProductRepository productRepository) {
+    public void setProductRepository(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
@@ -56,8 +57,8 @@ public class ProductController {
      *
      * @param product - the new product to be added in the fridge
      */
-    @PostMapping("/addProduct")
-    ResponseEntity<?> addProduct(@RequestBody Product product) {
+    @PostMapping("/addNewProduct")
+    ResponseEntity<?> addNewProduct(@RequestBody Product product) {
         float credits = product.getPrice();
         credits = Math.round(credits * 100) / 100;
 
@@ -82,7 +83,7 @@ public class ProductController {
      */
     @GetMapping("/getUserProducts")
     @ResponseBody
-    public List<Product> getUserProducts(@Username String username) {
+    public ResponseEntity<List<Product>> getUserProducts(@Username String username) {
         List<Product> allProducts = productRepository.findAll();
         List<Product> products = new ArrayList<>();
         for (Product p : allProducts) {
@@ -91,7 +92,12 @@ public class ProductController {
             }
 
         }
-        return products;
+        // return not found if user has no products or there's no user in database
+        if (products.size() == 0) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(products, HttpStatus.OK);
+        }
     }
     
     /**
@@ -112,25 +118,32 @@ public class ProductController {
     /**
      * Edits a product.
      *
-     * @param product - product to be got by Id
+     * @param productWithNewInfo - product to be got by Id
      * @return true if product successfully edited, false otherwise
      */
-    @RequestMapping("/editProduct") // Map ONLY POST Requests
+    @PutMapping("/updateProduct") // Map ONLY POST Requests
     public @ResponseBody
-    boolean editProduct(@RequestBody Product product) {
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
-        try {
-            return productRepository.updateExistingProduct(product.getProductName(),
-                product.getUsername(),
-                product.getPrice(),
-                product.getTotalPortions(),
-                product.getPortionsLeft(),
-                product.getExpired(),
-                product.getProductId()) == 1;
-        } catch (Exception e) {
-            return false;
+    ResponseEntity<String> updateProduct(@Username String username,
+                                         @RequestBody Product productWithNewInfo) {
+        Optional<Product> product = productRepository.findById(productWithNewInfo.getProductId());
+
+        if (product.isPresent()) {
+            try {
+                if (!product.get().getUsername().equals(username)) {
+                    return new ResponseEntity<>("It's not your product!",
+                            HttpStatus.FORBIDDEN);
+                }
+                productRepository.save(productWithNewInfo);
+            } catch (Exception e) {
+                return new ResponseEntity<>("Product couldn't be updated!",
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return new ResponseEntity<>("Product updated successfully!", HttpStatus.OK);
         }
+
+        return new ResponseEntity<>("Product not found!", HttpStatus.NOT_FOUND);
+
     }
 
     /**
@@ -139,13 +152,24 @@ public class ProductController {
      * @param productId - id of a product
      * @return true if product successfully deleted, false otherwise
      */
-    @DeleteMapping("/deleteProduct")
+    @DeleteMapping("/deleteProduct/{productId}")
     public @ResponseBody
-    boolean deleteProduct(@RequestParam long productId) {
-        try {
-            return productRepository.deleteProductById(productId) != 0;
-        } catch (Exception e) {
-            return false;
+    ResponseEntity<String> deleteProduct(@Username String username, @PathVariable long productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            try {
+                if (!product.getUsername().equals(username)) {
+                    return new ResponseEntity<>("It's not your product!",
+                            HttpStatus.FORBIDDEN);
+                }
+                productRepository.delete(product);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("The product couldn't be deleted");
+            }
+            return ResponseEntity.ok().body("Product successfully deleted.");
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -156,29 +180,30 @@ public class ProductController {
      * @param productId - the product of which the expired field must be changed
      * @return - true in case the expired field was changed, fale otherwise.
      */
-    @PostMapping("/setExpired")
+    @PostMapping("/setExpired/{productId}")
     public @ResponseBody
-    ResponseEntity<?> setExpired(@Username String username, @RequestBody Product productId) {
-        Product product = productRepository.findByProductId(productId.getProductId());
-        if (product == null) {
-            return ResponseEntity.badRequest().build();
+    ResponseEntity<?> setExpired(@Username String username, @PathVariable long productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            try {
+                float price = product.getPrice();
+                float pricePerPortion = price / product.getTotalPortions();
+                price = pricePerPortion * product.getPortionsLeft();
+
+                MicroserviceCommunicator.subtractCreditsWhenExpired(username, price);
+
+                productRepository.updateExistingProduct(product.getProductName(),
+                        product.getUsername(), product.getPrice(),
+                        product.getTotalPortions(), product.getPortionsLeft(),
+                        1, product.getProductId());
+                return ResponseEntity.created(URI.create("/setExpired")).build();
+
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().build();
+            }
         }
-        try {
-            float price = product.getPrice();
-            float pricePerPortion = price / product.getTotalPortions();
-            price = pricePerPortion * product.getPortionsLeft();
-            
-            MicroserviceCommunicator.subtractCreditsWhenExpired(username, price);
-            
-            productRepository.updateExistingProduct(product.getProductName(),
-                    product.getUsername(), product.getPrice(),
-                    product.getTotalPortions(), product.getPortionsLeft(),
-                    1, product.getProductId());
-            return ResponseEntity.created(URI.create("/setExpired")).build();
-    
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.badRequest().build();
     }
     
     /**
@@ -186,22 +211,26 @@ public class ProductController {
      *
      * @return - true if the products were successfully deleted, false otherwise
      */
-    @DeleteMapping("/deleteExpired")
+    @DeleteMapping("/deleteExpired/{productId}")
     public @ResponseBody
-    boolean deleteExpired(@RequestParam long productId) {
-        try {
-            Optional<Product> p = productRepository.findById(productId);
-            Product product = p.get();
-            if (product.getExpired() == 0) {
-                System.out.println("The product is not expired");
-                return false;
-            } else {
-                productRepository.delete(product);
-                return true;
+    ResponseEntity<String> deleteExpired(@PathVariable long productId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+
+            Product product = optionalProduct.get();
+            try {
+                if (product.getExpired() == 0) {
+                    return ResponseEntity.badRequest().body("The product is not expired");
+
+                } else {
+                    productRepository.delete(product);
+                    return ResponseEntity.ok().body("Product successfully deleted");
+                }
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("The product couldn't be deleted");
             }
-        } catch (Exception e) {
-            return false;
         }
+        return ResponseEntity.notFound().build();
     }
 
     /**Get products of a house fridge.
@@ -209,9 +238,9 @@ public class ProductController {
      * @param houseNr house number
      * @return list of products
      */
-    @GetMapping("/getProductsByHouse")
+    @GetMapping("/getProductsByHouse/{houseNr}")
     @ResponseBody
-    public List<Product> getProductsByHouse(@RequestParam int houseNr) {
+    public List<Product> getProductsByHouse(@PathVariable int houseNr) {
         //List<Product> allProducts = productRepository.findAll();
         List<String> usernames = MicroserviceCommunicator.sendRequestForUsersOfHouse(houseNr);
         

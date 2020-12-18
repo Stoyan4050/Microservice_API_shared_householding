@@ -106,6 +106,29 @@ public class HouseControllerTest {
         assertEquals(expected, result);
     }
 
+    /*
+    @Test
+    public void testUpdateHouseServerError() {
+        // set up the house with new info
+        final House houseWithNewInfo = new House(1, "CoolHouse");
+
+        // set up the current house
+        final House house = new House(1, "CoolestHouse");
+        when(houseRepository.findById(1)).thenReturn(Optional.of(house));
+
+
+        // run the test and verify the results
+        final ResponseEntity<House> result = houseController.updateHouse(houseWithNewInfo);
+        verify(houseRepository, times(1)).save(houseWithNewInfo);
+
+        final ResponseEntity<House> expected = new ResponseEntity("House couldn't be updated!",
+            HttpStatus.INTERNAL_SERVER_ERROR);
+
+        assertEquals(expected, result);
+    }
+
+     */
+
     @Test
     public void testUpdateHouseNotFound() {
         // set up the house with new info

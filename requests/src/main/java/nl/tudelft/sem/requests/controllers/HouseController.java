@@ -94,15 +94,13 @@ public class HouseController {
      * @param username username of the user creating the house
      */
     @PostMapping("/addNewHouse")
-    //@RequestMapping(value = "/addNewHouse", method=RequestMethod.POST,
-    //       consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addNewHouse(@RequestBody House house, @Username String username) {
+    public ResponseEntity<String> addNewHouse(@RequestBody House house, @Username String username) {
         Optional<User> user = userRepository.findById(username);
         return user.map(u -> {
             houseRepository.save(house);
             u.setHouse(house);
             userRepository.save(u);
-            return ResponseEntity.created(URI.create("/addNewHouse")).build();
+            return ResponseEntity.created(URI.create("/addNewHouse")).body("House was created");
         }).orElseGet(() ->
                 ResponseEntity.badRequest().body("User is not present in the database."));
     }
@@ -140,7 +138,7 @@ public class HouseController {
      * @param houseNumber houseNumber of the house to delete from the database
      */
     @DeleteMapping("/deleteHouse/{houseNumber}")
-    public ResponseEntity<?> deleteHouse(@PathVariable int houseNumber) {
+    public ResponseEntity<String> deleteHouse(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         if (house.isPresent()) {
             ResponseEntity<List<User>> usersResponse = getAllUsersFromHouse(houseNumber);
@@ -148,7 +146,6 @@ public class HouseController {
                 return ResponseEntity.badRequest().body("Invalid house number.");
             }
             List<User> users = usersResponse.getBody();
-            assert users != null;
             for (User user : users) {
                 user.setHouse(null);
                 userRepository.save(user);
