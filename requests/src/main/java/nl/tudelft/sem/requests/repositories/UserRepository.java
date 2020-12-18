@@ -21,5 +21,13 @@ public interface UserRepository extends JpaRepository<User, String> {
                           float totalCredits, String username);
 
     User findByUsername(String username);
+
+    @Query(value = "UPDATE user "
+            + "SET total_credits = 0 "
+            + "WHERE house_nr = ?1", nativeQuery = true)
+    @Modifying
+    @Transactional
+    void resetCredits(int houseNumber);
+
 }
 

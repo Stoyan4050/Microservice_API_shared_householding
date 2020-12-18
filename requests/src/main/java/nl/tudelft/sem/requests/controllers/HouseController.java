@@ -302,5 +302,14 @@ public class HouseController {
         return new ResponseEntity<>("The user or the house were not found, please check again!",
             HttpStatus.NOT_FOUND);
     }
+
+        /** Resets the credits of all users in that house to 0.
+     *
+     * @param houseNr number of the house to be reset
+     */
+    @PutMapping("/resetHouse/{houseNr}")
+    public void resetCredits(@PathVariable int houseNr) {
+        userRepository.resetCredits(houseNr);
+    }
 }
 
