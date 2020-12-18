@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
 
 
 @SuppressWarnings("PMD")
@@ -74,6 +75,15 @@ class ProductControllerTest {
         verify(productRepository).save(newProduct);
 
         assertTrue(result);
+    }
+
+    @Test
+    public void testAddProductException(){
+        doThrow(DataIntegrityViolationException.class).when(productRepository)
+                .save(product);
+        assertFalse(productController.addProduct(product));
+
+        verify(productRepository).save(product);
     }
 
     @Test
