@@ -16,7 +16,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
-
 /**
  * Class representing the User entity in the database - User table.
  */
@@ -50,13 +49,14 @@ public class User implements java.io.Serializable {
         this.username = username;
     }
 
-    /**Constructor for creating user.
+    /**
+     * Constructor for creating user.
      *
-     * @param username username of the user
-     * @param house house in which is the user
+     * @param username     username of the user
+     * @param house        house in which is the user
      * @param totalCredits credits of the user
-     * @param email email of the user
-     * @param requests all of the requests of the use for joining house
+     * @param email        email of the user
+     * @param requests     all of the requests of the use for joining house
      */
     public User(String username, House house,
                 float totalCredits, String email, Set<Request> requests) {
@@ -78,7 +78,7 @@ public class User implements java.io.Serializable {
     public void setUsername(String username) {
         this.username = username;
     }
-    
+
     @JsonBackReference("u1")
     public House getHouse() {
         return this.house;
@@ -125,10 +125,10 @@ public class User implements java.io.Serializable {
         User user = (User) o;
 
         return Float.compare(user.totalCredits, totalCredits) == 0
-                && Objects.equals(username, user.username)
-                && Objects.equals(house, user.house)
-                && Objects.equals(email, user.email)
-                && Objects.equals(requests, user.requests);
+            && Objects.equals(username, user.username)
+            && Objects.equals(house, user.house)
+            && Objects.equals(email, user.email)
+            && Objects.equals(requests, user.requests);
     }
 
     @Override

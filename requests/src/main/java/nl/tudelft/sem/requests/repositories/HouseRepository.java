@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
  * Repository interface for the houses.
  */
 @Repository
-public interface HouseRepository  extends JpaRepository<House, Integer> {
+public interface HouseRepository extends JpaRepository<House, Integer> {
     House findByHouseNr(int houseNr);
-	
+
 }

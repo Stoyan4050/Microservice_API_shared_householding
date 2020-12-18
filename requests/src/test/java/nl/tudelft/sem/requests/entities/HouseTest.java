@@ -30,13 +30,13 @@ public class HouseTest {
     @Test
     public void constructorEqualsTest() {
         Assertions.assertEquals(houseUnderTest,
-                new House(1, "name", Set.of(new Request()), Set.of(new User())));
+            new House(1, "name", Set.of(new Request()), Set.of(new User())));
     }
 
     @Test
     public void constructorNotEqualsTest() {
         Assertions.assertNotEquals(houseUnderTest,
-                new House(1, "noName", Set.of(new Request()), Set.of(new User())));
+            new House(1, "noName", Set.of(new Request()), Set.of(new User())));
     }
 
     @Test

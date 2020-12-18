@@ -1,14 +1,13 @@
 package nl.tudelft.sem.transactions.entities;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TransactionsSplitCreditsTest {
 
@@ -33,7 +32,7 @@ public class TransactionsSplitCreditsTest {
 
     @Test
     void getUsernames() {
-        List<String> expected = Arrays.asList("Kendra","Oskar","Fabian");
+        List<String> expected = Arrays.asList("Kendra", "Oskar", "Fabian");
         assertEquals(expected, t1.getUsernames());
     }
 
@@ -49,7 +48,7 @@ public class TransactionsSplitCreditsTest {
 
     @Test
     void getTransactionsSplit() {
-        assertEquals(transactionsSplit,t1.getTransactionsSplit());
+        assertEquals(transactionsSplit, t1.getTransactionsSplit());
     }
 
     @Test

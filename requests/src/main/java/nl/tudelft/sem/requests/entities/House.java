@@ -15,9 +15,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
-//import org.hibernate.annotations.Fetch;
-//import org.hibernate.annotations.FetchMode;
-
 /**
  * Class representing the House entity in the database - House table.
  */
@@ -39,22 +36,23 @@ public class House implements java.io.Serializable {
 
     @Cascade(CascadeType.DELETE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
-    private Set<Request> requests = new HashSet<Request>(0);
+    private Set<Request> requests = new HashSet<>(0);
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
-    private Set<User> users = new HashSet<User>(0);
-    
+    private Set<User> users = new HashSet<>(0);
+
     public House(int houseNr, String name) {
         this.houseNr = houseNr;
         this.name = name;
     }
 
-    /**Constructor for a house.
+    /**
+     * Constructor for a house.
      *
-     * @param houseNr the number of the house
-     * @param name name of the house
+     * @param houseNr  the number of the house
+     * @param name     name of the house
      * @param requests all of the requests for joining this house
-     * @param users all of the users living in this house
+     * @param users    all of the users living in this house
      */
     public House(int houseNr, String name, Set<Request> requests, Set<User> users) {
         this.houseNr = houseNr;
@@ -90,7 +88,7 @@ public class House implements java.io.Serializable {
     public void setRequests(Set<Request> requests) {
         this.requests = requests;
     }
-    
+
     @JsonIgnore
     public Set<User> getUsers() {
         return this.users;
@@ -110,7 +108,7 @@ public class House implements java.io.Serializable {
         }
         House house = (House) o;
         return houseNr == house.houseNr
-                && name.equals(house.name);
+            && name.equals(house.name);
     }
 
     @Override

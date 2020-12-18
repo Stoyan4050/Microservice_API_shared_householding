@@ -121,7 +121,7 @@ public class Product {
     public void setExpired(int expired) {
         this.expired = expired;
     }
-    
+
     @JsonIgnore
     public List<Transactions> getTransactionsList() {
         return transactionsList;
