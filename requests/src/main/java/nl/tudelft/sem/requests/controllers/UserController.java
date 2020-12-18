@@ -70,70 +70,32 @@ public class UserController {
         return ResponseEntity.created(URI.create("/addNewUser")).build();
     }
 
-    // TODO - choose the update method returning String or ResponseEntity (useful for tests)
-    /*
-    /**
-     * Updates a User, searched by the username. - With HTTP response
-     *
-     * @param userWithNewInfo - the User containing new data
-     * @param username        - the name of the User that is going to be changed
-     * @return a response entity
-     */
-    /*
-    @PutMapping("/updateUser/{username}")
-    public ResponseEntity<User> updateUser(@RequestBody User userWithNewInfo,
-                        @PathVariable String username) {
-        Optional<User> user = userRepository.findById(username);
-
-        if(user.isPresent()) {
-
-            user.get().setHouse(userWithNewInfo.getHouse());
-            user.get().setTotalCredits(userWithNewInfo.getTotalCredits());
-            user.get().setEmail(userWithNewInfo.getEmail());
-            user.get().setRequests(userWithNewInfo.getRequests());
-
-            User newUser;
-            try {
-                newUser = userRepository.save(user.get());
-            } catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
-            }
-
-            return new ResponseEntity<>(newUser, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-    */
 
     /**
-     * Updates a User, searched by the username. - Without HTTP response
+     * Updates a User, searched by the username.
      *
      * @param userWithNewInfo - the User containing new data
-     * @param username        - the name of the User that is going to be changed
-     * @return status if the update was successful or not
+     * @return OK                    - the user was updated successfully
+     *         NOT_FOUND             - the user was not found
+     *         INTERNAL_SERVER_ERROR - the user couldn't be updated because of a server error
      */
     @PutMapping("/updateUser")
-    public String updateUser(@RequestBody User userWithNewInfo, @Username String username) {
+    public ResponseEntity<String> updateUser(@RequestBody User userWithNewInfo,
+                                             @Username String username) {
         Optional<User> user = userRepository.findById(username);
 
         if (user.isPresent()) {
-            user.get().setHouse(userWithNewInfo.getHouse());
-            user.get().setTotalCredits(userWithNewInfo.getTotalCredits());
-            user.get().setEmail(userWithNewInfo.getEmail());
-            user.get().setRequests(userWithNewInfo.getRequests());
-
-            User newUser;
             try {
-                newUser = userRepository.save(user.get());
+                userRepository.save(userWithNewInfo);
             } catch (Exception e) {
-                return "User couldn't be updated!";
+                return new ResponseEntity<>("User couldn't be updated!",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            return "User updated successfully!";
+            return new ResponseEntity<>("User updated successfully!", HttpStatus.OK);
         }
 
-        return "User not found!";
+        return new ResponseEntity<>("User not found!", HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -160,7 +122,7 @@ public class UserController {
      *         FORBIDDEN - if the userBalance <= -50
      */
     @GetMapping("/getCreditsStatusForGroceries")
-    public ResponseEntity<User> getCreditsStatusForGroceries(@Username String username) {
+    public ResponseEntity<String> getCreditsStatusForGroceries(@Username String username) {
         Optional<User> user = userRepository.findById(username);
 
         if (user.isPresent()) {
@@ -168,7 +130,7 @@ public class UserController {
                 return new ResponseEntity<>(HttpStatus.OK);
             }
 
-            return new ResponseEntity("Your credits are less than -50! You should buy groceries.",
+            return new ResponseEntity<>("Your credits are less than -50! You should buy groceries.",
                 HttpStatus.FORBIDDEN);
         }
 
@@ -200,7 +162,7 @@ public class UserController {
                     currentUser.getTotalCredits() + credits,
                     currentUser.getUsername()) == 1) { //NOPMD
                 //return ResponseEntity.created(URI.create("/editUserCredits")).build();
-                ResponseEntity.created(URI.create("/editUserCredits")).body(15.f);
+                return ResponseEntity.created(URI.create("/editUserCredits")).build();
             }
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
