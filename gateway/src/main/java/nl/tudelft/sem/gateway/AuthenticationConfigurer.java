@@ -29,21 +29,21 @@ public class AuthenticationConfigurer extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
 
         http
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .exceptionHandling().authenticationEntryPoint(
-                        (req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                )
-                .and()
-                .addFilterAfter(
-                        new JwtAuthFilter(jwtConf), UsernamePasswordAuthenticationFilter.class
-                )
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, jwtConf.getUri()).permitAll()
-                // any requests that are not POST
-                // to jwtConf.uri ("/auth/**") should be authenticated
-                .anyRequest().authenticated();
+            .csrf().disable()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .exceptionHandling().authenticationEntryPoint(
+            (req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+        )
+            .and()
+            .addFilterAfter(
+                new JwtAuthFilter(jwtConf), UsernamePasswordAuthenticationFilter.class
+            )
+            .authorizeRequests()
+            .antMatchers(HttpMethod.POST, jwtConf.getUri()).permitAll()
+            // any requests that are not POST
+            // to jwtConf.uri ("/auth/**") should be authenticated
+            .anyRequest().authenticated();
     }
 
     @Bean

@@ -33,16 +33,20 @@ public class UserController {
     @Autowired
     private transient EurekaClient discoveryClient;
 
+    // no operation method that fixes a "dataflow anomaly" PMD warning
+    private static void nop(String s) {
+    }
+
     /**
      * POST Mapping for registration of users.
      *
      * @param user User to be added to the authentication database.
-     * @param b    A URI components builder
+     * @param uriComponentsBuilder    A URI components builder
      * @return A response entity depending on whether the operation was successful.
      */
     @PostMapping(value = "auth/register", consumes = {"application/json"})
     public ResponseEntity<?> register(final @Valid @RequestBody UserRegister user,
-                                      final UriComponentsBuilder b) {
+                                      final UriComponentsBuilder uriComponentsBuilder) {
 
         final String username = user.getUsername();
         if (jdbcUserDetailsManager.userExists(username)) {
@@ -70,7 +74,7 @@ public class UserController {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                    .body("Could not serialize User.");
+                .body("Could not serialize User.");
         }
 
         // get the uri of the requests microservice from eureka
@@ -79,9 +83,9 @@ public class UserController {
 
         // build a new POST request
         HttpRequest addNewUserReq = HttpRequest.newBuilder()
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(userRequestJson))
-                .uri(URI.create(requestsUri + "addNewUser/")).build();
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(userRequestJson))
+            .uri(URI.create(requestsUri + "addNewUser/")).build();
 
         HttpResponse<String> response = null;
         HttpClient client = HttpClient.newBuilder().build();
@@ -96,14 +100,11 @@ public class UserController {
         if (response.statusCode() != HttpStatus.CREATED.value()) {
             System.out.println("Status: " + response.statusCode());
             return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY)
-                    .body("Requests microservice returned: "
-                            + HttpStatus.resolve(response.statusCode()));
+                .body("Requests microservice returned: "
+                    + HttpStatus.resolve(response.statusCode()));
         }
 
-        final UriComponents uri = b.path("register/{user_name}").buildAndExpand(username);
+        final UriComponents uri = uriComponentsBuilder.path("register/{user_name}").buildAndExpand(username);
         return ResponseEntity.created(uri.toUri()).build();
     }
-
-    // no operation method that fixes a "dataflow anomaly" PMD warning
-    private static void nop(String s) {}
 }

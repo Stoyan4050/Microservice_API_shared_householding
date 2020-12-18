@@ -82,20 +82,20 @@ public class UserControllerTest {
     public void testUpdateUser() {
         // set up the user with new info
         final User userWithNewInfo = new User("username", new House(1, "name"),
-                10.0f, "email", Set.of(new Request()));
+            10.0f, "email", Set.of(new Request()));
 
         // set up the current user
         final User user = new User("username", new House(1, "name"),
-                5.0f, "email", Set.of(new Request()));
+            5.0f, "email", Set.of(new Request()));
         when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
         // run the test and verify the results
         final ResponseEntity<String> result = userController.updateUser(
-                userWithNewInfo, userWithNewInfo.getUsername());
+            userWithNewInfo, userWithNewInfo.getUsername());
         verify(userRepository, times(1)).save(userWithNewInfo);
 
         final ResponseEntity<String> expected = new ResponseEntity<>("User updated successfully!",
-                    HttpStatus.OK);
+            HttpStatus.OK);
 
         assertEquals(expected, result);
     }
@@ -113,10 +113,10 @@ public class UserControllerTest {
 
         // run the test
         final ResponseEntity<String> result = userController.updateUser(
-                userWithNewInfo, userWithNewInfo.getUsername());
+            userWithNewInfo, userWithNewInfo.getUsername());
 
         final ResponseEntity<String> expected = new ResponseEntity("User not found!",
-                    HttpStatus.NOT_FOUND);
+            HttpStatus.NOT_FOUND);
 
         // verify the results
         assertEquals(expected, result);
@@ -155,13 +155,13 @@ public class UserControllerTest {
     public void testGetCreditsStatusForGroceriesOk() {
         // set up the user
         final User user = new User("username", new House(1, "name"),
-                5.0f, "email", Set.of(new Request()));
+            5.0f, "email", Set.of(new Request()));
 
         userRepository.save(user);
 
         // run the test
         final ResponseEntity<String> result = userController.getCreditsStatusForGroceries(
-                "username");
+            "username");
 
         // verify the results
         assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
@@ -171,7 +171,7 @@ public class UserControllerTest {
     public void testGetCreditsStatusForGroceriesForbidden() {
         // set up the user
         final User user = new User("a", new House(1, "name"),
-                -60.0f, "email", Set.of(new Request()));
+            -60.0f, "email", Set.of(new Request()));
 
         userRepository.save(user);
 

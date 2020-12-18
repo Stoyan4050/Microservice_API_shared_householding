@@ -141,7 +141,7 @@ class ProductControllerTest {
         verify(productRepository).save(newProduct);
 
         final ResponseEntity<?> expected = ResponseEntity.created(URI.create("/addProduct"))
-                .build();
+            .build();
 
         assertEquals(expected, result);
 
@@ -151,14 +151,14 @@ class ProductControllerTest {
     @Test
     public void testAddProductException() {
         doThrow(DataIntegrityViolationException.class).when(productRepository)
-                .save(product);
+            .save(product);
 
         ResponseEntity<?> result = productController.addNewProduct(product);
 
         verify(productRepository).save(product);
 
         final ResponseEntity<?> expected = new ResponseEntity("Product not added!",
-                HttpStatus.OK);
+            HttpStatus.OK);
         verify(productRepository).save(product);
     }
 

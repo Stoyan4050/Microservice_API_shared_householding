@@ -17,4 +17,4 @@ checkStyle:
 PMD:
   stage: staticAnalysis
   script:
-      gradle pmdMain pmdTest
+    gradle pmdMain pmdTest
