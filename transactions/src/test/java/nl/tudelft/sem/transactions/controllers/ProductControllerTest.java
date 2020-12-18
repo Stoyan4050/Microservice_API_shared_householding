@@ -2,16 +2,17 @@ package nl.tudelft.sem.transactions.controllers;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
-import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.*;
+import org.mockito.MockitoAnnotations;
+
 
 @SuppressWarnings("PMD")
 class ProductControllerTest {
@@ -25,8 +26,9 @@ class ProductControllerTest {
     private transient ProductController productController;
 
     @BeforeEach
-    public void setUp() {
-        initMocks(this);
+    void setUp() {
+        productController = spy(ProductController.class);
+        MockitoAnnotations.initMocks(this);
         product = new Product("Milk", 14.0f, 12, "Chris");
     }
 
@@ -40,9 +42,8 @@ class ProductControllerTest {
         assertEquals(products.get(0), result.get(0));
     }
 
-
     @Test
-    public void getUserProducts(){
+    public void testGetUserProducts(){
         final List<Product> products = Arrays.asList(new Product("Butter",5,5,"kendra"));
 
         when(productRepository.findAll()).thenReturn(products);
@@ -53,21 +54,14 @@ class ProductControllerTest {
     }
 
     @Test
-    void deleteProduct() {
-        Assertions.assertFalse(productController.deleteProduct(-128));
+    public void testDeleteProduct() {
+        Optional<Product> product = Optional.ofNullable(null);
+        when(productRepository.findById(7l)).thenReturn(product);
+
+        productController.deleteProduct(7);
+
+        verify(productRepository, times(0)).deleteById(1l);
     }
 
-    /*@Test
-    void deleteProductTest(){
-        final List<Product> products = Arrays.asList(new Product("Butter",5,5,"kendra"));
-        when(productRepository.findAll()).thenReturn(products);
-        boolean result = productController.deleteProduct(products.get(0).getProductId());
 
-        assertEquals(true, result);
-    }
-    @Test
-    void editProduct() {
-        productController.editProduct(product);
-        Assertions.assertEquals("Milk", this.product.getProductName());
-    }*/
 }
