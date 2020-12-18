@@ -22,18 +22,17 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 
-@SuppressWarnings("PMD")
 class TransactionControllerTest {
     @Mock
-    TransactionsRepository transactionsRepository;
+    private transient TransactionsRepository transactionsRepository;
 
     @Mock
-    MicroserviceCommunicator microserviceCommunicator;
+    private transient MicroserviceCommunicator microserviceCommunicator;
 
     @InjectMocks
-    TransactionController transactionController;
+    private transient TransactionController transactionController;
 
-    Transactions transaction;
+    private transient Transactions transaction;
 
     @BeforeEach
     void setUp() {
