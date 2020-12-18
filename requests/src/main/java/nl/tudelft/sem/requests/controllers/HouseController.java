@@ -161,10 +161,17 @@ public class HouseController {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
 
+        // set the new house of the user
         user.get().setHouse(house.get());
 
         UserController userController = new UserController(userRepository);
         userController.updateUser(user.get());
+
+        // add the user to the members
+        house.get().getUsers().add(user.get());
+
+        HouseController houseController = new HouseController(houseRepository, userRepository);
+        houseController.updateHouse(house.get());
 
     }
 

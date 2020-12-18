@@ -188,6 +188,8 @@ public class HouseControllerTest {
         house.get().setUsers(users);
 
         // set up the updated members
+        final User newUser = new User("Mocha");
+        newUser.setHouse(house.get());
         Set<User> updatedUsers = new HashSet<>();
         updatedUsers.add(user1);
         updatedUsers.add(user2);
@@ -198,11 +200,10 @@ public class HouseControllerTest {
 
         // run the test and verify the results
         houseController.userJoiningHouse("Mocha", 1);
-        //verify(houseRepository, times(1)).save(house.get());
+        verify(userRepository, times(1)).save(user2);
 
         assertEquals(user2.getHouse().getHouseNr(), 1);
-        //assertEquals(updatedUsers, user2.getHouse().getUsers());
-        //TODO -> the users should also get updated -> should return true but it returns false
+        assertEquals(updatedUsers, user2.getHouse().getUsers());
     }
 
     @Test
