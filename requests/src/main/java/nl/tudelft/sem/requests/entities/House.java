@@ -12,6 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 //import org.hibernate.annotations.Fetch;
 //import org.hibernate.annotations.FetchMode;
@@ -35,6 +37,7 @@ public class House implements java.io.Serializable {
     @Column(name = "name", length = 25)
     private String name;
 
+    @Cascade(CascadeType.DELETE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "house")
     private Set<Request> requests = new HashSet<Request>(0);
 
