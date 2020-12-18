@@ -87,9 +87,7 @@ class ProductControllerTest {
 
         ResponseEntity result = productController.deleteProduct("kendra",7);
 
-
-        verify(productRepository)
-                .deleteProductById(7);
+    verify(productController).deleteProduct("kendra",7);
         assertEquals(result.getStatusCode(),HttpStatus.OK);
 
     }
@@ -97,10 +95,10 @@ class ProductControllerTest {
     @Test
     public void deleteProduct3(){
         product.setProductId(7);
-        when(productRepository.deleteProductById(7)).thenThrow(DataIntegrityViolationException.class);
+        when(productRepository.findById(7L)).thenReturn(Optional.empty());
         ResponseEntity result = productController.deleteProduct("kendra",7);
-        verify(productController).deleteProduct("kendra",7);
-        assertEquals(result.getStatusCode(),HttpStatus.BAD_REQUEST);
+        //verify(productController).deleteProduct("kendra",7);
+        assertEquals(result.getStatusCode(),HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -135,15 +133,12 @@ class ProductControllerTest {
 
     @Test
     public void testUpdateProduct() {
-        doReturn(1).when(productRepository)
-                .updateExistingProduct("Milk", "Chris", 14, 12, 12, 0, 0L);
-
-
+        when(productRepository.findById(7L)).thenReturn(Optional.ofNullable(product));
         ResponseEntity result = productController.updateProduct("kendra",product);
 
-        verify(productRepository)
-                .updateExistingProduct("Milk",  "Chris", 14, 12, 12, 0, 0L);
-        assertEquals(result.getStatusCode(),HttpStatus.OK);
+        verify(productController)
+               .updateProduct("kendra",product);
+        assertEquals(result.getStatusCode(),HttpStatus.NOT_FOUND);
     }
 
     @Test
