@@ -6,6 +6,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.bouncycastle.cert.ocsp.Req;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -115,10 +116,13 @@ public class RequestTest {
 
     @Test
     public void testHashcode() {
-        Request request1 = new Request(requestIdMock, new House(1, "CoolHouse"),
-                            new User("sleepy"));
-        Request request2 = new Request(requestIdMock, new House(1, "CoolHouse"),
-                            new User("sleepy"));
+        Request request1 = new Request();
+        request1.setHouse(new House(1, "CoolHouse"));
+        request1.setUser(new User("sleepy"));
+
+        Request request2 = new Request();
+        request2.setHouse(new House(1, "CoolHouse"));
+        request2.setUser(new User("sleepy"));
 
         Map<Request, String> map = new HashMap<>();
         map.put(request1, "dummy");
