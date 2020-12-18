@@ -24,23 +24,17 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 
 class TransactionControllerTest {
+    private static final String BOB = "bob";
     @Mock
     private transient TransactionsRepository transactionsRepository;
-
     @Mock
     private transient ProductRepository productRepository;
-
     @Mock
     private transient TransactionsSplitCredits transactionsSplitCredits;
-
     @InjectMocks
     private transient TransactionController transactionController;
-
     private transient Transactions transaction;
-
     private transient Product product;
-
-    private static final String BOB = "bob";
 
     @BeforeEach
     void setUp() {
@@ -95,7 +89,7 @@ class TransactionControllerTest {
 
     @Test
     void addNewTransaction() {
-        doReturn(product).when(productRepository).findByProductId(4L);
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4L);
 
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
@@ -107,7 +101,7 @@ class TransactionControllerTest {
 
     @Test
     void addNewTransactionFalse() {
-        doReturn(product).when(productRepository).findByProductId(4L);
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4L);
 
         doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
             .save(transaction);
@@ -120,7 +114,7 @@ class TransactionControllerTest {
     @Test
     void addNewTransactionSplittingCredits() {
         doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
-        doReturn(product).when(productRepository).findByProductId(4);
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
         doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
 
         ResponseEntity<String> result = transactionController
@@ -135,7 +129,7 @@ class TransactionControllerTest {
     @Test
     void addNewTransactionSplittingCreditsNullProduct() {
         doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
-        doReturn(null).when(productRepository).findByProductId(4);
+        doReturn(Optional.empty()).when(productRepository).findByProductId(4);
 
         ResponseEntity<String> result = transactionController
             .addNewTransactionSplittingCredits(transactionsSplitCredits);
@@ -146,7 +140,7 @@ class TransactionControllerTest {
     void addNewTransactionSplittingCreditsExpiredProduct() {
         transaction.getProductFk().setExpired(1);
         doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
-        doReturn(product).when(productRepository).findByProductId(4);
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
         ResponseEntity<String> result = transactionController
             .addNewTransactionSplittingCredits(transactionsSplitCredits);
         assertEquals(ResponseEntity.badRequest().body(
@@ -157,7 +151,7 @@ class TransactionControllerTest {
     void addNewTransactionSplittingCreditsNoPortionsLeft() {
         transaction.getProductFk().setPortionsLeft(-1);
         doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
-        doReturn(product).when(productRepository).findByProductId(4);
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
         ResponseEntity<String> result = transactionController
             .addNewTransactionSplittingCredits(transactionsSplitCredits);
         assertEquals(ResponseEntity.badRequest().body(
@@ -167,7 +161,7 @@ class TransactionControllerTest {
     @Test
     void addNewTransactionSplittingCreditsDataIntegrityViolation() {
         doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
-        doReturn(product).when(productRepository).findByProductId(4);
+        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
         doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
         doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
             .save(transaction);
