@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,5 +89,22 @@ class ProductControllerTest {
         assertTrue(result);
     }
 
-   
+    @Test
+    public void testSetExpired(){
+        boolean result = productController.setExpired(product);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsExpiredFalse(){
+        boolean result = productController.isExpired(product);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsExpiredTrue(){
+        product.setExpired(1);
+        boolean result = productController.isExpired(product);
+        assertTrue(result);
+    }
 }
