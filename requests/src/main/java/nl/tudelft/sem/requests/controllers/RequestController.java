@@ -1,5 +1,6 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.requests.config.Username;
@@ -56,10 +57,12 @@ public class RequestController {
      * @param requestId - the ID of the request to return
      * @return The request corresponding with that ID
      */
-    @GetMapping("getRequest/{requestId}")
+    @PostMapping("/getRequest")
     @ResponseBody
-    public Optional<Request> getRequestById(@PathVariable RequestId requestId) {
-        return requestRepository.findById(requestId);
+    public ResponseEntity<Request> getRequestById(@RequestBody RequestId requestId) {
+        return requestRepository.findById(requestId)
+                .map(request -> ResponseEntity.ok().body(request))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -68,21 +71,20 @@ public class RequestController {
      * @param newRequest - the Request to add to the database
      */
     @PostMapping("/addNewRequest")
-    public void addRequest(@RequestBody Request newRequest) {
-        requestRepository.save(newRequest);
+    public ResponseEntity<?> addRequest(@RequestBody Request newRequest) {
+        return ResponseEntity.created(URI.create("/addNewRequest"))
+                .body(requestRepository.save(newRequest));
     }
 
     /**
-     * Updates a Request, searched by the requestId. - Without HTTP response
+     * Updates a Request, searched by the requestId.
      *
      * @param requestWithNewInfo - the Request containing new data
-     * @param requestId          - the requestId of the Request that is going to be changed
      * @return status if the update was successful or not
      */
-    @PutMapping("/updateRequest/{requestId}")
-    public String updateRequest(@RequestBody Request requestWithNewInfo,
-                                @PathVariable RequestId requestId) {
-        Optional<Request> request = requestRepository.findById(requestId);
+    @PutMapping("/updateRequest")
+    public ResponseEntity<String> updateRequest(@RequestBody Request requestWithNewInfo) {
+        Optional<Request> request = requestRepository.findById(requestWithNewInfo.getId());
 
         if (request.isPresent()) {
             request.get().setId(requestWithNewInfo.getId());
@@ -90,17 +92,17 @@ public class RequestController {
             request.get().setUser(requestWithNewInfo.getUser());
             request.get().setApproved(requestWithNewInfo.isApproved());
 
-            Request newRequest;
             try {
-                newRequest = requestRepository.save(request.get());
+                requestRepository.save(request.get());
             } catch (Exception e) {
-                return "Request couldn't be updated!";
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Request couldn't be updated!");
             }
 
-            return "Request updated successfully!";
+            return ResponseEntity.ok().body("Request updated successfully!");
         }
 
-        return "Request not found!";
+        return ResponseEntity.notFound().build();
     }
 
     /**
@@ -108,10 +110,11 @@ public class RequestController {
      *
      * @param requestId - the ID of the request to delete from the database
      */
-    @DeleteMapping("deleteRequest/{requestId}")
+    @DeleteMapping("/deleteRequest")
     @ResponseBody
-    public void removeRequest(@PathVariable RequestId requestId) {
+    public ResponseEntity<?> removeRequest(@RequestBody RequestId requestId) {
         requestRepository.deleteById(requestId);
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -158,7 +161,7 @@ public class RequestController {
         //method userJoiningHouse of HouseController -> setting the house of the new user
         houseController.userJoiningHouse(username, houseNumber);
 
-        this.updateRequest(currentRequest.get(), currentRequest.get().getId());
+        this.updateRequest(currentRequest.get());
 
 
         return new ResponseEntity("You have successfully accepted the user: "

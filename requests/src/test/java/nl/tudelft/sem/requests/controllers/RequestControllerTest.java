@@ -1,5 +1,6 @@
 package nl.tudelft.sem.requests.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /**
  * Tests for the RequestController class and RequestRepository.
@@ -65,7 +68,8 @@ public class RequestControllerTest {
         when(mockRepository.findById(requestIdMock)).thenReturn(requests);
 
         // Run the test
-        final Optional<Request> result = requestControllerUnderTest.getRequestById(requestIdMock);
+        final ResponseEntity<Request> result = requestControllerUnderTest.getRequestById(requestIdMock);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
 
         // Verify the results
     }
