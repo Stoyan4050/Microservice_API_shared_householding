@@ -79,7 +79,6 @@ class ProductControllerTest {
         assertTrue(result);
     }
 
-
     @Test
     public void testAddProduct(){
         final Product newProduct = new Product("Butter",5,10,"kendra");
@@ -116,12 +115,14 @@ class ProductControllerTest {
     @Test
     public void testSetExpired(){
         boolean result = productController.setExpired(product);
+        verify(productController).setExpired(product);
         assertTrue(result);
     }
 
     @Test
     public void testIsExpiredFalse(){
         boolean result = productController.isExpired(product);
+        verify(productController).isExpired(product);
         assertFalse(result);
     }
 
@@ -129,6 +130,28 @@ class ProductControllerTest {
     public void testIsExpiredTrue(){
         product.setExpired(1);
         boolean result = productController.isExpired(product);
+        verify(productController).isExpired(product);
         assertTrue(result);
     }
+
+    @Test
+    public void testDeleteExpired(){
+        product.setExpired(1);
+        when(productRepository.findById(7l)).thenReturn(Optional.ofNullable(product));
+
+        boolean result = productController.deleteExpired(7);
+        verify(productController).deleteExpired(7);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testDeleteExpired2(){
+        product.setExpired(0);
+        when(productRepository.findById(7l)).thenReturn(Optional.ofNullable(product));
+
+        boolean result = productController.deleteExpired(7);
+        verify(productController).deleteExpired(7);
+        assertFalse(result);
+    }
+
 }
