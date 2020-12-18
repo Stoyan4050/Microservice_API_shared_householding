@@ -74,4 +74,19 @@ class ProductControllerTest {
 
         assertTrue(result);
     }
+
+    @Test
+    public void testEditProduct(){
+        doReturn(1).when(productRepository)
+                .updateExistingProduct("Milk", "Chris", 14, 12,12,0,0L);
+
+
+        boolean result = productController.editProduct(product);
+
+        verify(productRepository)
+                .updateExistingProduct("Milk", "Chris", 14, 12,12,0,0L);
+        assertTrue(result);
+    }
+
+   
 }
