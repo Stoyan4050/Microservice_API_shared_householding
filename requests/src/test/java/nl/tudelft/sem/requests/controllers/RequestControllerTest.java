@@ -146,8 +146,8 @@ public class RequestControllerTest {
         final ResponseEntity<String> result = requestController.updateRequest(requestWithNewInfo);
         verify(requestRepository, times(1)).save(requestWithNewInfo);
 
-        final ResponseEntity<String> expected = new ResponseEntity<>("Request updated successfully!",
-            HttpStatus.OK);
+        final ResponseEntity<String> expected = new ResponseEntity<>(
+                "Request updated successfully!", HttpStatus.OK);
 
         assertEquals(expected, result);
     }

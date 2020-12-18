@@ -4,6 +4,7 @@ import nl.tudelft.sem.transactions.entities.Product;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.ResponseEntity;
 
 @SuppressWarnings("PMD")
 class ProductControllerTest {
@@ -14,11 +15,6 @@ class ProductControllerTest {
     void setup() {
         product = new Product("Milk", 14.0f, 12, "Chris");
         productController = new ProductController();
-    }
-
-    @Test
-    void deleteProduct() {
-        Assertions.assertFalse(productController.deleteProduct(-128));
     }
     
 }
