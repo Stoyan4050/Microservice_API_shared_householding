@@ -120,13 +120,8 @@ public class HouseController {
         Optional<House> house = houseRepository.findById(houseWithNewInfo.getHouseNr());
 
         if (house.isPresent()) {
-            // update the house
-            house.get().setHouseNr(houseWithNewInfo.getHouseNr());
-            house.get().setName(houseWithNewInfo.getName());
-            house.get().setRequests(houseWithNewInfo.getRequests());
-            house.get().setUsers(houseWithNewInfo.getUsers());
-
             try {
+                // update the house
                 houseRepository.save(houseWithNewInfo);
             } catch (Exception e) {
                 return new ResponseEntity<>("House couldn't be updated!",
@@ -279,7 +274,7 @@ public class HouseController {
      */
     @PutMapping("/leaveHouse/{houseNumber}")
     public ResponseEntity<String> userLeavingHouse(@Username String username,
-                                                  @PathVariable int houseNumber) {
+                                                   @PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
 
