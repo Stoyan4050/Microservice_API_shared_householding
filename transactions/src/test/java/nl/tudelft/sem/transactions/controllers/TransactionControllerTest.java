@@ -14,6 +14,7 @@ import java.util.Optional;
 import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
+import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,10 +30,15 @@ class TransactionControllerTest {
     @Mock
     private transient MicroserviceCommunicator microserviceCommunicator;
 
+    @Mock
+    private transient ProductRepository productRepository;
+
     @InjectMocks
     private transient TransactionController transactionController;
 
     private transient Transactions transaction;
+
+    private transient Product product;
 
     @BeforeEach
     void setUp() {
@@ -42,13 +48,16 @@ class TransactionControllerTest {
         transaction.setTransactionId(1L);
         transaction.setPortionsConsumed(2);
         transaction.setUsername("Bob");
-        Product product = new Product();
+        product = new Product();
         product.setProductId(4);
-        transaction.setProduct(product);
+        transaction.setProductFk(product);
+        product.setExpired(0);
+        product.setPortionsLeft(5);
     }
 
     @Test
     void editTransaction() {
+        doReturn(transaction).when(transactionsRepository).getOne(1L);
         doReturn(1).when(transactionsRepository)
             .updateExistingTransaction(4, "Bob", 2, 1L);
 
@@ -84,6 +93,7 @@ class TransactionControllerTest {
 
     @Test
     void addNewTransaction() {
+        doReturn(product).when(productRepository).findByProductId(4L);
 
         boolean result = transactionController.addNewTransaction(transaction);
 
@@ -94,6 +104,8 @@ class TransactionControllerTest {
 
     @Test
     void addNewTransactionFalse() {
+        doReturn(product).when(productRepository).findByProductId(4L);
+
         doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
             .save(transaction);
 
