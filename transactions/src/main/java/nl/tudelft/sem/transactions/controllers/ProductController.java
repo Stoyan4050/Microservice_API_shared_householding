@@ -204,6 +204,29 @@ public class ProductController {
         }
     }
 
-
+    /**Get products of a house fridge.
+     *
+     * @param houseNr house number
+     * @return list of products
+     */
+    @GetMapping("/getProductsByHouse")
+    @ResponseBody
+    public List<Product> getProductsByHouse(@RequestParam int houseNr) {
+        //List<Product> allProducts = productRepository.findAll();
+        List<String> usernames = MicroserviceCommunicator.sendRequestForUsersOfHouse(houseNr);
+        
+        if (usernames == null) {
+            return null;
+        }
+        List<Product> products = new ArrayList<>();
+    
+        for (String username : usernames) {
+            //if (usernames.contains(p.getUsername())) {
+            //  products.add(p);
+            //}
+            products.addAll(productRepository.findByUsername(username));
+        }
+        return products;
+    }
 }
 

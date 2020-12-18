@@ -137,7 +137,7 @@ public class TransactionController {
     }
 
     /**
-     * Edits a transaction in the database.
+     * Edits a transaction in the database. Can not change the username for the transaction!
      *
      * @param transaction - transaction to be updated
      * @return true if transaction was updated
@@ -147,22 +147,48 @@ public class TransactionController {
     boolean editTransactions(@RequestBody Transactions transaction) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
-        //Transactions oldTransaction =
-        // transactionsRepository.getOne(transaction.getTransactionId());
-        //Product product = oldTransaction.getProductFk();
-        //oldTransaction.setPortionsConsumed(
-        // product.getPortionsLeft() + oldTransaction.getPortionsConsumed());
         
-        //float pricePerPortion = product.getPrice() / product.getTotalPortions();
+        Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
+        Product product = oldTransaction.getProductFk();
+        
+        float pricePerPortion = product.getPrice() / product.getTotalPortions(); //NOPMD
         
         
+        product.setPortionsLeft(product.getPortionsLeft() + oldTransaction.getPortionsConsumed());
         
+        if (product.getExpired() == 1
+                    || (product.getPortionsLeft() - transaction.getPortionsConsumed() < 0)) {
+            return false;
+        }
+    
+        float creditsForOldTransaction = pricePerPortion * oldTransaction.getPortionsConsumed();
+    
+        try {
+            MicroserviceCommunicator.sendRequestForChangingCredits(oldTransaction.getUsername(),
+                    creditsForOldTransaction, true);
+        } catch (Exception e) {
+            return false;
+        }
+    
+        try {
+            MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
+                    pricePerPortion * transaction.getPortionsConsumed(), false);
+        } catch (Exception e) {
+            return false;
+        }
         
         try {
+            productRepository.updateExistingProduct(product.getProductName(), product.getUsername(),
+                    product.getPrice(),
+                    product.getTotalPortions(),
+                    product.getPortionsLeft() - transaction.getPortionsConsumed(),
+                    product.getExpired(), product.getProductId());
+            
             if (transactionsRepository.updateExistingTransaction(transaction.getProductId(),
                 transaction.getUsername(),
                 transaction.getPortionsConsumed(),
                 transaction.getTransactionId()) == 0) {
+                System.out.println("AAaa");
                 return false;
             }
         } catch (Exception e) {

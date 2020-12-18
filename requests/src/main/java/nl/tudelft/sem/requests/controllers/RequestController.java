@@ -87,13 +87,8 @@ public class RequestController {
         Optional<Request> request = requestRepository.findById(requestWithNewInfo.getId());
 
         if (request.isPresent()) {
-            request.get().setId(requestWithNewInfo.getId());
-            request.get().setHouse(requestWithNewInfo.getHouse());
-            request.get().setUser(requestWithNewInfo.getUser());
-            request.get().setApproved(requestWithNewInfo.isApproved());
-
             try {
-                requestRepository.save(request.get());
+                requestRepository.save(requestWithNewInfo);
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body("Request couldn't be updated!");
@@ -161,8 +156,7 @@ public class RequestController {
         //method userJoiningHouse of HouseController -> setting the house of the new user
         houseController.userJoiningHouse(username, houseNumber);
 
-        this.updateRequest(currentRequest.get());
-
+        updateRequest(currentRequest.get());
 
         return new ResponseEntity("You have successfully accepted the user: "
                 + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
