@@ -71,7 +71,7 @@ public class HouseController {
     public ResponseEntity<House> getHouseByHouseNumber(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         return house.map(value -> ResponseEntity.ok().body(value))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -84,7 +84,7 @@ public class HouseController {
     public ResponseEntity<List<User>> getAllUsersFromHouse(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         return house.map(value -> ResponseEntity.ok().body(List.copyOf(value.getUsers())))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -102,7 +102,7 @@ public class HouseController {
             userRepository.save(u);
             return ResponseEntity.created(URI.create("/addNewHouse")).body("House was created");
         }).orElseGet(() ->
-                ResponseEntity.badRequest().body("User is not present in the database."));
+            ResponseEntity.badRequest().body("User is not present in the database."));
     }
 
     /**
@@ -110,8 +110,8 @@ public class HouseController {
      *
      * @param houseWithNewInfo - the House containing new data
      * @return OK                    - the house was updated successfully
-     *         NOT_FOUND             - the house was not found
-     *         INTERNAL_SERVER_ERROR - the house couldn't be updated because of a server error
+     * NOT_FOUND             - the house was not found
+     * INTERNAL_SERVER_ERROR - the house couldn't be updated because of a server error
      */
     @PutMapping("/updateHouse")
     public ResponseEntity<String> updateHouse(@RequestBody House houseWithNewInfo) {
@@ -156,7 +156,7 @@ public class HouseController {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
     /**
      * User joining a house, once a request has been approved.
      *
@@ -169,7 +169,7 @@ public class HouseController {
 
         // set the new house of the user
         user.get().setHouse(house.get());
-        
+
         UserController userController = new UserController(userRepository);
         userController.updateUser(user.get(), user.get().getUsername());
         // userController.updateUser(user.get());
@@ -179,9 +179,9 @@ public class HouseController {
 
         // HouseController houseController = new HouseController(houseRepository, userRepository);
         // houseController.updateHouse(house.get());
-        
+
     }
-    
+
     /**
      * Method for subtracting credits, when products is expired.
      *
@@ -193,65 +193,66 @@ public class HouseController {
     public @ResponseBody
     ResponseEntity<?> splitCreditsWhenExpired(@RequestParam String username,
                                               @RequestParam float credits) {
-        
+
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
-        
-        
+
+
         User currentUser = userRepository.findByUsername(username);
-        
+
         House house = currentUser.getHouse();
-        
+
         Set<User> users = house.getUsers();
-        
+
         if (users == null || users.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        
+
         credits = credits / users.size();
-        
+
         try {
             for (User user : users) {
                 if (userRepository.updateUserCredits(user.getHouse().getHouseNr(),
-                        user.getEmail(),
-                        user.getTotalCredits() - credits,
-                        user.getUsername()) == 0) { //NOPMD
+                    user.getEmail(),
+                    user.getTotalCredits() - credits,
+                    user.getUsername()) == 0) { //NOPMD
                     return ResponseEntity.badRequest().build();
                 }
-                
+
             }
             return ResponseEntity.created(URI.create("/editUserCredits")).build();
-            
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    /**Get all products from a fridge of the house.
+    /**
+     * Get all products from a fridge of the house.
      *
-     *@param houseNr the number of the house which products from the fridge will be displayed
-     *@return all products from the fridge
+     * @param houseNr the number of the house which products from the fridge will be displayed
+     * @return all products from the fridge
      */
     @PostMapping("/getUsernamesByHouse")
     public @ResponseBody
     ResponseEntity<?> getUsernamesByHouse(@RequestParam int houseNr) {
-        
+
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
-        
+
         House house = houseRepository.findByHouseNr(houseNr);
         Set<User> users = house.getUsers();
-        
-        
+
+
         if (users == null || users.isEmpty() || house == null) {
             return ResponseEntity.badRequest().build();
         }
-        
+
         List<String> usernames = new ArrayList<>();
         for (User user : users) {
             usernames.add(user.getUsername());
         }
-        
+
         try {
             return ResponseEntity.created(URI.create("/getUsernamesByHouse")).body(usernames);
         } catch (Exception e) {
@@ -266,8 +267,8 @@ public class HouseController {
      * @param username    - the username of the User entering the household
      * @param houseNumber - the house number of the House to add the user in
      * @return OK        - the user was successfully remove from the household
-     *         FORBIDDEN - the house number of the user is different from the one given
-     *         NOT_FOUND - if the user or the house do not exist in the database
+     * FORBIDDEN - the house number of the user is different from the one given
+     * NOT_FOUND - if the user or the house do not exist in the database
      */
     @PutMapping("/leaveHouse/{houseNumber}")
     public ResponseEntity<String> userLeavingHouse(@Username String username,

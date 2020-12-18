@@ -5,11 +5,12 @@ public class UserRegister {
     private String password;
     private String email;
 
-    /**Constructor for creating user when registering for the first time.
+    /**
+     * Constructor for creating user when registering for the first time.
      *
      * @param username username of the user
      * @param password password of the user
-     * @param email email of the user
+     * @param email    email of the user
      */
     public UserRegister(String username, String password, String email) {
         this.username = username;

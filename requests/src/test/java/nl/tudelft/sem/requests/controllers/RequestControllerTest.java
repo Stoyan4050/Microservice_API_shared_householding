@@ -34,17 +34,13 @@ import org.springframework.http.ResponseEntity;
 public class RequestControllerTest {
 
     @Mock
+    private static RequestId requestIdMock;
+    @Mock
     private transient RequestRepository requestRepository;
-
     @Mock
     private transient HouseRepository houseRepository;
-
     @Mock
     private transient UserRepository userRepository;
-
-    @Mock
-    private static RequestId requestIdMock;
-
     @InjectMocks
     private transient RequestController requestController;
 
@@ -57,7 +53,7 @@ public class RequestControllerTest {
     public void testGetAllRequests() {
         // set up the requests
         final List<Request> requests = Arrays.asList(new Request(requestIdMock,
-                new House(1, "name"), new User("username"), true));
+            new House(1, "name"), new User("username"), true));
         when(requestRepository.findAll()).thenReturn(requests);
 
         // run the test
@@ -73,7 +69,7 @@ public class RequestControllerTest {
     public void testGetRequestById() {
         // set up the request
         final Request request = new Request(requestIdMock,
-                new House(1, "namee"), new User("usernamee"), true);
+            new House(1, "namee"), new User("usernamee"), true);
         when(requestRepository.findById(requestIdMock)).thenReturn(Optional.of(request));
 
         // run the test
@@ -89,11 +85,11 @@ public class RequestControllerTest {
     public void testAddRequest() {
         // set up the request
         final Request newRequest = new Request(requestIdMock,
-                new House(1, "name"), new User("username"), false);
+            new House(1, "name"), new User("username"), false);
 
         // configure requestRepository.save(...).
         final Request request = new Request(requestIdMock,
-                new House(1, "name"), new User("username"), false);
+            new House(1, "name"), new User("username"), false);
         when(requestRepository.save(any(Request.class))).thenReturn(request);
 
         // run the test
@@ -148,7 +144,7 @@ public class RequestControllerTest {
         verify(requestRepository, times(1)).save(requestWithNewInfo);
 
         final ResponseEntity<String> expected = new ResponseEntity<>(
-                "Request updated successfully!", HttpStatus.OK);
+            "Request updated successfully!", HttpStatus.OK);
 
         assertEquals(expected, result);
     }
@@ -281,7 +277,7 @@ public class RequestControllerTest {
         //setting the request
         final RequestId requestId = new RequestId(1, "Ina");
         final Optional<Request> request = Optional.of(new Request(requestId, house.get(),
-                                                        newUser.get(), false));
+            newUser.get(), false));
 
         when(houseRepository.findById(1)).thenReturn(house);
         when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
@@ -430,6 +426,37 @@ public class RequestControllerTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    public void testMembersAcceptingRequestWhenHouseIsNull() {
+        //setting the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("user1");
+        final User user2 = new User("user2");
+        user1.setHouse(null);
+        user2.setHouse(null);
+
+        //setting the request
+        final RequestId requestId = new RequestId(1, user1.getUsername());
+        final Optional<Request> request = Optional.of(new Request(requestId, house.get(),
+                user1, false));
+
+        when(houseRepository.findById(1)).thenReturn(house);
+        when(userRepository.findById(user1.getUsername())).thenReturn(Optional.of(user1));
+        when(userRepository.findById(user2.getUsername())).thenReturn(Optional.of(user2));
+        when(requestRepository.existsById(requestId)).thenReturn(true);
+        when(requestRepository.findById(requestId)).thenReturn(request);
+
+        // run the test
+        final ResponseEntity<String> result = requestController.membersAcceptingRequest(user1.getUsername(),
+                1, user2.getUsername());
+
+        final ResponseEntity<String> expected = new ResponseEntity<>(
+                "You can't accept a user from other household!",
+                HttpStatus.FORBIDDEN);
+
+        // verify the results
+        assertEquals(expected, result);
+    }
 }
 
 

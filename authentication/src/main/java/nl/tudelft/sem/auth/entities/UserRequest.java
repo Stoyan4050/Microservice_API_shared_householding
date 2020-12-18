@@ -5,12 +5,14 @@ public class UserRequest {
     private String username;
     private String email;
 
-    public UserRequest() { }
+    public UserRequest() {
+    }
 
-    /**Constructor for creating user to send to the requests microservice.
+    /**
+     * Constructor for creating user to send to the requests microservice.
      *
      * @param username username of the user
-     * @param email email of the user
+     * @param email    email of the user
      */
     public UserRequest(String username, String email) {
         this.username = username;

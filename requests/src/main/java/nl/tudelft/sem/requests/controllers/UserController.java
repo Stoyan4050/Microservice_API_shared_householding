@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 
-
 /**
  * The controller class for User.
  */
@@ -76,8 +75,8 @@ public class UserController {
      *
      * @param userWithNewInfo - the User containing new data
      * @return OK                    - the user was updated successfully
-     *         NOT_FOUND             - the user was not found
-     *         INTERNAL_SERVER_ERROR - the user couldn't be updated because of a server error
+     * NOT_FOUND             - the user was not found
+     * INTERNAL_SERVER_ERROR - the user couldn't be updated because of a server error
      */
     @PutMapping("/updateUser")
     public ResponseEntity<String> updateUser(@RequestBody User userWithNewInfo,
@@ -119,7 +118,7 @@ public class UserController {
      *
      * @param username - the username of the User
      * @return OK - if the userBalance > -50
-     *         FORBIDDEN - if the userBalance <= -50
+     * FORBIDDEN - if the userBalance <= -50
      */
     @GetMapping("/getCreditsStatusForGroceries")
     public ResponseEntity<String> getCreditsStatusForGroceries(@Username String username) {
@@ -137,32 +136,32 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    /**Method For changing the credits of a user.
-    *
-    * @param username Username of the user which credits will be changed
-    * @param credits credits that will be added or subtracted from a user
-    * @return true if the credits were changed
-    */
+    /**
+     * Method For changing the credits of a user.
+     *
+     * @param username Username of the user which credits will be changed
+     * @param credits  credits that will be added or subtracted from a user
+     * @return true if the credits were changed
+     */
     @PostMapping("/editUserCredits")
     public @ResponseBody
     ResponseEntity<?> editUserCredits(@RequestParam String username,
-                             @RequestParam float credits,
-                             @RequestParam boolean add) {
+                                      @RequestParam float credits,
+                                      @RequestParam boolean add) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
         if (!add) {
             credits = credits * (-1);
         }
-    
+
         User currentUser = userRepository.findByUsername(username);
         //System.out.println(currentUser.toString());
 
         try {
             if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
-                    currentUser.getEmail(),
-                    currentUser.getTotalCredits() + credits,
-                    currentUser.getUsername()) == 1) { //NOPMD
-
+                currentUser.getEmail(),
+                currentUser.getTotalCredits() + credits,
+                currentUser.getUsername()) == 1) { //NOPMD
                 //return ResponseEntity.created(URI.create("/editUserCredits")).build();
                 return ResponseEntity.created(URI.create("/editUserCredits")).build();
             }
@@ -174,32 +173,32 @@ public class UserController {
         }
     }
 
-    /**Method for splitting credits, when users are eating together.
+    /**
+     * Method for splitting credits, when users are eating together.
      *
      * @param usernames usernames of the users eating together*
-     * @param credits amount of credits to be split
-     *
+     * @param credits   amount of credits to be split
      * @return true if the credits were subtracted from each user
      */
     @PostMapping("/splitCredits")
     public @ResponseBody
     boolean splitUserCredits(@RequestBody List<String> usernames, @RequestParam float credits) {
-        
+
         List<User> users = new ArrayList<>();
         for (String username : usernames) {
             users.add(userRepository.findByUsername(username));
         }
-        
+
         for (User user : users) {
             float currentCredits = user.getTotalCredits();
             currentCredits = currentCredits - credits;
             user.setTotalCredits(currentCredits);
-    
+
             try {
                 if (userRepository.updateUserCredits(user.getHouse().getHouseNr(),
-                        user.getEmail(),
-                        currentCredits,
-                        user.getUsername()) == 1) { //NOPMD
+                    user.getEmail(),
+                    currentCredits,
+                    user.getUsername()) == 1) { //NOPMD
                     continue;
                 }
             } catch (Exception e) {

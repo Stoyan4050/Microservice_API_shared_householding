@@ -53,22 +53,22 @@ public class TransactionController {
     @PostMapping("/addNewTransaction")
     public @ResponseBody
     ResponseEntity<String> addNewTransaction(@RequestBody Transactions transaction) {
-        
+
         Optional<Product> optionalProduct = productRepository.findByProductId(
-                transaction.getProductId());
+            transaction.getProductId());
 
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
             int portionsLeft = product.getPortionsLeft()
-                    - transaction.getPortionsConsumed();
+                - transaction.getPortionsConsumed();
 
             if (transaction.getProductFk().getExpired() == 1 || portionsLeft < 0) {
                 return ResponseEntity.badRequest().body(
-                        "Product is expired or there is no portions left");
+                    "Product is expired or there is no portions left");
             }
 
             float credits = product.getPrice()
-                    / product.getTotalPortions();
+                / product.getTotalPortions();
 
             credits = credits * transaction.getPortionsConsumed();
             credits = Math.round(credits * 100) / 100;
@@ -77,11 +77,11 @@ public class TransactionController {
             try {
                 transactionsRepository.save(transaction);
                 productRepository.updateExistingProduct(product.getProductName(),
-                        product.getUsername(), product.getPrice(), product.getTotalPortions(),
-                        portionsLeft, 0, product.getProductId());
+                    product.getUsername(), product.getPrice(), product.getTotalPortions(),
+                    portionsLeft, 0, product.getProductId());
 
                 MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
-                        credits, false);
+                    credits, false);
                 return ResponseEntity.ok().body("Transaction was successfully added");
             } catch (DataIntegrityViolationException e) {
                 return ResponseEntity.badRequest().body("Adding the transaction failed");
@@ -91,36 +91,37 @@ public class TransactionController {
         return ResponseEntity.notFound().build();
     }
 
-    /**New transaction which credits will be split among the users that are eating together.
+    /**
+     * New transaction which credits will be split among the users that are eating together.
      *
      * @param transactionsSplitCredits List of usernames and float with the credits
-     *                                that we will have to subtract
+     *                                 that we will have to subtract
      * @return true if the the credits were evenly distributed and subtracted from the users.
      */
     @PostMapping("/transactionSplittingCredits")
     public @ResponseBody
     ResponseEntity<String> addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
-                                                      transactionsSplitCredits) {
-        
-        
+                                                                 transactionsSplitCredits) {
+
+
         Transactions transaction = transactionsSplitCredits.getTransactionsSplit();
-        
+
         Optional<Product> optionalProduct = productRepository.findByProductId(
-                transaction.getProductId());
-        
+            transaction.getProductId());
+
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
             int portionsLeft = product.getPortionsLeft()
-                    - transaction.getPortionsConsumed();
+                - transaction.getPortionsConsumed();
 
             if (product.getExpired() == 1 || portionsLeft < 0) {
                 return ResponseEntity.badRequest().body(
-                        "Product is expired or there is no portions left");
+                    "Product is expired or there is no portions left");
             }
 
             List<String> usernames = transactionsSplitCredits.getUsernames();
             float credits = product.getPrice()
-                    / product.getTotalPortions();
+                / product.getTotalPortions();
 
             credits = credits * transaction.getPortionsConsumed();
             float splitCredits = credits / usernames.size();
@@ -129,8 +130,8 @@ public class TransactionController {
 
             try {
                 productRepository.updateExistingProduct(product.getProductName(),
-                        product.getUsername(), product.getPrice(),
-                        product.getTotalPortions(), portionsLeft, 0, product.getProductId());
+                    product.getUsername(), product.getPrice(),
+                    product.getTotalPortions(), portionsLeft, 0, product.getProductId());
 
                 transactionsRepository.save(transaction);
                 MicroserviceCommunicator.sendRequestForSplittingCredits(usernames, splitCredits);
@@ -140,7 +141,7 @@ public class TransactionController {
                 return ResponseEntity.badRequest().body("Adding the transaction failed");
             }
         }
-        
+
         return ResponseEntity.notFound().build();
     }
 
@@ -155,43 +156,43 @@ public class TransactionController {
     boolean editTransactions(@RequestBody Transactions transaction) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
-        
+
         Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
         Product product = oldTransaction.getProductFk();
-        
+
         float pricePerPortion = product.getPrice() / product.getTotalPortions(); //NOPMD
-        
-        
+
+
         product.setPortionsLeft(product.getPortionsLeft() + oldTransaction.getPortionsConsumed());
-        
+
         if (product.getExpired() == 1
-                    || (product.getPortionsLeft() - transaction.getPortionsConsumed() < 0)) {
+            || (product.getPortionsLeft() - transaction.getPortionsConsumed() < 0)) {
             return false;
         }
-    
+
         float creditsForOldTransaction = pricePerPortion * oldTransaction.getPortionsConsumed();
-    
+
         try {
             MicroserviceCommunicator.sendRequestForChangingCredits(oldTransaction.getUsername(),
-                    creditsForOldTransaction, true);
+                creditsForOldTransaction, true);
         } catch (Exception e) {
             return false;
         }
-    
+
         try {
             MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
-                    pricePerPortion * transaction.getPortionsConsumed(), false);
+                pricePerPortion * transaction.getPortionsConsumed(), false);
         } catch (Exception e) {
             return false;
         }
-        
+
         try {
             productRepository.updateExistingProduct(product.getProductName(), product.getUsername(),
-                    product.getPrice(),
-                    product.getTotalPortions(),
-                    product.getPortionsLeft() - transaction.getPortionsConsumed(),
-                    product.getExpired(), product.getProductId());
-            
+                product.getPrice(),
+                product.getTotalPortions(),
+                product.getPortionsLeft() - transaction.getPortionsConsumed(),
+                product.getExpired(), product.getProductId());
+
             if (transactionsRepository.updateExistingTransaction(transaction.getProductId(),
                 transaction.getUsername(),
                 transaction.getPortionsConsumed(),
