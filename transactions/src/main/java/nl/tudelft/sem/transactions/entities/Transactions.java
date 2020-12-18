@@ -39,6 +39,9 @@ public class Transactions {
         return transactionId;
     }
 
+    public void setProduct(Product product){
+        this.productFk =product;
+    }
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
     }

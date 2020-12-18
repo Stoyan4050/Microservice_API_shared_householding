@@ -1,5 +1,6 @@
 package nl.tudelft.sem.transactions.controllers;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,8 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 
 @SuppressWarnings("PMD")
@@ -89,19 +92,28 @@ class ProductControllerTest {
     public void testAddProduct(){
         final Product newProduct = new Product("Butter",5,10,"kendra");
 
-        boolean result = productController.addProduct(newProduct);
+        ResponseEntity<?> result = productController.addProduct(newProduct);
 
         verify(productRepository).save(newProduct);
 
-        assertTrue(result);
+        final ResponseEntity<?> expected = ResponseEntity.created(URI.create("/addProduct")).build();
+
+        assertEquals(expected, result);
+
+
     }
 
     @Test
     public void testAddProductException(){
         doThrow(DataIntegrityViolationException.class).when(productRepository)
                 .save(product);
-        assertFalse(productController.addProduct(product));
 
+        ResponseEntity<?> result = productController.addProduct(product);
+
+        verify(productRepository).save(product);
+
+        final ResponseEntity<?> expected = new ResponseEntity("Product not added!",
+                HttpStatus.OK);
         verify(productRepository).save(product);
     }
 
@@ -118,27 +130,15 @@ class ProductControllerTest {
         assertTrue(result);
     }
 
-    @Test
+   /* @Test
     public void testSetExpired(){
-        boolean result = productController.setExpired(product);
-        verify(productController).setExpired(product);
-        assertTrue(result);
-    }
+        ResponseEntity result = productController.setExpired("kendra",product);
+        verify(productController).setExpired("kendra",product);
 
-    @Test
-    public void testIsExpiredFalse(){
-        boolean result = productController.isExpired(product);
-        verify(productController).isExpired(product);
-        assertFalse(result);
-    }
+        ResponseEntity expected = ResponseEntity.created(URI.create("/setExpired")).build();
+        assertEquals(result,expected);
+    }*/
 
-    @Test
-    public void testIsExpiredTrue(){
-        product.setExpired(1);
-        boolean result = productController.isExpired(product);
-        verify(productController).isExpired(product);
-        assertTrue(result);
-    }
 
     @Test
     public void testDeleteExpired(){
