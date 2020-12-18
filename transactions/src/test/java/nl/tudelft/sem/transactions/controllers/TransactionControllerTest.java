@@ -14,6 +14,7 @@ import java.util.Optional;
 import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
+import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,9 @@ class TransactionControllerTest {
 
     @Mock
     private transient ProductRepository productRepository;
+
+    @Mock
+    private transient TransactionsSplitCredits transactionsSplitCredits;
 
     @InjectMocks
     private transient TransactionController transactionController;
@@ -112,4 +116,17 @@ class TransactionControllerTest {
         assertFalse(transactionController.addNewTransaction(transaction));
     }
 
+    @Test
+    void addNewTransactionSplittingCredits() {
+        doReturn(transaction).when(transactionsSplitCredits).getTransactionsSplit();
+        doReturn(product).when(productRepository).findByProductId(4);
+        doReturn(List.of("Bob")).when(transactionsSplitCredits).getUsernames();
+
+        boolean result = transactionController
+            .addNewTransactionSplittingCredits(transactionsSplitCredits);
+
+        verify(transactionsRepository).save(transaction);
+
+        assertTrue(result);
+    }
 }
