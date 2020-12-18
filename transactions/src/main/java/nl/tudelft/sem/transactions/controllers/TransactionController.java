@@ -5,6 +5,8 @@ import java.util.Optional;
 import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
+import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
+import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,6 +23,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class TransactionController {
     @Autowired
     private TransactionsRepository transactionsRepository;
+
+    @Autowired
+    private transient ProductRepository productRepository;
 
     public TransactionsRepository getTransactionsRepository() {
         return transactionsRepository;
@@ -47,18 +52,84 @@ public class TransactionController {
     @PostMapping("/addNewTransaction")
     public @ResponseBody
     boolean addNewTransaction(@RequestBody Transactions transaction) {
-        Product product = transaction.getProduct();
+        
+        Product product = productRepository.findByProductId(transaction.getProductId());
+        if (product == null) {
+            return false;
+        }
+        
+        int portionsLeft = product.getPortionsLeft()
+                                   - transaction.getPortionsConsumed();
+        
+        if (transaction.getProductFk().getExpired() == 1 || portionsLeft < 0) {
+            return false;
+        }
+        
         float credits = product.getPrice()
                                 / product.getTotalPortions();
         
         credits = credits * transaction.getPortionsConsumed();
         credits = Math.round(credits * 100) / 100;
+        
     
         try {
             transactionsRepository.save(transaction);
+            productRepository.updateExistingProduct(product.getProductName(),
+                    product.getUsername(), product.getPrice(), product.getTotalPortions(),
+                    portionsLeft, 0, product.getProductId());
+            
             MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
                     credits, false);
+            return true;
+        } catch (DataIntegrityViolationException e) {
+            return false;
+        }
+    }
+
+    /**New transaction which credits will be split among the users that are eating together.
+     *
+     * @param transactionsSplitCredits List of usernames and float with the credits
+     *                                that we will have to subtract
+     * @return true if the the credits were evenly distributed and subtracted from the users.
+     */
+    @PostMapping("/transactionSplittingCredits")
+    public @ResponseBody
+    boolean addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
+                                                      transactionsSplitCredits) {
+        
+        
+        Transactions transaction = transactionsSplitCredits.getTransactionsSplit();
+        
+        Product product = productRepository.findByProductId(transaction.getProductId());
+        
+        if (product == null) {
+            return false;
+        }
+        
+        int portionsLeft = product.getPortionsLeft()
+                                   - transaction.getPortionsConsumed();
     
+        if (product.getExpired() == 1 || portionsLeft < 0) {
+            return false;
+        }
+    
+        List<String> usernames = transactionsSplitCredits.getUsernames();
+        float credits = product.getPrice()
+                                / product.getTotalPortions();
+        
+        credits = credits * transaction.getPortionsConsumed();
+        float splitCredits = credits / usernames.size();
+        
+        splitCredits = Math.round(splitCredits * 100) / 100;
+        
+        try {
+            productRepository.updateExistingProduct(product.getProductName(),
+                    product.getUsername(), product.getPrice(),
+                    product.getTotalPortions(), portionsLeft, 0, product.getProductId());
+            
+            transactionsRepository.save(transaction);
+            MicroserviceCommunicator.sendRequestForSplittingCredits(usernames, splitCredits);
+            
             return true;
         } catch (DataIntegrityViolationException e) {
             return false;
@@ -66,7 +137,7 @@ public class TransactionController {
     }
 
     /**
-     * Edits a transaction in the database.
+     * Edits a transaction in the database. Can not change the username for the transaction!
      *
      * @param transaction - transaction to be updated
      * @return true if transaction was updated
@@ -76,14 +147,54 @@ public class TransactionController {
     boolean editTransactions(@RequestBody Transactions transaction) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
+        
+        Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
+        Product product = oldTransaction.getProductFk();
+        
+        float pricePerPortion = product.getPrice() / product.getTotalPortions(); //NOPMD
+        
+        
+        product.setPortionsLeft(product.getPortionsLeft() + oldTransaction.getPortionsConsumed());
+        
+        if (product.getExpired() == 1
+                    || (product.getPortionsLeft() - transaction.getPortionsConsumed() < 0)) {
+            return false;
+        }
+    
+        float creditsForOldTransaction = pricePerPortion * oldTransaction.getPortionsConsumed();
+    
         try {
-            return transactionsRepository.updateExistingTransaction(transaction.getProductId(),
-                transaction.getUsername(),
-                transaction.getPortionsConsumed(),
-                transaction.getTransactionId()) == 1;
+            MicroserviceCommunicator.sendRequestForChangingCredits(oldTransaction.getUsername(),
+                    creditsForOldTransaction, true);
         } catch (Exception e) {
             return false;
         }
+    
+        try {
+            MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
+                    pricePerPortion * transaction.getPortionsConsumed(), false);
+        } catch (Exception e) {
+            return false;
+        }
+        
+        try {
+            productRepository.updateExistingProduct(product.getProductName(), product.getUsername(),
+                    product.getPrice(),
+                    product.getTotalPortions(),
+                    product.getPortionsLeft() - transaction.getPortionsConsumed(),
+                    product.getExpired(), product.getProductId());
+            
+            if (transactionsRepository.updateExistingTransaction(transaction.getProductId(),
+                transaction.getUsername(),
+                transaction.getPortionsConsumed(),
+                transaction.getTransactionId()) == 0) {
+                System.out.println("AAaa");
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -98,8 +209,8 @@ public class TransactionController {
         try {
             Optional<Transactions> t = transactionsRepository.findById(transactionId);
             Transactions transaction = t.get();
-            transaction.getProduct().removeTransaction(transaction);
-            transaction.setProduct(null);
+            transaction.getProductFk().removeTransaction(transaction);
+            transaction.setProductFk(null);
             transactionsRepository.delete(transaction);
             System.out.println("The transaction was deleted.");
         } catch (Exception e) {

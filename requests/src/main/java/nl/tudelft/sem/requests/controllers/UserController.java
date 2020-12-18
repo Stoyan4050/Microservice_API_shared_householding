@@ -1,15 +1,15 @@
 package nl.tudelft.sem.requests.controllers;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+
 
 /**
  * The controller class for User.
@@ -62,9 +64,10 @@ public class UserController {
      *
      * @param user user to be added
      */
-    @PostMapping(value = "/addNewUser", consumes = "application/json")
-    public void addNewUser(@RequestBody User user) {
+    @PostMapping("/addNewUser")
+    public ResponseEntity<?> addNewUser(@RequestBody User user) {
         userRepository.save(user);
+        return ResponseEntity.created(URI.create("/addNewUser")).build();
     }
 
     // TODO - choose the update method returning String or ResponseEntity (useful for tests)
@@ -110,8 +113,8 @@ public class UserController {
      * @param username        - the name of the User that is going to be changed
      * @return status if the update was successful or not
      */
-    @PutMapping("/updateUser/{username}")
-    public String updateUser(@RequestBody User userWithNewInfo, @PathVariable String username) {
+    @PutMapping("/updateUser")
+    public String updateUser(@RequestBody User userWithNewInfo, @Username String username) {
         Optional<User> user = userRepository.findById(username);
 
         if (user.isPresent()) {
@@ -138,8 +141,8 @@ public class UserController {
      *
      * @param username username of the user to delete from the database
      */
-    @DeleteMapping("/deleteUser/{username}")
-    public void deleteUser(@PathVariable String username) {
+    @DeleteMapping("/deleteUser")
+    public void deleteUser(@Username String username) {
         Optional<User> user = userRepository.findById(username);
         if (user.isPresent()) {
             userRepository.deleteById(username);
@@ -156,8 +159,8 @@ public class UserController {
      * @return OK - if the userBalance > -50
      *         FORBIDDEN - if the userBalance <= -50
      */
-    @GetMapping("/getCreditsStatusForGroceries/{username}")
-    public ResponseEntity<User> getCreditsStatusForGroceries(@PathVariable String username) {
+    @GetMapping("/getCreditsStatusForGroceries")
+    public ResponseEntity<User> getCreditsStatusForGroceries(@Username String username) {
         Optional<User> user = userRepository.findById(username);
 
         if (user.isPresent()) {
@@ -180,7 +183,7 @@ public class UserController {
     */
     @PostMapping("/editUserCredits")
     public @ResponseBody
-    boolean editUserCredits(@RequestParam String username,
+    ResponseEntity<?> editUserCredits(@RequestParam String username,
                              @RequestParam float credits,
                              @RequestParam boolean add) {
         // @ResponseBody means the returned String is the response, not a view name
@@ -189,17 +192,54 @@ public class UserController {
             credits = credits * (-1);
         }
     
-        User currentUser = userRepository.getOne(username);
+        User currentUser = userRepository.findByUsername(username);
+        System.out.println(currentUser.toString());
         try {
             if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
                     currentUser.getEmail(),
                     currentUser.getTotalCredits() + credits,
                     currentUser.getUsername()) == 1) { //NOPMD
-                return true;
+                //return ResponseEntity.created(URI.create("/editUserCredits")).build();
+                ResponseEntity.created(URI.create("/editUserCredits")).body(15.f);
             }
-            return false;
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            return false;
+            return ResponseEntity.badRequest().build();
         }
+    }
+
+    /**Method for splitting credits, when users are eating together.
+     *
+     * @param usernames usernames of the users eating together*
+     * @param credits amount of credits to be split
+     *
+     * @return true if the credits were subtracted from each user
+     */
+    @PostMapping("/splitCredits")
+    public @ResponseBody
+    boolean splitUserCredits(@RequestBody List<String> usernames, @RequestParam float credits) {
+        
+        List<User> users = new ArrayList<>();
+        for (String username : usernames) {
+            users.add(userRepository.findByUsername(username));
+        }
+        
+        for (User user : users) {
+            float currentCredits = user.getTotalCredits();
+            currentCredits = currentCredits - credits;
+            user.setTotalCredits(currentCredits);
+    
+            try {
+                if (userRepository.updateUserCredits(user.getHouse().getHouseNr(),
+                        user.getEmail(),
+                        currentCredits,
+                        user.getUsername()) == 1) { //NOPMD
+                    continue;
+                }
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true;
     }
 }
