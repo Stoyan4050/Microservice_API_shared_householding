@@ -54,50 +54,51 @@ public class RequestControllerTest {
 
     @Test
     public void testGetAllRequests() {
-        // Setup
-
-        // Configure RequestRepository.findAll(...).
+        // set up the requests
         final List<Request> requests = Arrays.asList(new Request(requestIdMock,
                 new House(1, "name"), new User("username"), true));
         when(requestRepository.findAll()).thenReturn(requests);
 
-        // Run the test
+        // run the test
         final List<Request> result = requestController.getAllRequests();
 
-        // Verify the results
+        // verify the results
+        verify(requestRepository).findAll();
+        assertEquals(requests, result);
     }
 
 
     @Test
     public void testGetRequestById() {
-        // Setup
-
-        // Configure RequestRepository.findById(...).
-        final Optional<Request> requests = Optional.of(new Request(requestIdMock,
+        // set up the request
+        final Optional<Request> request = Optional.of(new Request(requestIdMock,
                 new House(1, "namee"), new User("usernamee"), true));
-        when(requestRepository.findById(requestIdMock)).thenReturn(requests);
+        when(requestRepository.findById(requestIdMock)).thenReturn(request);
 
-        // Run the test
+        // run the test
         final Optional<Request> result = requestController.getRequestById(requestIdMock);
 
-        // Verify the results
+        // verify the results
+        verify(requestRepository).findById(requestIdMock);
+        assertEquals(request, result);
     }
 
     @Test
     public void testAddRequest() {
-        // Setup
+        // set up the request
         final Request newRequest = new Request(requestIdMock,
-                new House(1, "name"), new User("username"), true);
+                new House(1, "name"), new User("username"), false);
 
-        // Configure RequestRepository.save(...).
+        // configure requestRepository.save(...).
         final Request request = new Request(requestIdMock,
-                new House(1, "name"), new User("username"), true);
+                new House(1, "name"), new User("username"), false);
         when(requestRepository.save(any(Request.class))).thenReturn(request);
 
-        // Run the test
+        // run the test
         requestController.addRequest(newRequest);
 
-        // Verify the results
+        // verify the results
+        verify(requestRepository).save(request);
     }
 
     @Test
@@ -140,8 +141,8 @@ public class RequestControllerTest {
         when(requestRepository.findById(requestId1)).thenReturn(Optional.of(request));
         when(requestRepository.findById(requestId2)).thenReturn(Optional.of(requestWithNewInfo));
 
-        final ResponseEntity<Request> result = requestController.updateRequest(requestWithNewInfo,
-            requestId1);
+        // run the test and verify the results
+        final ResponseEntity<Request> result = requestController.updateRequest(requestWithNewInfo);
         verify(requestRepository, times(1)).save(requestWithNewInfo);
 
         final ResponseEntity<Request> expected = new ResponseEntity("Request updated successfully!",
@@ -182,39 +183,36 @@ public class RequestControllerTest {
         final Request requestWithNewInfo = new Request(requestId2, house2.get(), newUser.get(),
             false);
 
-        final RequestId requestId3 = new RequestId(2, "Inaa");
-
         when(houseRepository.findById(1)).thenReturn(house1);
         when(houseRepository.findById(2)).thenReturn(house2);
         when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
         when(userRepository.findById("Ina")).thenReturn(newUser);
         when(requestRepository.findById(requestId1)).thenReturn(Optional.of(request));
-        when(requestRepository.findById(requestId2)).thenReturn(Optional.of(requestWithNewInfo));
+        //when(requestRepository.findById(requestId2)).thenReturn(Optional.of(requestWithNewInfo));
 
-        final ResponseEntity<Request> result = requestController.updateRequest(requestWithNewInfo,
-            requestId3);
+        // run the test
+        final ResponseEntity<Request> result = requestController.updateRequest(requestWithNewInfo);
 
         final ResponseEntity<Request> expected = new ResponseEntity("Request not found!",
             HttpStatus.NOT_FOUND);
 
+        // verify the results
         assertEquals(expected, result);
     }
 
     @Test
-    public void testRemoveRequest() {
-        // Setup
+    public void testDeleteRequest() {
+        // run the test
+        requestController.deleteRequest(requestIdMock);
 
-        // Run the test
-        requestController.removeRequest(requestIdMock);
-
-        // Verify the results
+        // verify the results
         verify(requestRepository).deleteById(requestIdMock);
     }
 
-    /*
     @Test
-    public void testMembersAcceptingRequest() { //TODO -> returns request not found
+    public void testMembersAcceptingRequest() {
+        //setting the house
         final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
         final User user1 = new User("Malwina");
         final User user2 = new User("Mocha");
@@ -222,11 +220,13 @@ public class RequestControllerTest {
         user1.setHouse(house.get());
         user2.setHouse(house.get());
 
+        //setting the members of the house
         Set<User> users = new HashSet<>();
         users.add(user1);
         users.add(user2);
         house.get().setUsers(users);
 
+        //setting the request
         final RequestId requestId = new RequestId(1, "Ina");
         final Optional<Request> request = Optional.of(new Request(requestId, house.get(),
                                                         newUser.get(), false));
@@ -235,18 +235,149 @@ public class RequestControllerTest {
         when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
         when(userRepository.findById("Ina")).thenReturn(newUser);
+        when(requestRepository.existsById(requestId)).thenReturn(true);
         when(requestRepository.findById(requestId)).thenReturn(request);
 
+        // run the test and verify the results
         final ResponseEntity<Request> result = requestController.membersAcceptingRequest("Ina",
             1, "Mocha");
-
+        verify(requestRepository).existsById(requestId);
 
         final ResponseEntity<Request> expected = new ResponseEntity("You have successfully "
             + "accepted the user: " + request.get().getUser().getUsername(), HttpStatus.OK);
 
         assertEquals(expected, result);
     }
-     */
+
+    @Test
+    public void testMembersAcceptingRequestDifferentHouse() {
+        //setting the 1st house
+        final Optional<House> house1 = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Malwina");
+        final User user2 = new User("Mocha");
+        user1.setHouse(house1.get());
+        user2.setHouse(house1.get());
+
+        //setting the members of the 1st house
+        Set<User> users1 = new HashSet<>();
+        users1.add(user1);
+        users1.add(user2);
+        house1.get().setUsers(users1);
+
+        //setting the 2nd house
+        final Optional<House> house2 = Optional.of(new House(2, "CoolestHouse"));
+        final User user3 = new User("Sleepy");
+        user3.setHouse(house2.get());
+
+        //setting the members of the 2nd house
+        Set<User> users2 = new HashSet<>();
+        users2.add(user3);
+        house2.get().setUsers(users2);
+
+        //setting the request
+        final Optional<User> newUser = Optional.of(new User("Ina"));
+        final RequestId requestId = new RequestId(1, "Ina");
+        final Optional<Request> request = Optional.of(new Request(requestId, house1.get(),
+            newUser.get(), false));
+
+        when(houseRepository.findById(1)).thenReturn(house1);
+        when(houseRepository.findById(2)).thenReturn(house2);
+        when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
+        when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
+        when(userRepository.findById("Sleepy")).thenReturn(Optional.of(user3));
+        when(userRepository.findById("Ina")).thenReturn(newUser);
+        when(requestRepository.existsById(requestId)).thenReturn(true);
+        when(requestRepository.findById(requestId)).thenReturn(request);
+
+        // run the test and verify the results
+        final ResponseEntity<Request> result = requestController.membersAcceptingRequest("Ina",
+            1, "Sleepy");
+        verify(requestRepository).existsById(requestId);
+
+        final ResponseEntity<Request> expected = new ResponseEntity("You can't accept a user"
+            + " from other household!", HttpStatus.FORBIDDEN);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testMembersAcceptingRequestUserNotFound() {
+        //setting the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Malwina");
+        final User user2 = new User("Mocha");
+        final Optional<User> newUser = Optional.of(new User("Ina"));
+        user1.setHouse(house.get());
+        user2.setHouse(house.get());
+
+        //setting the members of the house
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+        users.add(user2);
+        house.get().setUsers(users);
+
+        //setting the request
+        final RequestId requestId = new RequestId(1, "Ina");
+        final Optional<Request> request = Optional.of(new Request(requestId, house.get(),
+            newUser.get(), false));
+
+        when(houseRepository.findById(1)).thenReturn(house);
+        when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
+        when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
+        when(userRepository.findById("Ina")).thenReturn(newUser);
+        when(requestRepository.existsById(requestId)).thenReturn(true);
+        when(requestRepository.findById(requestId)).thenReturn(request);
+
+        // run the test and verify the results
+        final ResponseEntity<Request> result = requestController.membersAcceptingRequest("Ina",
+            1, "Sleepy");
+        verify(requestRepository).existsById(requestId);
+
+        final ResponseEntity<Request> expected = new ResponseEntity("The user is not found!",
+            HttpStatus.NOT_FOUND);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testMembersAcceptingRequestNotFound() {
+        //setting the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Malwina");
+        final User user2 = new User("Mocha");
+        final Optional<User> newUser = Optional.of(new User("Ina"));
+        user1.setHouse(house.get());
+        user2.setHouse(house.get());
+
+        //setting the members of the house
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+        users.add(user2);
+        house.get().setUsers(users);
+
+        //setting the request
+        final RequestId requestId = new RequestId(1, "Ina");
+        final Optional<Request> request = Optional.of(new Request(requestId, house.get(),
+            newUser.get(), false));
+
+        when(houseRepository.findById(1)).thenReturn(house);
+        when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
+        when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
+        when(userRepository.findById("Ina")).thenReturn(newUser);
+        when(requestRepository.existsById(requestId)).thenReturn(true);
+        when(requestRepository.findById(requestId)).thenReturn(request);
+
+        // run the test
+        final ResponseEntity<Request> result = requestController.membersAcceptingRequest("Sleepy",
+            1, "Mocha");
+
+        final ResponseEntity<Request> expected = new ResponseEntity("The request is not found!",
+            HttpStatus.NOT_FOUND);
+
+        // verify the results
+        assertEquals(expected, result);
+    }
+
 }
 
 
