@@ -41,6 +41,9 @@ class ProductControllerTest {
         when(productRepository.findAll()).thenReturn(products);
         final List<Product> result = productController.getAllProducts("kendra");
 
+        verify(productRepository).findAll();
+        verify(productController).getAllProducts("kendra");
+
         assertEquals(products.size(), result.size());
         assertEquals(products.get(0), result.get(0));
     }
@@ -51,6 +54,9 @@ class ProductControllerTest {
 
         when(productRepository.findAll()).thenReturn(products);
         final List<Product> result = productController.getUserProducts("kendra");
+
+        verify(productRepository).findAll();
+        verify(productController).getUserProducts("kendra");
 
         assertEquals(products.size(), result.size());
         assertEquals(products.get(0), result.get(0));
