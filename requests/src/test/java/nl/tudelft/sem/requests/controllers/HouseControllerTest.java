@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.exceptions.base.MockitoException.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -387,4 +388,34 @@ public class HouseControllerTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    void getUsernamesByHouseNumberNoUsers() {
+        // set up house
+        House house = new House();
+        when(houseRepository.findByHouseNr(5)).thenReturn(house);
+
+        // call the method under test
+        ResponseEntity<?> result = houseController.getUsernamesByHouse(5);
+
+        //verify results
+        assertEquals(ResponseEntity.badRequest().build(),result);
+    }
+
+    @Test
+    void getUsernamesByHouseNumberOneUser() {
+        // set up house and users
+        House house = new House();
+        User user = new User("Oskar");
+        house.setUsers(new HashSet<>(Arrays.asList(user)));
+        when(houseRepository.findByHouseNr(5)).thenReturn(house);
+
+        // call the method under test
+        ResponseEntity<?> result = houseController.getUsernamesByHouse(5);
+        List<String> strings = new ArrayList<String>();
+        strings.add("Oskar");
+
+        // verify results
+        assertEquals("201 CREATED",result.getStatusCode().toString());
+        assertEquals(strings,result.getBody());
+    }
 }
