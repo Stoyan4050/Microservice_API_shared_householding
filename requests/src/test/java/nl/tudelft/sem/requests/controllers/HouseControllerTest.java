@@ -383,4 +383,10 @@ public class HouseControllerTest {
         assertEquals(expected, result);
     }
 
+    @Test
+    void resetHouse() {
+        houseController.resetCredits(6);
+        verify(userRepository).resetCredits(6);
+    }
+
 }
