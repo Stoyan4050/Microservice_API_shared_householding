@@ -91,9 +91,9 @@ public class UserControllerTest {
 
         // run the test and verify the results
         final ResponseEntity<String> result = userController.updateUser(userWithNewInfo, userWithNewInfo.getUsername());
-        verify(userRepository, times(1)).save(user);
+        verify(userRepository, times(1)).save(userWithNewInfo);
 
-        final ResponseEntity<String> expected = new ResponseEntity("User updated successfully!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("User updated successfully!",
                     HttpStatus.OK);
 
         assertEquals(expected, result);

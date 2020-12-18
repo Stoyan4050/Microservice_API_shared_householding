@@ -127,7 +127,7 @@ public class HouseController {
             house.get().setUsers(houseWithNewInfo.getUsers());
 
             try {
-                houseRepository.save(house.get());
+                houseRepository.save(houseWithNewInfo);
             } catch (Exception e) {
                 return new ResponseEntity<>("House couldn't be updated!",
                     HttpStatus.INTERNAL_SERVER_ERROR);
@@ -277,7 +277,9 @@ public class HouseController {
      *         FORBIDDEN - the house number of the user is different from the one given
      *         NOT_FOUND - if the user or the house do not exist in the database
      */
-    public ResponseEntity<String> userLeavingHouse(String username, int houseNumber) {
+    @PutMapping("/leaveHouse/{houseNumber}")
+    public ResponseEntity<String> userLeavingHouse(@Username String username,
+                                                  @PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
 
@@ -288,8 +290,7 @@ public class HouseController {
                     user.get().setHouse(null);
 
                     userRepository.save(user.get());
-
-                    if (house.get().getUsers() == null) {
+                    if (house.get().getUsers().size() == 0) {
                         deleteHouse(houseNumber);
                     }
 

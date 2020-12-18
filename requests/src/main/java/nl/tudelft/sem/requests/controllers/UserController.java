@@ -86,7 +86,7 @@ public class UserController {
 
         if (user.isPresent()) {
             try {
-                userRepository.save(user.get());
+                userRepository.save(userWithNewInfo);
             } catch (Exception e) {
                 return new ResponseEntity<>("User couldn't be updated!",
                     HttpStatus.INTERNAL_SERVER_ERROR);

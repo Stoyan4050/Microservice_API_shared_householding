@@ -98,9 +98,9 @@ public class HouseControllerTest {
 
         // run the test and verify the results
         final ResponseEntity<String> result = houseController.updateHouse(houseWithNewInfo);
-        verify(houseRepository, times(1)).save(house);
+        verify(houseRepository, times(1)).save(houseWithNewInfo);
 
-        final ResponseEntity<String> expected = new ResponseEntity("House updated successfully!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("House updated successfully!",
             HttpStatus.OK);
 
         assertEquals(expected, result);
