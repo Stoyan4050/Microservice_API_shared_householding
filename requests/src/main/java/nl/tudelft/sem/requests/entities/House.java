@@ -1,7 +1,11 @@
 package nl.tudelft.sem.requests.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.hibernate.annotations.Fetch;
+//import org.hibernate.annotations.FetchMode;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -65,8 +69,8 @@ public class House implements java.io.Serializable {
     @JsonCreator
     public House(@JsonProperty("houseNr") int houseNr,
                  @JsonProperty("name") String name,
-                 @JsonProperty("requests") Set<Request> requests,
-                 @JsonProperty("users") Set<User> users) {
+                 Set<Request> requests,
+                 Set<User> users) {
         this.houseNr = houseNr;
         this.name = name;
         this.requests = requests;
