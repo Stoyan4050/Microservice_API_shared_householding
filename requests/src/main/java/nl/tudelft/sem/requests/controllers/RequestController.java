@@ -142,7 +142,8 @@ public class RequestController {
             return new ResponseEntity<>("The user is not found!", HttpStatus.NOT_FOUND);
         }
 
-        if (currentUser.get().getHouse().getHouseNr() != houseNumber) {
+        if (currentUser.get().getHouse() == null
+                || currentUser.get().getHouse().getHouseNr() != houseNumber) {
             return new ResponseEntity<>("You can't accept a user from other household!",
                     HttpStatus.FORBIDDEN);
         }
