@@ -72,23 +72,15 @@ public class UserController {
      * Updates a User, searched by the username.
      *
      * @param userWithNewInfo - the User containing new data
-     * @param username        - the name of the User that is going to be changed
      * @return OK                    - the user was updated successfully
      *         NOT_FOUND             - the user was not found
      *         INTERNAL_SERVER_ERROR - the user couldn't be updated because of a server error
      */
     @PutMapping("/updateUser/{username}")
-    public ResponseEntity<User> updateUser(@RequestBody User userWithNewInfo,
-                        @PathVariable String username) {
-        Optional<User> user = userRepository.findById(username);
+    public ResponseEntity<User> updateUser(@RequestBody User userWithNewInfo) {
+        Optional<User> user = userRepository.findById(userWithNewInfo.getUsername());
 
         if(user.isPresent()) {
-
-            user.get().setHouse(userWithNewInfo.getHouse());
-            user.get().setTotalCredits(userWithNewInfo.getTotalCredits());
-            user.get().setEmail(userWithNewInfo.getEmail());
-            user.get().setRequests(userWithNewInfo.getRequests());
-
             try {
                 userRepository.save(user.get());
             } catch (Exception e) {

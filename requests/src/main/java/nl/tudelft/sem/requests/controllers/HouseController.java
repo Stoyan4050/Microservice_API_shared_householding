@@ -108,22 +108,15 @@ public class HouseController {
      * Updates a House, searched by the houseNr.
      *
      * @param houseWithNewInfo - the House containing new data
-     * @param houseNr          - the houseNr of the House that is going to be updated
      * @return OK                    - the house was updated successfully
      *         NOT_FOUND             - the house was not found
      *         INTERNAL_SERVER_ERROR - the house couldn't be updated because of a server error
      */
-    @PutMapping("/updateHouse/{houseNr}")
-    public ResponseEntity<House> updateHouse(@RequestBody House houseWithNewInfo,
-                                              @PathVariable int houseNr) {
-        Optional<House> house = houseRepository.findById(houseNr);
+    @PutMapping("/updateHouse")
+    public ResponseEntity<House> updateHouse(@RequestBody House houseWithNewInfo) {
+        Optional<House> house = houseRepository.findById(houseWithNewInfo.getHouseNr());
 
         if (house.isPresent()) {
-            house.get().setHouseNr(houseWithNewInfo.getHouseNr());
-            house.get().setName(houseWithNewInfo.getName());
-            house.get().setRequests(houseWithNewInfo.getRequests());
-            house.get().setUsers(houseWithNewInfo.getUsers());
-
             try {
                 houseRepository.save(house.get());
             } catch (Exception e) {
@@ -171,7 +164,7 @@ public class HouseController {
         user.get().setHouse(house.get());
 
         UserController userController = new UserController(userRepository);
-        userController.updateUser(user.get(), user.get().getUsername());
+        userController.updateUser(user.get());
 
     }
 

@@ -1,7 +1,6 @@
 package nl.tudelft.sem.requests.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,9 +40,14 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUser() {
+        // set up the users
         final List<User> users = Arrays.asList(new User("username"));
         when(userRepository.findAll()).thenReturn(users);
+
+        // run the test
         final List<User> result = userController.getAllUsers();
+
+        // verify the results
         assertEquals(users.size(), result.size());
         assertEquals(users.get(0), result.get(0));
     }
@@ -51,31 +55,42 @@ public class UserControllerTest {
 
     @Test
     public void testGetUserByUsername() {
+        // set up the user
         final Optional<User> user = Optional.of(new User("username"));
         when(userRepository.findById("username")).thenReturn(user);
 
+        // run the test
         final Optional<User> result = userController.getUserByUsername("username");
+
+        // verify the results
         assertEquals(user, result);
     }
 
     @Test
     public void testAddUser() {
+        // set up the user
         final User newUser = new User("username");
+
+        // run the test
         userController.addNewUser(newUser);
+
+        // verify the results
         verify(userRepository, times(1)).save(newUser);
     }
 
     @Test
     public void testUpdateUser() {
+        // set up the user with new info
         final User userWithNewInfo = new User("username", new House(1, "name"),
                 10.0f, "email", Set.of(new Request()));
 
+        // set up the current user
         final User user = new User("username", new House(1, "name"),
                 5.0f, "email", Set.of(new Request()));
-
         when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
-        final ResponseEntity<User> result = userController.updateUser(userWithNewInfo, "username");
+        // run the test and verify the results
+        final ResponseEntity<User> result = userController.updateUser(userWithNewInfo);
         verify(userRepository, times(1)).save(user);
 
         final ResponseEntity<User> expected = new ResponseEntity("User updated successfully!",
@@ -86,28 +101,35 @@ public class UserControllerTest {
 
     @Test
     public void testUpdateUserNotFound() {
+        // set up the user with new info
         final User userWithNewInfo = new User("username", new House(1, "name"),
             10.0f, "email", Set.of(new Request()));
 
+        // set up the current user
         final User user = new User("username", new House(1, "name"),
             5.0f, "email", Set.of(new Request()));
+        //when(userRepository.findById("username")).thenReturn(Optional.of(user));
 
-        when(userRepository.findById("username")).thenReturn(Optional.of(user));
-
-        final ResponseEntity<User> result = userController.updateUser(userWithNewInfo,
-            "usernameName");
+        // run the test
+        final ResponseEntity<User> result = userController.updateUser(userWithNewInfo);
 
         final ResponseEntity<User> expected = new ResponseEntity("User not found!",
                     HttpStatus.NOT_FOUND);
 
+        // verify the results
         assertEquals(expected, result);
     }
 
     @Test
     public void testDeleteUser() {
+        // set up the user
         Optional<User> user = Optional.of(new User("username2"));
         when(userRepository.findById("username2")).thenReturn(user);
+
+        // run the test
         userController.deleteUser("username2");
+
+        // verify the results
         verify(userRepository, times(1)).deleteById("username2");
     }
 
@@ -115,31 +137,45 @@ public class UserControllerTest {
     public void testDeleteUser2() {
         // in this situation there's no user with username "username1",
         // thus the deleteById won't be invoked
+
+        // set up the user
         Optional<User> user = Optional.ofNullable(null);
         when(userRepository.findById("username1")).thenReturn(user);
+
+        // run the test
         userController.deleteUser("username1");
+
+        // verify the results
         verify(userRepository, times(0)).deleteById("username2");
     }
 
     @Test
     public void testGetCreditsStatusForGroceriesOk() {
+        // set up the user
         final User user = new User("username", new House(1, "name"),
                 5.0f, "email", Set.of(new Request()));
 
         userRepository.save(user);
 
+        // run the test
         final ResponseEntity<User> result = userController.getCreditsStatusForGroceries("username");
+
+        // verify the results
         assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
     }
 
     @Test
     public void testGetCreditsStatusForGroceriesForbidden() {
+        // set up the user
         final User user = new User("a", new House(1, "name"),
                 -60.0f, "email", Set.of(new Request()));
 
         userRepository.save(user);
 
+        // run the test
         final ResponseEntity<User> result = userController.getCreditsStatusForGroceries("a");
+
+        // verify the results
         assertEquals(new ResponseEntity<>(HttpStatus.NOT_FOUND), result);
     }
 }

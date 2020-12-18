@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -78,15 +77,13 @@ public class RequestController {
      * Updates a Request, searched by the requestId.
      *
      * @param requestWithNewInfo - the Request containing new data
-     * @param requestId          - the requestId of the Request that is going to be changed
      * @return OK                    - the request was updated successfully
      *         NOT_FOUND             - the request was not found
      *         INTERNAL_SERVER_ERROR - the request couldn't be updated because of a server error
      */
-    @PutMapping("/updateRequest/{requestId}")
-    public ResponseEntity<Request> updateRequest(@RequestBody Request requestWithNewInfo,
-                                               @PathVariable RequestId requestId) {
-        Optional<Request> request = requestRepository.findById(requestId);
+    @PutMapping("/updateRequest")
+    public ResponseEntity<Request> updateRequest(@RequestBody Request requestWithNewInfo) {
+        Optional<Request> request = requestRepository.findById(requestWithNewInfo.getId());
 
         if (request.isPresent()) {
             try {
@@ -109,7 +106,7 @@ public class RequestController {
      */
     @DeleteMapping("deleteRequest/{requestId}")
     @ResponseBody
-    public void removeRequest(@PathVariable RequestId requestId) {
+    public void deleteRequest(@PathVariable RequestId requestId) {
         requestRepository.deleteById(requestId);
     }
 
@@ -138,7 +135,7 @@ public class RequestController {
         Optional<User> currentUser = userController.getUserByUsername(myUsername);
 
         if (!currentUser.isPresent()) {
-            return new ResponseEntity("User not found!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity("The user is not found!", HttpStatus.NOT_FOUND);
         }
 
         if (currentUser.get().getHouse().getHouseNr() != houseNumber) {
@@ -157,8 +154,7 @@ public class RequestController {
         //method userJoiningHouse of HouseController -> setting the house of the new user
         houseController.userJoiningHouse(username, houseNumber);
 
-        updateRequest(currentRequest.get(), currentRequest.get().getId());
-
+        updateRequest(currentRequest.get());
 
         return new ResponseEntity("You have successfully accepted the user: "
                 + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
