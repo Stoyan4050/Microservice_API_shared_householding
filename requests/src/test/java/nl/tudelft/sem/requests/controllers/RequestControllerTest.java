@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.exceptions.base.MockitoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -148,6 +149,56 @@ public class RequestControllerTest {
 
         final ResponseEntity<String> expected = new ResponseEntity<>(
                 "Request updated successfully!", HttpStatus.OK);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testUpdateRequestServerError() {
+        //set up the 1st house
+        final Optional<House> house1 = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Malwina");
+        user1.setHouse(house1.get());
+
+        Set<User> users1 = new HashSet<>();
+        users1.add(user1);
+        house1.get().setUsers(users1);
+
+        //set up the 2nd house
+        final Optional<House> house2 = Optional.of(new House(2, "CoolestHouse"));
+        final User user2 = new User("Mocha");
+        user2.setHouse(house2.get());
+
+        Set<User> users2 = new HashSet<>();
+        users2.add(user2);
+        house2.get().setUsers(users2);
+
+        //set up the current request
+        final Optional<User> newUser = Optional.of(new User("Ina"));
+
+        final RequestId requestId1 = new RequestId(1, "Ina");
+        final Request request = new Request(requestId1, house1.get(), newUser.get(),
+            false);
+
+        //set up the new request
+        final RequestId requestId2 = new RequestId(2, "Ina");
+        final Request requestWithNewInfo = new Request(requestId2, house2.get(), newUser.get(),
+            false);
+
+        when(houseRepository.findById(1)).thenReturn(house1);
+        when(houseRepository.findById(2)).thenReturn(house2);
+        when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
+        when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
+        when(userRepository.findById("Ina")).thenReturn(newUser);
+        when(requestRepository.findById(requestId1)).thenReturn(Optional.of(request));
+        when(requestRepository.findById(requestId2)).thenReturn(Optional.of(requestWithNewInfo));
+        when(requestRepository.save(requestWithNewInfo)).thenThrow(new MockitoException("Request couldn't be updated!"));
+
+        // run the test and verify the results
+        final ResponseEntity<String> result = requestController.updateRequest(requestWithNewInfo);
+
+        final ResponseEntity<String> expected = new ResponseEntity<>("Request couldn't be updated!",
+            HttpStatus.INTERNAL_SERVER_ERROR);
 
         assertEquals(expected, result);
     }

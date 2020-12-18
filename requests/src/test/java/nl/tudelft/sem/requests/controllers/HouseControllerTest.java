@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.exceptions.base.MockitoException.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.exceptions.base.MockitoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -106,7 +110,6 @@ public class HouseControllerTest {
         assertEquals(expected, result);
     }
 
-    /*
     @Test
     public void testUpdateHouseServerError() {
         // set up the house with new info
@@ -115,19 +118,18 @@ public class HouseControllerTest {
         // set up the current house
         final House house = new House(1, "CoolestHouse");
         when(houseRepository.findById(1)).thenReturn(Optional.of(house));
-
+        when(houseRepository.save(houseWithNewInfo)).thenThrow(new MockitoException("House couldn't be updated!"));
+        //doThrow(Exception.class).when(houseRepository).save(Mockito.any(House.class));
 
         // run the test and verify the results
-        final ResponseEntity<House> result = houseController.updateHouse(houseWithNewInfo);
-        verify(houseRepository, times(1)).save(houseWithNewInfo);
+        final ResponseEntity<String> result = houseController.updateHouse(houseWithNewInfo);
 
-        final ResponseEntity<House> expected = new ResponseEntity("House couldn't be updated!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("House couldn't be updated!",
             HttpStatus.INTERNAL_SERVER_ERROR);
 
         assertEquals(expected, result);
     }
 
-     */
 
     @Test
     public void testUpdateHouseNotFound() {

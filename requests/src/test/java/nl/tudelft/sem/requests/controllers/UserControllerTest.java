@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.exceptions.base.MockitoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -96,6 +97,28 @@ public class UserControllerTest {
 
         final ResponseEntity<String> expected = new ResponseEntity<>("User updated successfully!",
                     HttpStatus.OK);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testUpdateUserServerError() {
+        // set up the user with new info
+        final User userWithNewInfo = new User("username", new House(1, "name"),
+            10.0f, "email", Set.of(new Request()));
+
+        // set up the current user
+        final User user = new User("username", new House(1, "name"),
+            5.0f, "email", Set.of(new Request()));
+        when(userRepository.findById("username")).thenReturn(Optional.of(user));
+        when(userRepository.save(userWithNewInfo)).thenThrow(new MockitoException("User couldn't be updated!"));
+        //doThrow(Exception.class).when(houseRepository).save(Mockito.any(House.class));
+
+        // run the test and verify the results
+        final ResponseEntity<String> result = userController.updateUser(userWithNewInfo, "username");
+
+        final ResponseEntity<String> expected = new ResponseEntity<>("User couldn't be updated!",
+            HttpStatus.INTERNAL_SERVER_ERROR);
 
         assertEquals(expected, result);
     }
