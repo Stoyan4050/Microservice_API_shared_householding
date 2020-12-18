@@ -6,6 +6,7 @@ import java.util.Optional;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -63,5 +64,14 @@ class ProductControllerTest {
         verify(productRepository, times(0)).deleteById(1l);
     }
 
+    @Test
+    public void testAddProduct(){
+        final Product newProduct = new Product("Butter",5,10,"kendra");
 
+        boolean result = productController.addProduct(newProduct);
+
+        verify(productRepository).save(newProduct);
+
+        assertTrue(result);
+    }
 }
