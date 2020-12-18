@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 
-
 @EnableJpaRepositories("nl.tudelft.sem.template.repositories")
 
 @Controller
@@ -65,7 +64,7 @@ public class ProductController {
         try {
             productRepository.save(product);
             MicroserviceCommunicator.sendRequestForChangingCredits(product.getUsername(),
-                    credits, true);
+                credits, true);
 
             return ResponseEntity.created(URI.create("/addProduct")).build();
         } catch (DataIntegrityViolationException e) {
@@ -73,8 +72,7 @@ public class ProductController {
         }
     }
 
- 
- 
+
     /**
      * The method returns the products added by a specified user.
      *
@@ -99,7 +97,7 @@ public class ProductController {
             return new ResponseEntity<>(products, HttpStatus.OK);
         }
     }
-    
+
     /**
      * Gets all products from the database.
      *
@@ -131,12 +129,12 @@ public class ProductController {
             try {
                 if (!product.get().getUsername().equals(username)) {
                     return new ResponseEntity<>("It's not your product!",
-                            HttpStatus.FORBIDDEN);
+                        HttpStatus.FORBIDDEN);
                 }
                 productRepository.save(productWithNewInfo);
             } catch (Exception e) {
                 return new ResponseEntity<>("Product couldn't be updated!",
-                        HttpStatus.INTERNAL_SERVER_ERROR);
+                    HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             return new ResponseEntity<>("Product updated successfully!", HttpStatus.OK);
@@ -161,7 +159,7 @@ public class ProductController {
             try {
                 if (!product.getUsername().equals(username)) {
                     return new ResponseEntity<>("It's not your product!",
-                            HttpStatus.FORBIDDEN);
+                        HttpStatus.FORBIDDEN);
                 }
                 productRepository.delete(product);
             } catch (Exception e) {
@@ -194,9 +192,9 @@ public class ProductController {
                 MicroserviceCommunicator.subtractCreditsWhenExpired(username, price);
 
                 productRepository.updateExistingProduct(product.getProductName(),
-                        product.getUsername(), product.getPrice(),
-                        product.getTotalPortions(), product.getPortionsLeft(),
-                        1, product.getProductId());
+                    product.getUsername(), product.getPrice(),
+                    product.getTotalPortions(), product.getPortionsLeft(),
+                    1, product.getProductId());
                 return ResponseEntity.created(URI.create("/setExpired")).build();
 
             } catch (Exception e) {
@@ -205,7 +203,7 @@ public class ProductController {
         }
         return ResponseEntity.badRequest().build();
     }
-    
+
     /**
      * This method deletes all the products which are expired but are still in the database.
      *
@@ -233,7 +231,8 @@ public class ProductController {
         return ResponseEntity.notFound().build();
     }
 
-    /**Get products of a house fridge.
+    /**
+     * Get products of a house fridge.
      *
      * @param houseNr house number
      * @return list of products
@@ -243,12 +242,12 @@ public class ProductController {
     public List<Product> getProductsByHouse(@PathVariable int houseNr) {
         //List<Product> allProducts = productRepository.findAll();
         List<String> usernames = MicroserviceCommunicator.sendRequestForUsersOfHouse(houseNr);
-        
+
         if (usernames == null) {
             return null;
         }
         List<Product> products = new ArrayList<>();
-    
+
         for (String username : usernames) {
             //if (usernames.contains(p.getUsername())) {
             //  products.add(p);

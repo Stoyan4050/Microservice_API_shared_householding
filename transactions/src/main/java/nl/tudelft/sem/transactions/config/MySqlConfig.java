@@ -27,11 +27,11 @@ public class MySqlConfig {
     public DataSource dataSource() {
         DataSourceBuilder<?> dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName(
-                environment.getProperty("spring.datasource.driver-class-name"));
+            environment.getProperty("spring.datasource.driver-class-name"));
         dataSourceBuilder.url(environment.getProperty("spring.datasource.url"));
         dataSourceBuilder.username(environment.getProperty("spring.datasource.username"));
         dataSourceBuilder.password(environment.getProperty("spring.datasource.password"));
-        
+
         return dataSourceBuilder.build();
     }
 }

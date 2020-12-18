@@ -23,9 +23,9 @@ public class Request implements java.io.Serializable {
 
     @EmbeddedId
     @AttributeOverrides({@AttributeOverride(name = "houseNr",
-                    column = @Column(name = "house_nr", nullable = false)),
-            @AttributeOverride(name = "username",
-                    column = @Column(name = "username", nullable = false, length = 25))
+        column = @Column(name = "house_nr", nullable = false)),
+        @AttributeOverride(name = "username",
+            column = @Column(name = "username", nullable = false, length = 25))
     })
     private RequestId id;
 
@@ -41,11 +41,12 @@ public class Request implements java.io.Serializable {
     @Column(name = "approved")
     private boolean approved;
 
-    /**Constructor for requests.
+    /**
+     * Constructor for requests.
      *
-     * @param id request id.
-     * @param user the user which request will be send.
-     * @param house the house the user wants to join.
+     * @param id       request id.
+     * @param user     the user which request will be send.
+     * @param house    the house the user wants to join.
      * @param approved check if the request is approved.
      */
     public Request(RequestId id, House house, User user, boolean approved) {
@@ -106,9 +107,9 @@ public class Request implements java.io.Serializable {
         Request request = (Request) o;
 
         return approved == request.approved
-                && Objects.equals(id, request.id)
-                && Objects.equals(user, request.user)
-                && Objects.equals(house, request.house);
+            && Objects.equals(id, request.id)
+            && Objects.equals(user, request.user)
+            && Objects.equals(house, request.house);
     }
 
     @Override

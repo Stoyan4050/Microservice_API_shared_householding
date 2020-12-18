@@ -3,10 +3,8 @@ package nl.tudelft.sem.requests.entities;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-
 import java.util.HashMap;
 import java.util.Map;
-import org.bouncycastle.cert.ocsp.Req;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,13 +47,13 @@ public class RequestTest {
     @Test
     public void constructorEqualsTest() {
         Assertions.assertEquals(requestUnderTest,
-                new Request(requestIdMock, mockHouse, mockUser, false));
+            new Request(requestIdMock, mockHouse, mockUser, false));
     }
 
     @Test
     public void constructorNotEqualsTest() {
         Assertions.assertNotEquals(requestUnderTest,
-                new Request(requestIdMock, mockHouse, mockUser, true));
+            new Request(requestIdMock, mockHouse, mockUser, true));
     }
 
     @Test
@@ -126,7 +124,7 @@ public class RequestTest {
 
         Map<Request, String> map = new HashMap<>();
         map.put(request1, "dummy");
-        
+
         Assertions.assertEquals("dummy", map.get(request2));
     }
 

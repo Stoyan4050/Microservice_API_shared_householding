@@ -1,81 +1,81 @@
 allprojects {
-	repositories {
-		mavenCentral()
-	}
+    repositories {
+        mavenCentral()
+    }
 
-	group = 'nl.tudelft.cse.sem.template'
-	version = '0.0.1-SNAPSHOT'
+    group = 'nl.tudelft.cse.sem.template'
+    version = '0.0.1-SNAPSHOT'
 }
 subprojects {
-	buildscript {
-		repositories {
-			mavenCentral()
-			//Needed only for SNAPSHOT versions
-			//maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-		}
-		dependencies {
-			classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
-		}
-	}
+    buildscript {
+        repositories {
+            mavenCentral()
+            //Needed only for SNAPSHOT versions
+            //maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        }
+        dependencies {
+            classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
+        }
+    }
 
-	apply plugin: 'java'
-	// Test coverage
-	apply plugin: 'jacoco'
+    apply plugin: 'java'
+    // Test coverage
+    apply plugin: 'jacoco'
 
-	// Code style
-	apply plugin: 'checkstyle'
+    // Code style
+    apply plugin: 'checkstyle'
 
-	// PMD
-	apply plugin: 'pmd'
+    // PMD
+    apply plugin: 'pmd'
 
-	// PITest
+    // PITest
 //	apply plugin: 'info.solidsoft.pitest' version '1.5.2'
 
-	apply plugin: 'application'
+    apply plugin: 'application'
 
-	sourceCompatibility = 11
-	targetCompatibility = 11
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
-	jacoco {
-		toolVersion = "0.8.6"
-	}
+    jacoco {
+        toolVersion = "0.8.6"
+    }
 
-	test {
-		useJUnitPlatform()
-		jacoco {
-			enabled = true
-			includes = ['nl.tudelft.sem.*']
-			excludes = []
-		}
-	}
+    test {
+        useJUnitPlatform()
+        jacoco {
+            enabled = true
+            includes = ['nl.tudelft.sem.*']
+            excludes = []
+        }
+    }
 
-	jacocoTestCoverageVerification() {
-		dependsOn test
-		violationRules {
-			rule {
-				enabled = true
-				element = 'CLASS'
-				includes = ['nl.tudelft.sem.*']
+    jacocoTestCoverageVerification() {
+        dependsOn test
+        violationRules {
+            rule {
+                enabled = true
+                element = 'CLASS'
+                includes = ['nl.tudelft.sem.*']
 
-				limit {
-					counter = 'BRANCH'
-					value = 'COVEREDRATIO'
-					minimum = 0.1
-				}
-			}
-		}
-	}
+                limit {
+                    counter = 'BRANCH'
+                    value = 'COVEREDRATIO'
+                    minimum = 0.1
+                }
+            }
+        }
+    }
 
-	checkstyle {
-		toolVersion "8.37"
-		configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
-		checkstyleMain.enabled = false // each microservice should test for checkstyle issues
-		checkstyleTest.enabled = false // each microservice should test for checkstyle issues
-	}
+    checkstyle {
+        toolVersion "8.37"
+        configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+        checkstyleMain.enabled = false // each microservice should test for checkstyle issues
+        checkstyleTest.enabled = false // each microservice should test for checkstyle issues
+    }
 
-	pmd {
-		incrementalAnalysis = true
-		pmdMain.enabled = false // each microservice should test for pmd issues
-		pmdTest.enabled = false // each microservice should test for pmd issues
-	}
+    pmd {
+        incrementalAnalysis = true
+        pmdMain.enabled = false // each microservice should test for pmd issues
+        pmdTest.enabled = false // each microservice should test for pmd issues
+    }
 }

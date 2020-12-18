@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,8 +60,8 @@ public class RequestController {
     @ResponseBody
     public ResponseEntity<Request> getRequestById(@RequestBody RequestId requestId) {
         return requestRepository.findById(requestId)
-                .map(request -> ResponseEntity.ok().body(request))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+            .map(request -> ResponseEntity.ok().body(request))
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
@@ -73,7 +72,7 @@ public class RequestController {
     @PostMapping("/addNewRequest")
     public ResponseEntity<?> addRequest(@RequestBody Request newRequest) {
         return ResponseEntity.created(URI.create("/addNewRequest"))
-                .body(requestRepository.save(newRequest));
+            .body(requestRepository.save(newRequest));
     }
 
     /**
@@ -81,8 +80,8 @@ public class RequestController {
      *
      * @param requestWithNewInfo - the Request containing new data
      * @return OK                    - the request was updated successfully
-     *         NOT_FOUND             - the request was not found
-     *         INTERNAL_SERVER_ERROR - the request couldn't be updated because of a server error
+     * NOT_FOUND             - the request was not found
+     * INTERNAL_SERVER_ERROR - the request couldn't be updated because of a server error
      */
     @PutMapping("/updateRequest")
     public ResponseEntity<String> updateRequest(@RequestBody Request requestWithNewInfo) {
@@ -118,14 +117,14 @@ public class RequestController {
      * One of the members accepting a request from a user to join their household.
      *
      * @return NOT_FOUND - if the user/request was not found
-     *         FORBIDDEN - if the request house does not coincide with the user house
-     *         OK        - if the user was successfully updated
+     * FORBIDDEN - if the request house does not coincide with the user house
+     * OK        - if the user was successfully updated
      */
     @PostMapping("/membersAcceptedRequest")
     public ResponseEntity<String> membersAcceptingRequest(
-                    @RequestParam(name = "username") String username,
-                    @RequestParam(name = "houseNumber") int houseNumber,
-                    @Username String myUsername) {
+        @RequestParam(name = "username") String username,
+        @RequestParam(name = "houseNumber") int houseNumber,
+        @Username String myUsername) {
 
         RequestId id = new RequestId(houseNumber, username);
 
@@ -144,7 +143,7 @@ public class RequestController {
 
         if (currentUser.get().getHouse().getHouseNr() != houseNumber) {
             return new ResponseEntity<>("You can't accept a user from other household!",
-                    HttpStatus.FORBIDDEN);
+                HttpStatus.FORBIDDEN);
         }
 
         Optional<Request> currentRequest = requestRepository.findById(id);
@@ -161,7 +160,7 @@ public class RequestController {
         updateRequest(currentRequest.get());
 
         return new ResponseEntity<>("You have successfully accepted the user: "
-                + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
+            + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
     }
 
 }
