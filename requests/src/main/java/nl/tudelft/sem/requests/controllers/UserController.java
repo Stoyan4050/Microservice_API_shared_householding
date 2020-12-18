@@ -155,7 +155,8 @@ public class UserController {
         }
 
         User currentUser = userRepository.findByUsername(username);
-        System.out.println(currentUser.toString());
+        //System.out.println(currentUser.toString());
+
         try {
             if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
                 currentUser.getEmail(),
@@ -164,8 +165,10 @@ public class UserController {
                 //return ResponseEntity.created(URI.create("/editUserCredits")).build();
                 return ResponseEntity.created(URI.create("/editUserCredits")).build();
             }
+
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
+
             return ResponseEntity.badRequest().build();
         }
     }

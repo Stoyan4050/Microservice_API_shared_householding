@@ -4,8 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.exceptions.base.MockitoException.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -13,12 +17,15 @@ import java.util.Optional;
 import java.util.Set;
 import nl.tudelft.sem.requests.entities.House;
 import nl.tudelft.sem.requests.entities.User;
+import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.exceptions.base.MockitoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -104,7 +111,6 @@ public class HouseControllerTest {
         assertEquals(expected, result);
     }
 
-    /*
     @Test
     public void testUpdateHouseServerError() {
         // set up the house with new info
@@ -113,19 +119,18 @@ public class HouseControllerTest {
         // set up the current house
         final House house = new House(1, "CoolestHouse");
         when(houseRepository.findById(1)).thenReturn(Optional.of(house));
-
+        when(houseRepository.save(houseWithNewInfo)).thenThrow(new MockitoException("House couldn't be updated!"));
+        //doThrow(Exception.class).when(houseRepository).save(Mockito.any(House.class));
 
         // run the test and verify the results
-        final ResponseEntity<House> result = houseController.updateHouse(houseWithNewInfo);
-        verify(houseRepository, times(1)).save(houseWithNewInfo);
+        final ResponseEntity<String> result = houseController.updateHouse(houseWithNewInfo);
 
-        final ResponseEntity<House> expected = new ResponseEntity("House couldn't be updated!",
+        final ResponseEntity<String> expected = new ResponseEntity<>("House couldn't be updated!",
             HttpStatus.INTERNAL_SERVER_ERROR);
 
         assertEquals(expected, result);
     }
 
-     */
 
     @Test
     public void testUpdateHouseNotFound() {
@@ -384,9 +389,124 @@ public class HouseControllerTest {
     }
 
     @Test
-    void resetHouse() {
-        houseController.resetCredits(6);
-        verify(userRepository).resetCredits(6);
+    void getUsernamesByHouseNumberNoUsers() {
+        // set up house
+        House house = new House();
+        when(houseRepository.findByHouseNr(5)).thenReturn(house);
+
+        // call the method under test
+        ResponseEntity<?> result = houseController.getUsernamesByHouse(5);
+
+        //verify results
+        assertEquals(ResponseEntity.badRequest().build(),result);
     }
 
+    @Test
+    void getUsernamesByHouseNumberOneUser() {
+        // set up house and users
+        House house = new House();
+        User user = new User("Oskar");
+        house.setUsers(new HashSet<>(Arrays.asList(user)));
+        when(houseRepository.findByHouseNr(5)).thenReturn(house);
+
+        // call the method under test
+        ResponseEntity<?> result = houseController.getUsernamesByHouse(5);
+        List<String> strings = new ArrayList<String>();
+        strings.add("Oskar");
+
+        // verify results
+        assertEquals("201 CREATED",result.getStatusCode().toString());
+        assertEquals(strings,result.getBody());
+    }
+
+    @Test
+    public void testSplitCreditsWhenExpiredOk() {
+        // set up the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Sleepy", house.get(),
+            5.0f, "email1", Set.of(new Request()));
+        final User user2 = new User("Malwina", house.get(),
+            15.0f, "email2", Set.of(new Request()));
+        final User user3 = new User("Mocha", house.get(),
+            10.0f, "email3", Set.of(new Request()));
+
+        // add the users
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+        users.add(user2);
+        users.add(user3);
+        house.get().setUsers(users);
+
+        when(houseRepository.findByHouseNr(1)).thenReturn(house.get());
+        when(userRepository.findByUsername("Sleepy")).thenReturn(user1);
+        when(userRepository.findByUsername("Malwina")).thenReturn(user2);
+        when(userRepository.findByUsername("Mocha")).thenReturn(user3);
+        when(userRepository.updateUserCredits(1, "email1", 0, "Sleepy")).thenReturn(1);
+        when(userRepository.updateUserCredits(1, "email2", 10, "Malwina")).thenReturn(1);
+        when(userRepository.updateUserCredits(1, "email3", 5, "Mocha")).thenReturn(1);
+
+        // run the test
+        final ResponseEntity<?> result = houseController.splitCreditsWhenExpired("Sleepy", 15);
+
+        final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.CREATED);
+
+        // verify the results
+        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+    }
+
+    @Test
+    public void testSplitCreditsWhenExpiredEmptyHouse() {
+        // set up the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Sleepy", house.get(),
+            5.0f, "email1", Set.of(new Request()));
+        final User user2 = new User("Malwina", house.get(),
+            15.0f, "email2", Set.of(new Request()));
+        final User user3 = new User("Mocha", house.get(),
+            10.0f, "email3", Set.of(new Request()));
+
+        when(houseRepository.findByHouseNr(1)).thenReturn(house.get());
+        when(userRepository.findByUsername("Sleepy")).thenReturn(user1);
+        when(userRepository.findByUsername("Malwina")).thenReturn(user2);
+        when(userRepository.findByUsername("Mocha")).thenReturn(user3);
+        when(userRepository.updateUserCredits(1, "email1", 0, "Sleepy")).thenReturn(1);
+        when(userRepository.updateUserCredits(1, "email2", 10, "Malwina")).thenReturn(1);
+        when(userRepository.updateUserCredits(1, "email3", 5, "Mocha")).thenReturn(1);
+
+        // run the test
+        final ResponseEntity<?> result = houseController.splitCreditsWhenExpired("Sleepy", 15);
+
+        final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        // verify the results
+        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+    }
+
+    @Test
+    public void testSplitCreditsWhenExpiredBadUpdate() {
+        // set up the house
+        final Optional<House> house = Optional.of(new House(1, "CoolHouse"));
+        final User user1 = new User("Sleepy", house.get(),
+            5.0f, "email1", Set.of(new Request()));
+        final User user2 = new User("Malwina", house.get(),
+            15.0f, "email2", Set.of(new Request()));
+        final User user3 = new User("Mocha", house.get(),
+            10.0f, "email3", Set.of(new Request()));
+
+        when(houseRepository.findByHouseNr(1)).thenReturn(house.get());
+        when(userRepository.findByUsername("Sleepy")).thenReturn(user1);
+        when(userRepository.findByUsername("Malwina")).thenReturn(user2);
+        when(userRepository.findByUsername("Mocha")).thenReturn(user3);
+        when(userRepository.updateUserCredits(1, "email1", 0, "Sleepy")).thenReturn(0);
+        when(userRepository.updateUserCredits(1, "email2", 10, "Malwina")).thenReturn(0);
+        when(userRepository.updateUserCredits(1, "email3", 5, "Mocha")).thenReturn(0);
+
+        // run the test
+        final ResponseEntity<?> result = houseController.splitCreditsWhenExpired("Sleepy", 15);
+
+        final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        // verify the results
+        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+    }
 }
