@@ -127,6 +127,7 @@ public class MicroserviceCommunicator {
 
             if (httpResponse.body().equals("" + false)) {
                 System.out.print("Error: Operation did not succeed!");
+                return;
             }
             System.out.println("Operation was successful!");
 

@@ -202,6 +202,7 @@ public class UserController {
                     continue;
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 return false;
             }
         }
