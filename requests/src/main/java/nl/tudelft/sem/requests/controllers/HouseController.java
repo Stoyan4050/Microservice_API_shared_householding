@@ -261,6 +261,35 @@ public class HouseController {
 
     }
 
+    /**Finding the house number of a user, by his username.
+    *
+    * @param username username of the user for which we will look for his house number
+    * @return the house number of the user
+    */
+    @PostMapping("/getHouseByUsername")
+    public @ResponseBody
+    ResponseEntity<?> getHouseByUsername(@RequestParam String username) {
+    
+        // @ResponseBody means the returned String is the response, not a view name
+        // @RequestParam means it is a parameter from the GET or POST request
+    
+        House house = houseRepository.findByUsersUsername(username);
+    
+    
+        if (house == null) {
+            return ResponseEntity.badRequest().build();
+        }
+    
+        try {
+            return ResponseEntity.created(URI.create("/getHouseByUsername"))
+                           .body(house.getHouseNr());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    
+    }
+    
+
     /**
      * User leaving a house.
      *

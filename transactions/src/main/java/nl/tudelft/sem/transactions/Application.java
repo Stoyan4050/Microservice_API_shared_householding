@@ -1,6 +1,7 @@
 package nl.tudelft.sem.transactions;
 
 import nl.tudelft.sem.transactions.config.JwtConf;
+import nl.tudelft.sem.transactions.handlers.HouseValidator;
 import nl.tudelft.sem.transactions.handlers.ProductValidator;
 import nl.tudelft.sem.transactions.handlers.TokensValidator;
 import nl.tudelft.sem.transactions.handlers.Validator;
@@ -34,8 +35,12 @@ public class Application {
      */
     @Bean
     public Validator validate() {
+        
+        HouseValidator houseValidator = new HouseValidator();
+        houseValidator.setNext(new TokensValidator());
+        
         Validator handler = new ProductValidator();
-        handler.setNext(new TokensValidator());
+        handler.setNext(houseValidator);
 
         return handler;
     }
