@@ -1,10 +1,13 @@
 package nl.tudelft.sem.transactions;
 
+import com.netflix.discovery.EurekaClient;
 import nl.tudelft.sem.transactions.config.JwtConf;
 import nl.tudelft.sem.transactions.handlers.HouseValidator;
 import nl.tudelft.sem.transactions.handlers.ProductValidator;
 import nl.tudelft.sem.transactions.handlers.TokensValidator;
+import nl.tudelft.sem.transactions.handlers.TransactionValidator;
 import nl.tudelft.sem.transactions.handlers.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -28,6 +31,9 @@ public class Application {
         return new JwtConf();
     }
 
+    @Autowired
+    private transient EurekaClient discoveryClient;
+
     /**
      * Register a new validator bean that initializes the product and token validators.
      *
@@ -35,12 +41,12 @@ public class Application {
      */
     @Bean
     public Validator validate() {
-        
-        HouseValidator houseValidator = new HouseValidator();
-        houseValidator.setNext(new TokensValidator());
-        
+
         Validator handler = new ProductValidator();
-        handler.setNext(houseValidator);
+
+        handler.setNext(new HouseValidator())
+                .setNext(new TransactionValidator(discoveryClient))
+                .setNext(new TokensValidator());
 
         return handler;
     }

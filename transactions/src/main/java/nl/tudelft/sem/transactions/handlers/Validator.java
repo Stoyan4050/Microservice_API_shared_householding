@@ -6,7 +6,7 @@ import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.http.ResponseEntity;
 
 public interface Validator {
-    void setNext(Validator handler);
+    Validator setNext(Validator handler);
 
     ResponseEntity<String> handle(Transactions transactions,
                                   ProductRepository productRepository,
