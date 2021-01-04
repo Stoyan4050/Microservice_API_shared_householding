@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 public class TransactionsSplitCreditsTest {
 
-    private TransactionsSplitCredits t1;
-    private Transactions transactionsSplit;
+    private transient TransactionsSplitCredits t1;
+    private transient Transactions transactionsSplit;
 
     @BeforeEach
     void setup() {
@@ -44,5 +44,11 @@ public class TransactionsSplitCreditsTest {
         usernames2.add("Fabian2");
         t1.setUsernames(usernames2);
         assertEquals(usernames2, t1.getUsernames());
+    }
+
+    @Test
+    void asTransaction() {
+        Transactions transaction = t1.asTransaction();
+        assertEquals(transaction.getClass(), Transactions.class);
     }
 }

@@ -104,7 +104,9 @@ public class UserController {
                     + HttpStatus.resolve(response.statusCode()));
         }
 
-        final UriComponents uri = uriComponentsBuilder.path("register/{user_name}").buildAndExpand(username);
+        final UriComponents uri = uriComponentsBuilder
+                .path("register/{user_name}")
+                .buildAndExpand(username);
         return ResponseEntity.created(uri.toUri()).build();
     }
 }

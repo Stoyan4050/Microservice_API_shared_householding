@@ -7,5 +7,8 @@ import org.springframework.http.ResponseEntity;
 
 public interface Validator {
     void setNext(Validator handler);
-    ResponseEntity<String> handle(Transactions transactions, ProductRepository productRepository, TransactionsRepository transactionsRepository);
+
+    ResponseEntity<String> handle(Transactions transactions,
+                                  ProductRepository productRepository,
+                                  TransactionsRepository transactionsRepository);
 }

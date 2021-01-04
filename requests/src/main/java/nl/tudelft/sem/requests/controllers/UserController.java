@@ -75,8 +75,8 @@ public class UserController {
      *
      * @param userWithNewInfo - the User containing new data
      * @return OK                    - the user was updated successfully
-     * NOT_FOUND             - the user was not found
-     * INTERNAL_SERVER_ERROR - the user couldn't be updated because of a server error
+     *         NOT_FOUND             - the user was not found
+     *         INTERNAL_SERVER_ERROR - the user couldn't be updated because of a server error
      */
     @PutMapping("/updateUser")
     public ResponseEntity<String> updateUser(@RequestBody User userWithNewInfo,
@@ -118,7 +118,7 @@ public class UserController {
      *
      * @param username - the username of the User
      * @return OK - if the userBalance > -50
-     * FORBIDDEN - if the userBalance <= -50
+     *         FORBIDDEN - if the userBalance <= -50
      */
     @GetMapping("/getCreditsStatusForGroceries")
     public ResponseEntity<String> getCreditsStatusForGroceries(@Username String username) {

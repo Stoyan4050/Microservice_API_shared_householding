@@ -33,7 +33,7 @@ public class AuthenticationConfigurer extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .exceptionHandling().authenticationEntryPoint(
-            (req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                (req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)
         )
             .and()
             .addFilterAfter(

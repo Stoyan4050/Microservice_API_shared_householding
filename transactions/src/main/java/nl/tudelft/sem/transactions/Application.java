@@ -27,6 +27,11 @@ public class Application {
         return new JwtConf();
     }
 
+    /**
+     * Register a new validator bean that initializes the product and token validators.
+     *
+     * @return The newly created validator.
+     */
     @Bean
     public Validator validate() {
         Validator handler = new ProductValidator();
