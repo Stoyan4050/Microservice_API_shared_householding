@@ -21,7 +21,7 @@ public class TransactionsSplitCreditsTest {
         usernames.add("Kendra");
         usernames.add("Oskar");
         usernames.add("Fabian");
-        t1 = new TransactionsSplitCredits(usernames, transactionsSplit);
+        t1 = new TransactionsSplitCredits(usernames);
     }
 
     @Test
@@ -45,17 +45,4 @@ public class TransactionsSplitCreditsTest {
         t1.setUsernames(usernames2);
         assertEquals(usernames2, t1.getUsernames());
     }
-
-    @Test
-    void getTransactionsSplit() {
-        assertEquals(transactionsSplit, t1.getTransactionsSplit());
-    }
-
-    @Test
-    void setTransactionSplit() {
-        Transactions ts2 = new Transactions();
-        t1.setTransactionsSplit(ts2);
-        assertEquals(ts2, t1.getTransactionsSplit());
-    }
-
 }

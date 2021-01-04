@@ -1,6 +1,7 @@
 package nl.tudelft.sem.requests.repositories;
 
 import nl.tudelft.sem.requests.entities.House;
+import nl.tudelft.sem.requests.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,5 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface HouseRepository extends JpaRepository<House, Integer> {
     House findByHouseNr(int houseNr);
+
+    House findByUser(User user);
 
 }

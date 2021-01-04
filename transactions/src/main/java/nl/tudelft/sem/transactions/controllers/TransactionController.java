@@ -6,6 +6,7 @@ import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
+import nl.tudelft.sem.transactions.handlers.Validator;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class TransactionController {
 
     @Autowired
     private transient ProductRepository productRepository;
+
+    @Autowired
+    private transient Validator handler;
 
     public TransactionsRepository getTransactionsRepository() {
         return transactionsRepository;
@@ -54,41 +58,7 @@ public class TransactionController {
     public @ResponseBody
     ResponseEntity<String> addNewTransaction(@RequestBody Transactions transaction) {
 
-        Optional<Product> optionalProduct = productRepository.findByProductId(
-            transaction.getProductId());
-
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            int portionsLeft = product.getPortionsLeft()
-                - transaction.getPortionsConsumed();
-
-            if (transaction.getProductFk().getExpired() == 1 || portionsLeft < 0) {
-                return ResponseEntity.badRequest().body(
-                    "Product is expired or there is no portions left");
-            }
-
-            float credits = product.getPrice()
-                / product.getTotalPortions();
-
-            credits = credits * transaction.getPortionsConsumed();
-            credits = Math.round(credits * 100) / 100;
-
-
-            try {
-                transactionsRepository.save(transaction);
-                productRepository.updateExistingProduct(product.getProductName(),
-                    product.getUsername(), product.getPrice(), product.getTotalPortions(),
-                    portionsLeft, 0, product.getProductId());
-
-                MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
-                    credits, false);
-                return ResponseEntity.ok().body("Transaction was successfully added");
-            } catch (DataIntegrityViolationException e) {
-                return ResponseEntity.badRequest().body("Adding the transaction failed");
-            }
-
-        }
-        return ResponseEntity.notFound().build();
+        return handler.handle(transaction, productRepository, transactionsRepository);
     }
 
     /**
@@ -103,46 +73,7 @@ public class TransactionController {
     ResponseEntity<String> addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
                                                                  transactionsSplitCredits) {
 
-
-        Transactions transaction = transactionsSplitCredits.getTransactionsSplit();
-
-        Optional<Product> optionalProduct = productRepository.findByProductId(
-            transaction.getProductId());
-
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            int portionsLeft = product.getPortionsLeft()
-                - transaction.getPortionsConsumed();
-
-            if (product.getExpired() == 1 || portionsLeft < 0) {
-                return ResponseEntity.badRequest().body(
-                    "Product is expired or there is no portions left");
-            }
-
-            List<String> usernames = transactionsSplitCredits.getUsernames();
-            float credits = product.getPrice()
-                / product.getTotalPortions();
-
-            credits = credits * transaction.getPortionsConsumed();
-            float splitCredits = credits / usernames.size();
-
-            splitCredits = Math.round(splitCredits * 100) / 100;
-
-            try {
-                productRepository.updateExistingProduct(product.getProductName(),
-                    product.getUsername(), product.getPrice(),
-                    product.getTotalPortions(), portionsLeft, 0, product.getProductId());
-
-                transactionsRepository.save(transaction);
-                MicroserviceCommunicator.sendRequestForSplittingCredits(usernames, splitCredits);
-
-                return ResponseEntity.ok().body("Transaction was successfully added");
-            } catch (DataIntegrityViolationException e) {
-                return ResponseEntity.badRequest().body("Adding the transaction failed");
-            }
-        }
-
-        return ResponseEntity.notFound().build();
+        return handler.handle(transactionsSplitCredits, productRepository, transactionsRepository);
     }
 
     /**
@@ -151,6 +82,7 @@ public class TransactionController {
      * @param transaction - transaction to be updated
      * @return true if transaction was updated
      */
+    // TODO validators
     @RequestMapping("/editTransaction")
     public @ResponseBody
     boolean editTransactions(@RequestBody Transactions transaction) {
