@@ -188,7 +188,8 @@ public class RequestControllerTest {
         when(userRepository.findById("Ina")).thenReturn(newUser);
         when(requestRepository.findById(requestId1)).thenReturn(Optional.of(request));
         when(requestRepository.findById(requestId2)).thenReturn(Optional.of(requestWithNewInfo));
-        when(requestRepository.save(requestWithNewInfo)).thenThrow(new MockitoException("Request couldn't be updated!"));
+        when(requestRepository.save(requestWithNewInfo))
+                .thenThrow(new MockitoException("Request couldn't be updated!"));
 
         // run the test and verify the results
         final ResponseEntity<String> result = requestController.updateRequest(requestWithNewInfo);
@@ -447,7 +448,8 @@ public class RequestControllerTest {
         when(requestRepository.findById(requestId)).thenReturn(request);
 
         // run the test
-        final ResponseEntity<String> result = requestController.membersAcceptingRequest(user1.getUsername(),
+        final ResponseEntity<String> result = requestController
+                .membersAcceptingRequest(user1.getUsername(),
                 1, user2.getUsername());
 
         final ResponseEntity<String> expected = new ResponseEntity<>(

@@ -4,11 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.exceptions.base.MockitoException.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -16,8 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import nl.tudelft.sem.requests.entities.House;
-import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.entities.Request;
+import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,7 +116,8 @@ public class HouseControllerTest {
         // set up the current house
         final House house = new House(1, "CoolestHouse");
         when(houseRepository.findById(1)).thenReturn(Optional.of(house));
-        when(houseRepository.save(houseWithNewInfo)).thenThrow(new MockitoException("House couldn't be updated!"));
+        when(houseRepository.save(houseWithNewInfo))
+                .thenThrow(new MockitoException("House couldn't be updated!"));
         //doThrow(Exception.class).when(houseRepository).save(Mockito.any(House.class));
 
         // run the test and verify the results
@@ -398,7 +396,7 @@ public class HouseControllerTest {
         ResponseEntity<?> result = houseController.getUsernamesByHouse(5);
 
         //verify results
-        assertEquals(ResponseEntity.badRequest().build(),result);
+        assertEquals(ResponseEntity.badRequest().build(), result);
     }
 
     @Test
@@ -415,8 +413,8 @@ public class HouseControllerTest {
         strings.add("Oskar");
 
         // verify results
-        assertEquals("201 CREATED",result.getStatusCode().toString());
-        assertEquals(strings,result.getBody());
+        assertEquals("201 CREATED", result.getStatusCode().toString());
+        assertEquals(strings, result.getBody());
     }
 
     @Test
