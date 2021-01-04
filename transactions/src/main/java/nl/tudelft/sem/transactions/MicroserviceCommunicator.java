@@ -3,6 +3,8 @@ package nl.tudelft.sem.transactions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,6 +12,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.InvalidParameterException;
 import java.util.List;
+import nl.tudelft.sem.requests.entities.User;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -180,6 +183,50 @@ public class MicroserviceCommunicator {
                 "Error encountered while trying to send a request for expired credits: "
                     + e.getLocalizedMessage());
             return null;
+        }
+    }
+
+    /**
+     * Get credits of a user from the requests microservice.
+     *
+     * @param username The username of the user.
+     * @param discoveryClient The Eureka discovery client
+     *                        that should be autowired at a higher level.
+     * @return The credits of the user returned from the requests microservice.
+     */
+    public static float getCredits(String username, EurekaClient discoveryClient) {
+        // get the uri of the requests microservice from eureka
+        InstanceInfo requestsInstance = discoveryClient.getNextServerFromEureka("REQUESTS", false);
+        String requestsUri = requestsInstance.getHomePageUrl();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(requestsUri + "getUser/" + username))
+                .GET()
+                .build();
+
+        try {
+            HttpResponse<String> httpResponse = httpClient.send(
+                    request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Request to get credits sent successfully!");
+
+            if (httpResponse.body().equals("")) {
+                System.out.print("Error: Operation did not succeed! Empty user.");
+                return 0;
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            User user = mapper.readValue(httpResponse.body(), User.class);
+            System.out.println("Operation was successful! Total credits: "
+                    + user.getTotalCredits());
+
+            return user.getTotalCredits();
+
+        } catch (IOException | InterruptedException e) {
+            System.out.println(
+                    "Error encountered while trying to send a request for user: "
+                            + e.getLocalizedMessage());
+            return 0;
         }
     }
 

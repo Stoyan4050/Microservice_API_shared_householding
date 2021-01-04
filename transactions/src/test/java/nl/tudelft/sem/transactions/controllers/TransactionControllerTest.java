@@ -59,7 +59,7 @@ class TransactionControllerTest {
         product.setPortionsLeft(5);
 
         validator = new ProductValidator();
-        validator.setNext(new TokensValidator());
+        validator.setNext(new TokensValidator(null)); // can pass it a mocked discoveryClient, when testing the microservice communication
     }
 
     @Test

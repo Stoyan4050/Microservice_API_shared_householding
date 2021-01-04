@@ -6,7 +6,7 @@ import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.http.ResponseEntity;
 
 public abstract class BaseValidator implements Validator {
-    private transient Validator next;
+    protected transient Validator next;
 
     public void setNext(Validator v) {
         this.next = v;
