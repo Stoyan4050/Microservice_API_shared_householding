@@ -13,14 +13,14 @@ build:
 checkStyle:
   stage: staticAnalysis
   script:
-    gradle checkstyleMain checkStyleTest
+    gradle build checkstyleMain checkStyleTest
 
 PMD:
   stage: staticAnalysis
   script:
-    gradle pmdMain pmdTest
+    gradle build pmdMain pmdTest
 
 test:
   stage: test
   script:
-    gradle test
+    gradle build test
