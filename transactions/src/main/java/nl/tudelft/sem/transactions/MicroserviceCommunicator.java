@@ -197,7 +197,7 @@ public class MicroserviceCommunicator {
                     request, HttpResponse.BodyHandlers.ofString());
             System.out.println("Request sent successfully!");
             if (httpResponse.statusCode() == HttpStatus.BAD_REQUEST.value()) {
-                System.out.println("Error: Operation did not succeed!");
+                System.out.println("The user does not have a house!");
                 return -1;
             }
             ObjectMapper mapper = new ObjectMapper();

@@ -21,7 +21,7 @@ public class ProductValidator extends BaseValidator {
             int portionsLeft = product.getPortionsLeft()
                     - transaction.getPortionsConsumed();
 
-            if (transaction.getProductFk().getExpired() == 1 || portionsLeft < 0) {
+            if (product.getExpired() == 1 || portionsLeft < 0) {
                 return ResponseEntity.badRequest().body(
                         "Product is expired or there is no portions left");
             }

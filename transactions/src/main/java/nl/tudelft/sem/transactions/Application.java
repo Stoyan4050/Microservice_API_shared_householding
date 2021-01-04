@@ -45,8 +45,8 @@ public class Application {
         Validator handler = new ProductValidator();
 
         handler.setNext(new HouseValidator())
-                .setNext(new TransactionValidator(discoveryClient))
-                .setNext(new TokensValidator());
+                .setNext(new TokensValidator())
+                .setNext(new TransactionValidator(discoveryClient));
 
         return handler;
     }
