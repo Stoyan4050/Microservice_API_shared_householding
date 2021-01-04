@@ -4,6 +4,7 @@ import com.netflix.discovery.EurekaClient;
 import nl.tudelft.sem.transactions.config.JwtConf;
 import nl.tudelft.sem.transactions.handlers.ProductValidator;
 import nl.tudelft.sem.transactions.handlers.TokensValidator;
+import nl.tudelft.sem.transactions.handlers.TransactionValidator;
 import nl.tudelft.sem.transactions.handlers.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -40,7 +41,10 @@ public class Application {
     @Bean
     public Validator validate() {
         Validator handler = new ProductValidator();
-        handler.setNext(new TokensValidator(discoveryClient));
+        TokensValidator tokensValidator = new TokensValidator();
+        TransactionValidator transactionValidator = new TransactionValidator(discoveryClient);
+        tokensValidator.setNext(transactionValidator);
+        handler.setNext(tokensValidator);
 
         return handler;
     }

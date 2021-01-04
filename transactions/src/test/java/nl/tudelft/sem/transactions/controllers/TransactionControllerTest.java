@@ -15,6 +15,7 @@ import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
 import nl.tudelft.sem.transactions.handlers.ProductValidator;
 import nl.tudelft.sem.transactions.handlers.TokensValidator;
+import nl.tudelft.sem.transactions.handlers.TransactionValidator;
 import nl.tudelft.sem.transactions.handlers.Validator;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
@@ -57,9 +58,13 @@ class TransactionControllerTest {
         transaction.setProductFk(product);
         product.setExpired(0);
         product.setPortionsLeft(5);
+        product.setPrice(1);
 
         validator = new ProductValidator();
-        validator.setNext(new TokensValidator(null)); // can pass it a mocked discoveryClient, when testing the microservice communication
+        TokensValidator tokensValidator = new TokensValidator();
+        TransactionValidator transactionValidator = new TransactionValidator(null); // can pass it a mocked discoveryClient, when testing the microservice communication
+        tokensValidator.setNext(transactionValidator);
+        validator.setNext(tokensValidator);
     }
 
     @Test
