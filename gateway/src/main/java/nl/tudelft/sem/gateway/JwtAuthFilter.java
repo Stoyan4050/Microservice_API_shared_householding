@@ -3,6 +3,7 @@ package nl.tudelft.sem.gateway;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
@@ -46,6 +47,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 .setSigningKey(jwtConf.getSecret().getBytes())
                 .parseClaimsJws(token)
                 .getBody();
+
+            // if the expiration date is in the past, return
+            if (claims.getExpiration().before(new Date(System.currentTimeMillis()))) {
+                chain.doFilter(request, response);
+                return;
+            }
 
             String username = claims.getSubject();
             if (username != null) {
