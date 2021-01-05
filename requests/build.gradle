@@ -45,12 +45,3 @@ dependencies {
     compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-server', version: '2.2.6.RELEASE'
 
 }
-
-// so that some entities can be used by the other microservices
-bootJar {
-    enabled = false
-}
-
-jar {
-    enabled = true
-}

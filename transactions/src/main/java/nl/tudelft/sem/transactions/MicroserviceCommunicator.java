@@ -12,7 +12,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.InvalidParameterException;
 import java.util.List;
-import nl.tudelft.sem.requests.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -225,7 +224,7 @@ public class MicroserviceCommunicator {
         String requestsUri = requestsInstance.getHomePageUrl();
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(requestsUri + "getUser/" + username))
+                .uri(URI.create(requestsUri + "getCredits/" + username))
                 .GET()
                 .build();
 
@@ -241,15 +240,15 @@ public class MicroserviceCommunicator {
             }
 
             ObjectMapper mapper = new ObjectMapper();
-            User user = mapper.readValue(httpResponse.body(), User.class);
+            Float credits = mapper.readValue(httpResponse.body(), Float.class);
             System.out.println("Operation was successful! Total credits: "
-                    + user.getTotalCredits());
+                    + credits);
 
-            return user.getTotalCredits();
+            return credits;
 
         } catch (IOException | InterruptedException e) {
             System.out.println(
-                    "Error encountered while trying to send a request for user: "
+                    "Error encountered while trying to send a request for user's credits: "
                             + e.getLocalizedMessage());
             return 0;
         }
