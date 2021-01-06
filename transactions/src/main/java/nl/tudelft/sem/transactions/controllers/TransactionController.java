@@ -10,7 +10,6 @@ import nl.tudelft.sem.transactions.handlers.Validator;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -90,7 +89,14 @@ public class TransactionController {
         // @RequestParam means it is a parameter from the GET or POST request
 
         Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
-        Product product = oldTransaction.getProductFk();
+        Optional<Product> products = productRepository
+                .findByProductId(transaction.getProductFk().getProductId());
+        Product product;
+        if (!products.isPresent()) {
+            return false;
+        } else {
+            product = products.get();
+        }
 
         float pricePerPortion = product.getPrice() / product.getTotalPortions(); //NOPMD
 
@@ -129,7 +135,6 @@ public class TransactionController {
                 transaction.getUsername(),
                 transaction.getPortionsConsumed(),
                 transaction.getTransactionId()) == 0) {
-                System.out.println("AAaa");
                 return false;
             }
         } catch (Exception e) {
