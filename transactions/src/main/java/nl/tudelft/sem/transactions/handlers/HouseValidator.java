@@ -35,7 +35,7 @@ public class HouseValidator extends BaseValidator {
             System.out.println(houseNumberProduct);
             System.out.println(houseNumberUser);
 
-            if (houseNumberProduct == -1 || houseNumberUser == -1){
+            if (houseNumberProduct == -1 || houseNumberUser == -1) {
                 return ResponseEntity.notFound().build();
             }
 

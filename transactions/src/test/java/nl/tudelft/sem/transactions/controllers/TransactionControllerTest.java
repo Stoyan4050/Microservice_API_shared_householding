@@ -73,6 +73,8 @@ class TransactionControllerTest {
         doReturn(transaction).when(transactionsRepository).getOne(1L);
         doReturn(1).when(transactionsRepository)
                 .updateExistingTransaction(4, BOB, 2, 1L);
+        doReturn(Optional.of(product)).when(productRepository)
+                .findByProductId(product.getProductId());
 
         boolean result = transactionController.editTransactions(transaction);
 

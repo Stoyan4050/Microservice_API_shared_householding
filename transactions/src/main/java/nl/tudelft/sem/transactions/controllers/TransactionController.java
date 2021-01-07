@@ -88,7 +88,6 @@ public class TransactionController {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
 
-        Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
         Optional<Product> products = productRepository
                 .findByProductId(transaction.getProductFk().getProductId());
         Product product;
@@ -100,7 +99,7 @@ public class TransactionController {
 
         float pricePerPortion = product.getPrice() / product.getTotalPortions(); //NOPMD
 
-
+        Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
         product.setPortionsLeft(product.getPortionsLeft() + oldTransaction.getPortionsConsumed());
 
         if (product.getExpired() == 1

@@ -31,7 +31,7 @@ public class House implements java.io.Serializable {
     private int houseNr;
 
 
-    @Column(name = "name", length = 25)
+    @Column(name = "name", length = 1000)
     private String name;
 
     @Cascade(CascadeType.DELETE)
