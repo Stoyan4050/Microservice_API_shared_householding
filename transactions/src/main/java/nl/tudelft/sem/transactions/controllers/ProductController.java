@@ -9,6 +9,12 @@ import nl.tudelft.sem.transactions.config.JwtConf;
 import nl.tudelft.sem.transactions.config.Username;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
+import nl.tudelft.sem.transactions.strategy.AmountStrategy;
+import nl.tudelft.sem.transactions.strategy.NameStrategy;
+import nl.tudelft.sem.transactions.strategy.PriceStrategy;
+import nl.tudelft.sem.transactions.strategy.PriceThenAmountThenNameStrategy;
+import nl.tudelft.sem.transactions.strategy.RandomStrategy;
+import nl.tudelft.sem.transactions.strategy.SortProductsStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -21,6 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 
@@ -28,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ProductController {
+    private SortProductsStrategy sortProductsStrategy;
 
     @Autowired
     private ProductRepository productRepository;
@@ -102,14 +110,47 @@ public class ProductController {
      * Gets all products from the database.
      *
      * @param username The username of the user making the request
-     * @return All products in the database
+     * @param strategy The strategy to sort the returned products; possible options:
+     *                 null - random order
+     *                 "amount" - sorted by portions left in ascending order
+     *                 "name" - sorted lexicographically by product name
+     *                 "price" - sorted by price in ascending order
+     *                 "priceThenAmountThenName" - sorted primarily on price,
+     *                 secondary on number of portions left, ternary on product name
+     * @return All products in the database corresponding to specific user, sorted
+     * on given strategy
      */
     @GetMapping("/allProducts")
     public @ResponseBody
-    List<Product> getAllProducts(@Username String username) {
+    List<Product> getAllProducts(@Username String username,
+                                 @RequestParam String strategy) {
 
         System.out.println(username);
-        return productRepository.findAll();
+        List<Product> products = productRepository.findAll();
+
+        if (strategy == null) {
+            sortProductsStrategy = new RandomStrategy();
+        } else {
+            switch (strategy) {
+                case "amount":
+                    sortProductsStrategy = new AmountStrategy();
+                    break;
+                case "name":
+                    sortProductsStrategy = new NameStrategy();
+                    break;
+                case "price":
+                    sortProductsStrategy = new PriceStrategy();
+                    break;
+                case "priceThenAmountThenName":
+                    sortProductsStrategy = new PriceThenAmountThenNameStrategy();
+                    break;
+                default:
+                    sortProductsStrategy = new RandomStrategy();
+            }
+        }
+
+        sortProductsStrategy.sortProducts(products);
+        return products;
     }
 
 

@@ -45,10 +45,10 @@ class ProductControllerTest {
     public void testGetAllProducts() {
         final List<Product> products = Arrays.asList(new Product("Butter", 5, 5, "kendra"));
         when(productRepository.findAll()).thenReturn(products);
-        final List<Product> result = productController.getAllProducts("kendra");
+        final List<Product> result = productController.getAllProducts("kendra", null);
 
         verify(productRepository).findAll();
-        verify(productController).getAllProducts("kendra");
+        verify(productController).getAllProducts("kendra", null);
 
         assertEquals(products.size(), result.size());
         assertEquals(products.get(0), result.get(0));
