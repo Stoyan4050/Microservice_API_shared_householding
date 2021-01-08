@@ -109,7 +109,6 @@ public class ProductController {
     /**
      * Gets all products from the database.
      *
-     * @param username The username of the user making the request
      * @param strategy The strategy to sort the returned products; possible options:
      *                 null - random order
      *                 "amount" - sorted by portions left in ascending order
@@ -118,14 +117,12 @@ public class ProductController {
      *                 "priceThenAmountThenName" - sorted primarily on price,
      *                 secondary on number of portions left, ternary on product name
      * @return All products in the database corresponding to specific user, sorted
-     * on given strategy
-     */
+     *         on given strategy
+     * */
     @GetMapping("/allProducts")
     public @ResponseBody
-    List<Product> getAllProducts(@Username String username,
-                                 @RequestParam String strategy) {
+    List<Product> getAllProducts(@RequestParam String strategy) {
 
-        System.out.println(username);
         List<Product> products = productRepository.findAll();
 
         if (strategy == null) {
