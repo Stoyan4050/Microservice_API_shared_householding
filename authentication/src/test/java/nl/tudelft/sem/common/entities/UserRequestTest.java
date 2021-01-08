@@ -1,16 +1,17 @@
 package nl.tudelft.sem.common.entities;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import nl.tudelft.sem.auth.entities.UserRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserRequestTest {
 
     private static UserRequest userRequest;
     private static final String username = "user";
     private static final String email = "pass";
+
     @BeforeEach
     void setup() {
         userRequest = new UserRequest();

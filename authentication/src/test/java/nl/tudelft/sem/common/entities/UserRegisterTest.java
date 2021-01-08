@@ -1,10 +1,10 @@
 package nl.tudelft.sem.common.entities;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import nl.tudelft.sem.auth.entities.UserRegister;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserRegisterTest {
 
@@ -12,6 +12,7 @@ class UserRegisterTest {
     private static final String username = "user";
     private static final String password = "pass";
     private static final String email = "asdf@asdf.com";
+
     @BeforeEach
     void setup() {
         userRegister = new UserRegister();

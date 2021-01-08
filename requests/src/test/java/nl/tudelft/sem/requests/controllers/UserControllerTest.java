@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -114,11 +113,13 @@ public class UserControllerTest {
         final User user = new User("username", new House(1, "name"),
             5.0f, "email", Set.of(new Request()));
         when(userRepository.findById("username")).thenReturn(Optional.of(user));
-        when(userRepository.save(userWithNewInfo)).thenThrow(new MockitoException("User couldn't be updated!"));
+        when(userRepository.save(userWithNewInfo))
+                .thenThrow(new MockitoException("User couldn't be updated!"));
         //doThrow(Exception.class).when(houseRepository).save(Mockito.any(House.class));
 
         // run the test and verify the results
-        final ResponseEntity<String> result = userController.updateUser(userWithNewInfo, "username");
+        final ResponseEntity<String> result =
+                userController.updateUser(userWithNewInfo, "username");
 
         final ResponseEntity<String> expected = new ResponseEntity<>("User couldn't be updated!",
             HttpStatus.INTERNAL_SERVER_ERROR);
@@ -319,7 +320,7 @@ public class UserControllerTest {
         when(userRepository.findByUsername("Malwina")).thenReturn(user2);
         when(userRepository.findByUsername("Mocha")).thenReturn(user3);
 
-        List<String> users= new ArrayList<>();
+        List<String> users = new ArrayList<>();
         users.add(user1.getUsername());
         users.add(user2.getUsername());
         users.add(user3.getUsername());
@@ -351,7 +352,7 @@ public class UserControllerTest {
         when(userRepository.findByUsername("Malwina")).thenReturn(user2);
         when(userRepository.findByUsername("Mocha")).thenReturn(user3);
 
-        List<String> users= new ArrayList<>();
+        List<String> users = new ArrayList<>();
         users.add(user1.getUsername());
         users.add(user2.getUsername());
         users.add(user3.getUsername());
@@ -359,10 +360,11 @@ public class UserControllerTest {
         //when(userRepository.updateUserCredits(2, "email1", 10, "Sleepy")).thenReturn(0);
         //when(userRepository.updateUserCredits(1, "email2", 3, "Malwina")).thenReturn(0);
         //when(userRepository.updateUserCredits(1, "email3", 5, "Mocha")).thenReturn(0);
-        when(userRepository.updateUserCredits(Mockito.anyInt(), Mockito.anyString(), Mockito.anyFloat(),
-            Mockito.anyString())).thenReturn(0);
+        when(userRepository.updateUserCredits(Mockito.anyInt(),
+                Mockito.anyString(), Mockito.anyFloat(),
+                Mockito.anyString())).thenReturn(0);
         //Mockito.doThrow(Exception.class).when(userRepository).updateUserCredits(Mockito.anyInt(),
-            //Mockito.anyString(), Mockito.anyFloat(), Mockito.anyString());
+        //Mockito.anyString(), Mockito.anyFloat(), Mockito.anyString());
 
         // run the test
         final boolean result = userController.splitUserCredits(users, 1);

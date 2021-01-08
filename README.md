@@ -2,7 +2,7 @@
 
 ### Running
 
-`gradle bootRun`
+`gradle bootRun --parallel`
 
 To run all microservices separately:
 
