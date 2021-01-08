@@ -81,7 +81,6 @@ public class TransactionController {
      * @param transaction - transaction to be updated
      * @return true if transaction was updated
      */
-    // TODO validators
     @RequestMapping("/editTransaction")
     public @ResponseBody
     boolean editTransactions(@RequestBody Transactions transaction) {
