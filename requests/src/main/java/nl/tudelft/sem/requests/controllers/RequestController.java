@@ -79,9 +79,9 @@ public class RequestController {
      * Updates a Request, searched by the requestId.
      *
      * @param requestWithNewInfo - the Request containing new data
-     * @return OK                 - the request was updated successfully
-     *      NOT_FOUND             - the request was not found
-     *      INTERNAL_SERVER_ERROR - the request couldn't be updated because of a server error
+     * @return OK                    - the request was updated successfully
+     *         NOT_FOUND             - the request was not found
+     *         INTERNAL_SERVER_ERROR - the request couldn't be updated because of a server error
      */
     @PutMapping("/updateRequest")
     public ResponseEntity<String> updateRequest(@RequestBody Request requestWithNewInfo) {
