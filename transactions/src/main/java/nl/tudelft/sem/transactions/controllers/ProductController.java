@@ -67,7 +67,7 @@ public class ProductController {
     @PostMapping("/addNewProduct")
     ResponseEntity<?> addNewProduct(@RequestBody Product product) {
         float credits = product.getPrice();
-        credits = Math.round(credits * 100) / 100;
+        credits = Math.round(credits * 100) / 100.f;
 
         try {
             productRepository.save(product);

@@ -2,19 +2,17 @@ package nl.tudelft.sem.transactions.entities;
 
 import java.util.List;
 
-public class TransactionsSplitCredits {
+public class TransactionsSplitCredits extends Transactions {
     private List<String> usernames;
-    private transient Transactions transactionsSplit;
 
     /**
      * Constructor for transaction for splitting credits.
      *
      * @param usernames         List of usernames.
-     * @param transactionsSplit transaction, which credits we have to split.
      */
-    public TransactionsSplitCredits(List<String> usernames, Transactions transactionsSplit) {
+    public TransactionsSplitCredits(List<String> usernames) {
+        super();
         this.usernames = usernames;
-        this.transactionsSplit = transactionsSplit;
     }
 
     public TransactionsSplitCredits() {
@@ -28,11 +26,19 @@ public class TransactionsSplitCredits {
         this.usernames = usernames;
     }
 
-    public Transactions getTransactionsSplit() {
-        return transactionsSplit;
-    }
+    /**
+     * Create a new Transaction from this TransactionSplitCredits object.
+     * Useful when saving TransactionSplitCredits as a Transaction in the database.
+     *
+     * @return A newly created Transaction from this object.
+     */
+    public Transactions asTransaction() {
+        Transactions transaction = new Transactions();
+        transaction.setProductFk(this.getProductFk());
+        transaction.setPortionsConsumed(this.getPortionsConsumed());
+        transaction.setUsername(this.getUsername());
+        transaction.setTransactionId(this.getTransactionId());
 
-    public void setTransactionsSplit(Transactions transactionsSplit) {
-        this.transactionsSplit = transactionsSplit;
+        return transaction;
     }
 }

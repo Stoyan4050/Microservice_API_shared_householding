@@ -59,6 +59,19 @@ public class UserController {
     }
 
     /**
+     * Returns the credits of a user with given username.
+     *
+     * @param username username of the user
+     * @return User's credits that were found with that username in the database
+     */
+    @GetMapping("/getCredits/{username}")
+    @ResponseBody
+    public Optional<Float> getCreditsByUsername(@PathVariable String username) {
+        Optional<User> user = userRepository.findById(username);
+        return user.map(User::getTotalCredits);
+    }
+
+    /**
      * Adds a new user to the database.
      *
      * @param user user to be added
@@ -202,6 +215,7 @@ public class UserController {
                     continue;
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 return false;
             }
         }

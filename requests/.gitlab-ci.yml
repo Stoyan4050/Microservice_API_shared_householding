@@ -1,4 +1,5 @@
 image: registry.fvdh.dev/gradle:6.7-jdk11
+
 stages:
   - build
   - staticAnalysis

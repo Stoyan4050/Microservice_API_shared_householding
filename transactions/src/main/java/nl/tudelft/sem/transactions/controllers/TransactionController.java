@@ -6,10 +6,10 @@ import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
+import nl.tudelft.sem.transactions.handlers.Validator;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +27,9 @@ public class TransactionController {
 
     @Autowired
     private transient ProductRepository productRepository;
+
+    @Autowired
+    private transient Validator handler;
 
     public TransactionsRepository getTransactionsRepository() {
         return transactionsRepository;
@@ -54,41 +57,7 @@ public class TransactionController {
     public @ResponseBody
     ResponseEntity<String> addNewTransaction(@RequestBody Transactions transaction) {
 
-        Optional<Product> optionalProduct = productRepository.findByProductId(
-            transaction.getProductId());
-
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            int portionsLeft = product.getPortionsLeft()
-                - transaction.getPortionsConsumed();
-
-            if (transaction.getProductFk().getExpired() == 1 || portionsLeft < 0) {
-                return ResponseEntity.badRequest().body(
-                    "Product is expired or there is no portions left");
-            }
-
-            float credits = product.getPrice()
-                / product.getTotalPortions();
-
-            credits = credits * transaction.getPortionsConsumed();
-            credits = Math.round(credits * 100) / 100;
-
-
-            try {
-                transactionsRepository.save(transaction);
-                productRepository.updateExistingProduct(product.getProductName(),
-                    product.getUsername(), product.getPrice(), product.getTotalPortions(),
-                    portionsLeft, 0, product.getProductId());
-
-                MicroserviceCommunicator.sendRequestForChangingCredits(transaction.getUsername(),
-                    credits, false);
-                return ResponseEntity.ok().body("Transaction was successfully added");
-            } catch (DataIntegrityViolationException e) {
-                return ResponseEntity.badRequest().body("Adding the transaction failed");
-            }
-
-        }
-        return ResponseEntity.notFound().build();
+        return handler.handle(transaction, productRepository, transactionsRepository);
     }
 
     /**
@@ -103,46 +72,7 @@ public class TransactionController {
     ResponseEntity<String> addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
                                                                  transactionsSplitCredits) {
 
-
-        Transactions transaction = transactionsSplitCredits.getTransactionsSplit();
-
-        Optional<Product> optionalProduct = productRepository.findByProductId(
-            transaction.getProductId());
-
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            int portionsLeft = product.getPortionsLeft()
-                - transaction.getPortionsConsumed();
-
-            if (product.getExpired() == 1 || portionsLeft < 0) {
-                return ResponseEntity.badRequest().body(
-                    "Product is expired or there is no portions left");
-            }
-
-            List<String> usernames = transactionsSplitCredits.getUsernames();
-            float credits = product.getPrice()
-                / product.getTotalPortions();
-
-            credits = credits * transaction.getPortionsConsumed();
-            float splitCredits = credits / usernames.size();
-
-            splitCredits = Math.round(splitCredits * 100) / 100;
-
-            try {
-                productRepository.updateExistingProduct(product.getProductName(),
-                    product.getUsername(), product.getPrice(),
-                    product.getTotalPortions(), portionsLeft, 0, product.getProductId());
-
-                transactionsRepository.save(transaction);
-                MicroserviceCommunicator.sendRequestForSplittingCredits(usernames, splitCredits);
-
-                return ResponseEntity.ok().body("Transaction was successfully added");
-            } catch (DataIntegrityViolationException e) {
-                return ResponseEntity.badRequest().body("Adding the transaction failed");
-            }
-        }
-
-        return ResponseEntity.notFound().build();
+        return handler.handle(transactionsSplitCredits, productRepository, transactionsRepository);
     }
 
     /**
@@ -157,12 +87,18 @@ public class TransactionController {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
 
-        Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
-        Product product = oldTransaction.getProductFk();
+        Optional<Product> products = productRepository
+                .findByProductId(transaction.getProductFk().getProductId());
+        Product product;
+        if (!products.isPresent()) {
+            return false;
+        } else {
+            product = products.get();
+        }
 
         float pricePerPortion = product.getPrice() / product.getTotalPortions(); //NOPMD
 
-
+        Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
         product.setPortionsLeft(product.getPortionsLeft() + oldTransaction.getPortionsConsumed());
 
         if (product.getExpired() == 1
@@ -197,7 +133,6 @@ public class TransactionController {
                 transaction.getUsername(),
                 transaction.getPortionsConsumed(),
                 transaction.getTransactionId()) == 0) {
-                System.out.println("AAaa");
                 return false;
             }
         } catch (Exception e) {
