@@ -110,8 +110,8 @@ public class HouseController {
      *
      * @param houseWithNewInfo - the House containing new data
      * @return OK                    - the house was updated successfully
-     * NOT_FOUND             - the house was not found
-     * INTERNAL_SERVER_ERROR - the house couldn't be updated because of a server error
+     *         NOT_FOUND             - the house was not found
+     *         INTERNAL_SERVER_ERROR - the house couldn't be updated because of a server error
      */
     @PutMapping("/updateHouse")
     public ResponseEntity<String> updateHouse(@RequestBody House houseWithNewInfo) {
@@ -267,8 +267,8 @@ public class HouseController {
      * @param username    - the username of the User entering the household
      * @param houseNumber - the house number of the House to add the user in
      * @return OK        - the user was successfully remove from the household
-     * FORBIDDEN - the house number of the user is different from the one given
-     * NOT_FOUND - if the user or the house do not exist in the database
+     *         FORBIDDEN - the house number of the user is different from the one given
+     *         NOT_FOUND - if the user or the house do not exist in the database
      */
     @PutMapping("/leaveHouse/{houseNumber}")
     public ResponseEntity<String> userLeavingHouse(@Username String username,
@@ -303,7 +303,7 @@ public class HouseController {
             HttpStatus.NOT_FOUND);
     }
 
-        /** Resets the credits of all users in that house to 0.
+    /** Resets the credits of all users in that house to 0.
      *
      * @param houseNr number of the house to be reset
      */
