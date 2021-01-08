@@ -105,8 +105,7 @@ public class UserController {
         }
 
         final UriComponents uri = uriComponentsBuilder
-                .path("register/{user_name}")
-                .buildAndExpand(username);
+                .path("register/{user_name}").buildAndExpand(username);
         return ResponseEntity.created(uri.toUri()).build();
     }
 }
