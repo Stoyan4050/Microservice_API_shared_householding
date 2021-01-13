@@ -37,10 +37,12 @@ public class UserController {
     @PostMapping(value = "auth/register", consumes = {"application/json"})
     public ResponseEntity<?> register(final @Valid @RequestBody UserRegister user) {
 
-        Optional<ResponseEntity<String>> responseEntity =  jdbcCreateUser(user);
         // if jdbcCreateUser has returned a response entity, return it, otherwise call postNewUser()
-        return responseEntity.orElseGet(() -> {
-            // make a POST request to the requests microservice to add the user
+        return checkUserExists(user.getUsername()).orElseGet(() -> {
+            // if a user with that username does not exist, add it to the database
+            jdbcCreateUser(user);
+
+            // make a POST request to the requests microservice to add the user there as well
             UserHelper helper = new UserHelper(discoveryClient);
             return helper.postNewUser(user.getUsername(), user.getEmail());
         });
@@ -48,22 +50,52 @@ public class UserController {
     }
 
     /**
-     * Create a user in the authentication database by using jdbc.
+     * Check whether a user with a given username already exists in the database.
      *
-     * @param user A user object of the new user.
-     * @return Optional of a response entity that may be returned if the username is not unique.
+     * @param username The username that should be checked whether it's unique.
+     * @return An Optional of a ResponseEntity if the username is already in use.
+     *         An empty Optional otherwise.
      */
-    private Optional<ResponseEntity<String>> jdbcCreateUser(UserRegister user) {
-        if (jdbcUserDetailsManager.userExists(user.getUsername())) {
+    private Optional<ResponseEntity<String>> checkUserExists(String username) {
+        if (jdbcUserDetailsManager.userExists(username)) {
             return Optional.of(new ResponseEntity<>("User already exists.", HttpStatus.CONFLICT));
         }
-
-        jdbcUserDetailsManager.createUser(org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(passwordEncoder.encode(user.getPassword()))
-                .roles("USER")
-                .build());
         return Optional.empty();
     }
 
+    /**
+     * Create a user in the authentication database by using jdbc.
+     *
+     * @param user A user object of the new user.
+     */
+    private void jdbcCreateUser(UserRegister user) {
+        jdbcUserDetailsManager.createUser(buildUser(user.getUsername(), user.getPassword()));
+    }
+
+    /**
+     * Build a UserDetails object that can be used by jdbcUserDetailsManager
+     * to add new users to the database.
+     *
+     * @param username Username of the user that will be used to build a UserDetails object.
+     * @param password Password of the user that will be used to build a UserDetails object.
+     * @return The built UserDetails object.
+     */
+    private org.springframework.security.core.userdetails.UserDetails buildUser(String username,
+                                                                                String password) {
+        return org.springframework.security.core.userdetails.User
+                .withUsername(username)
+                .password(encodePassword(password))
+                .roles("USER")
+                .build();
+    }
+
+    /**
+     * Helper method that uses this.passwordEncoder to encode a given password.
+     *
+     * @param password Password to be encoded.
+     * @return The encoded password as a String.
+     */
+    private String encodePassword(String password) {
+        return this.passwordEncoder.encode(password);
+    }
 }
