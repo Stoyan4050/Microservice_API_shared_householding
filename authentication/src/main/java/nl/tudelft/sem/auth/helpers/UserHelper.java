@@ -10,8 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class UserHelper {
-    transient ObjectMapper mapper;
-    transient MicroserviceCommunicator microserviceCommunicator;
+    transient UserRequestHelper userRequestHelper;
 
     /**
      * Creates a new UserHelper.
@@ -20,9 +19,7 @@ public class UserHelper {
      *                        to get the URI of the other microservices.
      */
     public UserHelper(EurekaClient discoveryClient) {
-        // need an object mapper to JSON encode the body of the POST request
-        this.mapper = new ObjectMapper();
-        this.microserviceCommunicator = new MicroserviceCommunicator(discoveryClient);
+        userRequestHelper = new UserRequestHelper(discoveryClient);
     }
 
     // no operation method that fixes a "dataflow anomaly" PMD warning
@@ -52,13 +49,13 @@ public class UserHelper {
         return addUser(userRequestJson, username);
     }
 
-    private String serializeUserRequest(String username,
-                                        String email) throws JsonProcessingException {
-        return this.mapper.writeValueAsString(new UserRequest(username, email));
+    private String serializeUserRequest(String username, String email)
+            throws JsonProcessingException {
+        return this.userRequestHelper.serializeUserRequest(username, email);
     }
 
     private ResponseEntity<String> addUser(String userRequestJson, String username) {
-        return this.microserviceCommunicator.addNewUser(userRequestJson, username);
+        return this.userRequestHelper.addUser(userRequestJson, username);
     }
 
 }
