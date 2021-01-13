@@ -43,8 +43,6 @@ public class UserController {
     public ResponseEntity<?> register(final @Valid @RequestBody UserRegister user,
                                       final UriComponentsBuilder uriComponentsBuilder) {
 
-        final String username = user.getUsername();
-
         Optional<ResponseEntity<String>> responseEntity =  jdbcCreateUser(user);
         // if jdbcCreateUser has returned a response entity, return it, otherwise call postNewUser()
         return responseEntity.orElseGet(() -> {
@@ -56,8 +54,9 @@ public class UserController {
 
     /**
      * Create a user in the authentication database by using jdbc.
+     *
      * @param user A user object of the new user.
-     * @return
+     * @return Optional of a response entity that may be returned if the username is not unique.
      */
     private Optional<ResponseEntity<String>> jdbcCreateUser(UserRegister user) {
         if (jdbcUserDetailsManager.userExists(user.getUsername())) {
