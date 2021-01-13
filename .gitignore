@@ -28,3 +28,6 @@ gradle-app.setting
 
 ### IDE ###
 .idea
+
+### Code MR ###
+codemr/
