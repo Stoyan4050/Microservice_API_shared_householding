@@ -2,13 +2,9 @@ package nl.tudelft.sem.auth.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import javax.validation.Valid;
+import nl.tudelft.sem.auth.MicroserviceCommunicator;
 import nl.tudelft.sem.auth.entities.UserRegister;
 import nl.tudelft.sem.auth.entities.UserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +15,6 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
@@ -29,7 +24,6 @@ public class UserController {
     private transient JdbcUserDetailsManager jdbcUserDetailsManager;
     @Autowired
     private transient PasswordEncoder passwordEncoder;
-
     @Autowired
     private transient EurekaClient discoveryClient;
 
@@ -60,7 +54,23 @@ public class UserController {
             .build());
 
         // make a POST request to the requests microservice to add the user
+        return postNewUser(user, uriComponentsBuilder, username);
 
+    }
+
+    /**
+     * Helper method that uses the MicroService communicator to send a POST request to the
+     * request microservice's addNewUser method.
+     *
+     * @param user A UserRequest object received by the client.
+     * @param uriComponentsBuilder uriComponentsBuilder A URI Components Builder that is passed
+     *                             from the respective controller class.
+     * @param username Username of the newly created user.
+     * @return A response entity that should be returned to the client.
+     */
+    public ResponseEntity<String> postNewUser(UserRegister user,
+                                              UriComponentsBuilder uriComponentsBuilder,
+                                              String username) {
         // need an object mapper to JSON encode the body of the POST request
         ObjectMapper mapper = new ObjectMapper();
 
@@ -74,38 +84,10 @@ public class UserController {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
-                .body("Could not serialize User.");
+                    .body("Could not serialize User.");
         }
 
-        // get the uri of the requests microservice from eureka
-        InstanceInfo requestsInstance = discoveryClient.getNextServerFromEureka("REQUESTS", false);
-        String requestsUri = requestsInstance.getHomePageUrl();
-
-        // build a new POST request
-        HttpRequest addNewUserReq = HttpRequest.newBuilder()
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(userRequestJson))
-            .uri(URI.create(requestsUri + "addNewUser/")).build();
-
-        HttpResponse<String> response = null;
-        HttpClient client = HttpClient.newBuilder().build();
-        try {
-            response = client.send(addNewUserReq, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
-        // if the microservice returns anything different from 201, report to the client
-        if (response.statusCode() != HttpStatus.CREATED.value()) {
-            System.out.println("Status: " + response.statusCode());
-            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY)
-                .body("Requests microservice returned: "
-                    + HttpStatus.resolve(response.statusCode()));
-        }
-
-        final UriComponents uri = uriComponentsBuilder
-                .path("register/{user_name}").buildAndExpand(username);
-        return ResponseEntity.created(uri.toUri()).build();
+        MicroserviceCommunicator communicator = new MicroserviceCommunicator(discoveryClient);
+        return communicator.addNewUser(userRequestJson, uriComponentsBuilder, username);
     }
 }

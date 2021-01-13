@@ -21,9 +21,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 public class JwtFilter extends UsernamePasswordAuthenticationFilter {
 
-    private final AuthenticationManager authManager;
+    private final transient AuthenticationManager authManager;
 
-    private final JwtConf jwtConfig;
+    private final transient JwtConf jwtConfig;
 
     /**
      * Creates an instance of a JwtFilter.
@@ -40,14 +40,6 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
         this.setRequiresAuthenticationRequestMatcher(
             new AntPathRequestMatcher("/auth/login", "POST")
         );
-    }
-
-    public AuthenticationManager getAuthManager() {
-        return authManager;
-    }
-
-    public JwtConf getJwtConfig() {
-        return jwtConfig;
     }
 
     @Override
