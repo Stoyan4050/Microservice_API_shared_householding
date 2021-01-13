@@ -3,6 +3,7 @@ package nl.tudelft.sem.auth.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.discovery.EurekaClient;
+import java.util.Optional;
 import javax.validation.Valid;
 import nl.tudelft.sem.auth.MicroserviceCommunicator;
 import nl.tudelft.sem.auth.entities.UserRegister;
@@ -43,19 +44,32 @@ public class UserController {
                                       final UriComponentsBuilder uriComponentsBuilder) {
 
         final String username = user.getUsername();
-        if (jdbcUserDetailsManager.userExists(username)) {
-            return new ResponseEntity<>("User already exists.", HttpStatus.CONFLICT);
+
+        Optional<ResponseEntity<String>> responseEntity =  jdbcCreateUser(user);
+        // if jdbcCreateUser has returned a response entity, return it, otherwise call postNewUser()
+        return responseEntity.orElseGet(() -> {
+            // make a POST request to the requests microservice to add the user
+            return postNewUser(user, uriComponentsBuilder);
+        });
+
+    }
+
+    /**
+     * Create a user in the authentication database by using jdbc.
+     * @param user A user object of the new user.
+     * @return
+     */
+    private Optional<ResponseEntity<String>> jdbcCreateUser(UserRegister user) {
+        if (jdbcUserDetailsManager.userExists(user.getUsername())) {
+            return Optional.of(new ResponseEntity<>("User already exists.", HttpStatus.CONFLICT));
         }
 
         jdbcUserDetailsManager.createUser(org.springframework.security.core.userdetails.User
-            .withUsername(user.getUsername())
-            .password(passwordEncoder.encode(user.getPassword()))
-            .roles("USER")
-            .build());
-
-        // make a POST request to the requests microservice to add the user
-        return postNewUser(user, uriComponentsBuilder, username);
-
+                .withUsername(user.getUsername())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .roles("USER")
+                .build());
+        return Optional.empty();
     }
 
     /**
@@ -65,12 +79,10 @@ public class UserController {
      * @param user A UserRequest object received by the client.
      * @param uriComponentsBuilder uriComponentsBuilder A URI Components Builder that is passed
      *                             from the respective controller class.
-     * @param username Username of the newly created user.
      * @return A response entity that should be returned to the client.
      */
-    public ResponseEntity<String> postNewUser(UserRegister user,
-                                              UriComponentsBuilder uriComponentsBuilder,
-                                              String username) {
+    private ResponseEntity<String> postNewUser(UserRegister user,
+                                              UriComponentsBuilder uriComponentsBuilder) {
         // need an object mapper to JSON encode the body of the POST request
         ObjectMapper mapper = new ObjectMapper();
 
@@ -88,6 +100,6 @@ public class UserController {
         }
 
         MicroserviceCommunicator communicator = new MicroserviceCommunicator(discoveryClient);
-        return communicator.addNewUser(userRequestJson, uriComponentsBuilder, username);
+        return communicator.addNewUser(userRequestJson, uriComponentsBuilder, user.getUsername());
     }
 }
