@@ -3,6 +3,7 @@ package nl.tudelft.sem.auth;
 import com.netflix.discovery.EurekaClient;
 import java.io.IOException;
 import java.net.http.HttpResponse;
+import nl.tudelft.sem.auth.helpers.HttpRequestHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -45,11 +46,11 @@ public class MicroserviceCommunicator {
     private HttpResponse<String> sendRequest(EurekaClient discoveryClient,
                                              String userRequestJson) throws IOException,
                                                                             InterruptedException {
-        return MicroserviceCommunicatorHelper.sendHttpRequest(discoveryClient, userRequestJson);
+        return HttpRequestHelper.sendHttpRequest(discoveryClient, userRequestJson);
     }
 
     private ResponseEntity<String> checkResponse(HttpResponse<String> response, String username) {
-        return MicroserviceCommunicatorHelper.checkResponseCode(response)
+        return HttpRequestHelper.checkResponseCode(response)
                 .orElseGet(() -> ResponseEntity.created(
                                     UriComponentsBuilder.fromPath("register/{user_name}")
                                         .buildAndExpand(username).toUri()

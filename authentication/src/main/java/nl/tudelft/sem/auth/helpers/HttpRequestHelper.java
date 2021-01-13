@@ -1,4 +1,4 @@
-package nl.tudelft.sem.auth;
+package nl.tudelft.sem.auth.helpers;
 
 import com.netflix.discovery.EurekaClient;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public class MicroserviceCommunicatorHelper {
+public class HttpRequestHelper {
 
     /**
      * Build an HTTP request.

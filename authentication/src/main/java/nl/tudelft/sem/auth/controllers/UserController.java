@@ -4,6 +4,7 @@ import com.netflix.discovery.EurekaClient;
 import java.util.Optional;
 import javax.validation.Valid;
 import nl.tudelft.sem.auth.entities.UserRegister;
+import nl.tudelft.sem.auth.helpers.UserHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +41,8 @@ public class UserController {
         // if jdbcCreateUser has returned a response entity, return it, otherwise call postNewUser()
         return responseEntity.orElseGet(() -> {
             // make a POST request to the requests microservice to add the user
-            UserControllerHelper helper = new UserControllerHelper(discoveryClient);
-            return helper.postNewUser(user);
+            UserHelper helper = new UserHelper(discoveryClient);
+            return helper.postNewUser(user.getUsername(), user.getEmail());
         });
 
     }
