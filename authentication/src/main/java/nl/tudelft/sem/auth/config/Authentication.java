@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -20,36 +19,9 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 @EnableWebSecurity
 public class Authentication extends WebSecurityConfigurerAdapter {
     @Autowired
-    private DataSource dataSource;
+    private transient DataSource dataSource;
     @Autowired
-    private UserDetailsService userDetailsService;
-    @Autowired
-    private JwtConf jwtConf;
-
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public UserDetailsService getUserDetailsService() {
-        return userDetailsService;
-    }
-
-    public void setUserDetailsService(
-        UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-
-    public JwtConf getJwtConf() {
-        return jwtConf;
-    }
-
-    public void setJwtConf(JwtConf jwtConf) {
-        this.jwtConf = jwtConf;
-    }
+    private transient JwtConf jwtConf;
 
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
