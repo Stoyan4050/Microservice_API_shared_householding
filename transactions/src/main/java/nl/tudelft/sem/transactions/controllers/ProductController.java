@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ProductController {
-    private SortProductsStrategy sortProductsStrategy;
 
     @Autowired
     private ProductRepository productRepository;
@@ -117,37 +116,40 @@ public class ProductController {
      *                 "priceThenAmountThenName" - sorted primarily on price,
      *                 secondary on number of portions left, ternary on product name
      * @return All products in the database corresponding to specific user, sorted
-     *         on given strategy
-     * */
+     * on given strategy
+     */
     @GetMapping("/allProducts")
     public @ResponseBody
     List<Product> getAllProducts(@RequestParam String strategy) {
-
         List<Product> products = productRepository.findAll();
 
+        createStrategy(strategy).sortProducts(products);
+        return products;
+    }
+
+    /**
+     * Creates a strategy for retrieving all products based on the name of the strategy.
+     *
+     * @param strategy name of the strategy to be created
+     * @return Strategy created from given string
+     */
+    private SortProductsStrategy createStrategy(String strategy) {
         if (strategy == null) {
-            sortProductsStrategy = new RandomStrategy();
+            return new RandomStrategy();
         } else {
             switch (strategy) {
                 case "amount":
-                    sortProductsStrategy = new AmountStrategy();
-                    break;
+                    return new AmountStrategy();
                 case "name":
-                    sortProductsStrategy = new NameStrategy();
-                    break;
+                    return new NameStrategy();
                 case "price":
-                    sortProductsStrategy = new PriceStrategy();
-                    break;
+                    return new PriceStrategy();
                 case "priceThenAmountThenName":
-                    sortProductsStrategy = new PriceThenAmountThenNameStrategy();
-                    break;
+                    return new PriceThenAmountThenNameStrategy();
                 default:
-                    sortProductsStrategy = new RandomStrategy();
+                    return new RandomStrategy();
             }
         }
-
-        sortProductsStrategy.sortProducts(products);
-        return products;
     }
 
 
