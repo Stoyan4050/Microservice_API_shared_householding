@@ -40,7 +40,7 @@ public class ProductController {
     private ProductRepository productRepository;
 
     @Autowired
-    private JwtConf jwtConf;
+    private transient JwtConf jwtConf;
 
     public ProductRepository getProductRepository() {
         return productRepository;
@@ -48,14 +48,6 @@ public class ProductController {
 
     public void setProductRepository(ProductRepository productRepository) {
         this.productRepository = productRepository;
-    }
-
-    public JwtConf getJwtConf() {
-        return jwtConf;
-    }
-
-    public void setJwtConf(JwtConf jwtConf) {
-        this.jwtConf = jwtConf;
     }
 
     /**
