@@ -1,4 +1,4 @@
-package nl.tudelft.sem.auth.helpers;
+package nl.tudelft.sem.auth.helpers.communication;
 
 import com.netflix.discovery.EurekaClient;
 import java.io.IOException;

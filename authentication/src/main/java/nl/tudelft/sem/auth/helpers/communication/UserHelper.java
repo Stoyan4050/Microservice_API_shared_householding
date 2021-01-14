@@ -1,11 +1,7 @@
-package nl.tudelft.sem.auth.helpers;
+package nl.tudelft.sem.auth.helpers.communication;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.discovery.EurekaClient;
-import nl.tudelft.sem.auth.MicroserviceCommunicator;
-import nl.tudelft.sem.auth.entities.UserRegister;
-import nl.tudelft.sem.auth.entities.UserRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 

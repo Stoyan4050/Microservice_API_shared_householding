@@ -1,21 +1,13 @@
 package nl.tudelft.sem.auth.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Date;
-import java.util.stream.Collectors;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import nl.tudelft.sem.auth.entities.UserCredentials;
+import nl.tudelft.sem.auth.helpers.authentication.AuthenticationHelper;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -47,12 +39,8 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
                                                 HttpServletResponse response) {
         try {
             // Obtain credentials
-            UserCredentials user = new ObjectMapper()
-                .readValue(request.getInputStream(), UserCredentials.class);
-
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                user.getUsername(), user.getPassword(), Collections.emptyList());
-            return authManager.authenticate(authToken);
+            return authManager.authenticate(AuthenticationHelper
+                    .obtainCredentials(request.getInputStream()));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -66,16 +54,12 @@ public class JwtFilter extends UsernamePasswordAuthenticationFilter {
         HttpServletResponse response,
         FilterChain chain,
         Authentication auth
-    ) throws IOException, ServletException {
+    ) {
         long now = System.currentTimeMillis();
-        String token = Jwts.builder()
-            .setSubject(auth.getName())
-            .claim("authorities", auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-            .setIssuedAt(new Date(now))
-            .setExpiration(new Date(now + jwtConfig.getExpiration() * 1000L))  // in milliseconds
-            .signWith(SignatureAlgorithm.HS512, jwtConfig.getSecret().getBytes())
-            .compact();
+        Date current = new Date(now);
+        Date expiration = new Date(now + jwtConfig.getExpiration() * 1000L);
+        byte[] bytes = jwtConfig.getSecret().getBytes();
+        String token = AuthenticationHelper.generateToken(auth, current, expiration, bytes);
         response.addHeader(jwtConfig.getHeader(), jwtConfig.getPrefix() + token);
     }
 

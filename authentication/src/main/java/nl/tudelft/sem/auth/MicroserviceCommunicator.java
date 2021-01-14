@@ -3,7 +3,7 @@ package nl.tudelft.sem.auth;
 import com.netflix.discovery.EurekaClient;
 import java.io.IOException;
 import java.net.http.HttpResponse;
-import nl.tudelft.sem.auth.helpers.HttpRequestHelper;
+import nl.tudelft.sem.auth.helpers.communication.HttpRequestHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;

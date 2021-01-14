@@ -1,4 +1,4 @@
-package nl.tudelft.sem.auth.helpers;
+package nl.tudelft.sem.auth.helpers.communication;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

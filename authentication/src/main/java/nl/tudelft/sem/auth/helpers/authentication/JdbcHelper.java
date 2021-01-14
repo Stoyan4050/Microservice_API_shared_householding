@@ -1,4 +1,4 @@
-package nl.tudelft.sem.auth.helpers;
+package nl.tudelft.sem.auth.helpers.authentication;
 
 import java.util.Optional;
 import nl.tudelft.sem.auth.entities.UserRegister;
