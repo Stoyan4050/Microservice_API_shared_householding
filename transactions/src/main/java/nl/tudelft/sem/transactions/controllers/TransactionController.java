@@ -7,6 +7,7 @@ import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
 import nl.tudelft.sem.transactions.handlers.Validator;
+import nl.tudelft.sem.transactions.handlers.ValidatorHelper;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class TransactionController {
     public @ResponseBody
     ResponseEntity<String> addNewTransaction(@RequestBody Transactions transaction) {
 
-        return handler.handle(transaction, productRepository, transactionsRepository);
+        return handler.handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
     }
 
     /**
@@ -72,7 +73,7 @@ public class TransactionController {
     ResponseEntity<String> addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
                                                                  transactionsSplitCredits) {
 
-        return handler.handle(transactionsSplitCredits, productRepository, transactionsRepository);
+        return handler.handle(new ValidatorHelper(transactionsSplitCredits, productRepository, transactionsRepository));
     }
 
     /**

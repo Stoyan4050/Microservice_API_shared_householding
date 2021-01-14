@@ -1,5 +1,6 @@
 package nl.tudelft.sem.transactions.controllers;
 
+import nl.tudelft.sem.transactions.handlers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -13,10 +14,6 @@ import java.util.Optional;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
-import nl.tudelft.sem.transactions.handlers.ProductValidator;
-import nl.tudelft.sem.transactions.handlers.TokensValidator;
-import nl.tudelft.sem.transactions.handlers.TransactionValidator;
-import nl.tudelft.sem.transactions.handlers.Validator;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,8 +106,8 @@ class TransactionControllerTest {
     @Test
     void addNewTransaction() {
         doReturn(Optional.of(product)).when(productRepository).findByProductId(4L);
-        doReturn(validator.handle(transaction, productRepository, transactionsRepository))
-                .when(handler).handle(transaction, productRepository, transactionsRepository);
+        doReturn(validator.handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
+                .when(handler).handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
@@ -123,8 +120,8 @@ class TransactionControllerTest {
     @Test
     void addNewTransactionProductNotPresent() {
         doReturn(Optional.empty()).when(productRepository).findByProductId(4L);
-        doReturn(validator.handle(transaction, productRepository, transactionsRepository))
-                .when(handler).handle(transaction, productRepository, transactionsRepository);
+        doReturn(validator.handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
+                .when(handler).handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
@@ -138,8 +135,8 @@ class TransactionControllerTest {
 
         doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
                 .save(transaction);
-        doReturn(validator.handle(transaction, productRepository, transactionsRepository))
-                .when(handler).handle(transaction, productRepository, transactionsRepository);
+        doReturn(validator.handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
+                .when(handler).handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
@@ -161,9 +158,9 @@ class TransactionControllerTest {
         doReturn(transaction).when(transactionsSplitCredits).asTransaction();
 
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
@@ -178,9 +175,9 @@ class TransactionControllerTest {
     void addNewTransactionSplittingCreditsNullProduct() {
         doReturn(Optional.empty()).when(productRepository).findByProductId(4);
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
@@ -201,9 +198,9 @@ class TransactionControllerTest {
                 .getPortionsConsumed();
         doReturn(transaction).when(transactionsSplitCredits).asTransaction();
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
@@ -225,9 +222,9 @@ class TransactionControllerTest {
                 .getPortionsConsumed();
         doReturn(transaction).when(transactionsSplitCredits).asTransaction();
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
@@ -252,9 +249,9 @@ class TransactionControllerTest {
                 .getPortionsConsumed();
         doReturn(transaction).when(transactionsSplitCredits).asTransaction();
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
