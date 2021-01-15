@@ -141,7 +141,6 @@ public class HouseController {
     public ResponseEntity<String> deleteHouse(@PathVariable int houseNumber) {
         Optional<House> house = houseRepository.findById(houseNumber);
         if (house.isPresent()) {
-            ResponseEntity<List<User>> usersResponse = getAllUsersFromHouse(houseNumber);
             nullifyHousesForUsers(houseNumber);
             houseRepository.deleteById(houseNumber);
             return ResponseEntity.ok().body("House successfully deleted.");
