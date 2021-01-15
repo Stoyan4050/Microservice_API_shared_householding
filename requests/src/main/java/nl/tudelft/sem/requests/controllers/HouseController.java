@@ -32,10 +32,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class HouseController {
 
     @Autowired
-    private transient HouseRepository houseRepository;
+    private final transient HouseRepository houseRepository;
 
     @Autowired
-    private transient UserRepository userRepository;
+    private final transient UserRepository userRepository;
 
     /**
      * Constructor for linking the house and user repositories used in membersAcceptingRequest
@@ -167,19 +167,10 @@ public class HouseController {
         Optional<House> house = houseRepository.findById(houseNumber);
         Optional<User> user = userRepository.findById(username);
 
-        // set the new house of the user
         user.get().setHouse(house.get());
 
         UserController userController = new UserController(userRepository);
         userController.updateUser(user.get(), user.get().getUsername());
-        // userController.updateUser(user.get());
-
-        // // add the user to the members
-        // house.get().getUsers().add(user.get());
-
-        // HouseController houseController = new HouseController(houseRepository, userRepository);
-        // houseController.updateHouse(house.get());
-
     }
 
     /**
@@ -193,10 +184,6 @@ public class HouseController {
     public @ResponseBody
     ResponseEntity<?> splitCreditsWhenExpired(@RequestParam String username,
                                               @RequestParam float credits) {
-
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
-
 
         User currentUser = userRepository.findByUsername(username);
 
@@ -237,9 +224,6 @@ public class HouseController {
     public @ResponseBody
     ResponseEntity<?> getUsernamesByHouse(@RequestParam int houseNr) {
 
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
-
         House house = houseRepository.findByHouseNr(houseNr);
         Set<User> users = house.getUsers();
 
@@ -269,9 +253,6 @@ public class HouseController {
     @PostMapping("/getHouseByUsername")
     public @ResponseBody
     ResponseEntity<?> getHouseByUsername(@RequestParam String username) {
-    
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
     
         House house = houseRepository.findByUsersUsername(username);
     

@@ -25,7 +25,6 @@ public class User implements java.io.Serializable {
 
     static final long serialVersionUID = 42L;
 
-    // Primary key in the database
     @Id
     @Column(name = "username", unique = true, nullable = false, length = 30)
     private String username;
