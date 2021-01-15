@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 
 public class TransactionValidator extends BaseValidator {
     private final transient EurekaClient discoveryClient;
-    private transient String username;
 
     public TransactionValidator(EurekaClient discoveryClient) {
         this.discoveryClient = discoveryClient;
@@ -42,10 +41,9 @@ public class TransactionValidator extends BaseValidator {
                 return goodRequest("Transaction was successfully added");
             }
             return goodRequest("Transaction was successfully added. Remaining credits for "
-                            + username + ": "
-                            + getCredits());
+                            + getUsername(helper) + ": "
+                            + getCredits(helper));
         }
-        System.out.println("AAAAAAAAA1");
         return next.handle(helper);
 
     }
@@ -54,10 +52,8 @@ public class TransactionValidator extends BaseValidator {
         return ResponseEntity.badRequest().body("Adding the transaction failed");
     }
 
-    public float getCredits() {
-        System.out.println("us" + username);
-        System.out.println(MicroserviceCommunicator.getCredits(username, discoveryClient));
-        return MicroserviceCommunicator.getCredits(username, discoveryClient);
+    public float getCredits(ValidatorHelper helper) {
+        return MicroserviceCommunicator.getCredits(getUsername(helper), discoveryClient);
     }
 
     public ResponseEntity<String> goodRequest(String body) {
@@ -66,6 +62,10 @@ public class TransactionValidator extends BaseValidator {
 
     public Product getProduct(ValidatorHelper helper) {
         return helper.getProduct();
+    }
+
+    public String getUsername(ValidatorHelper helper) {
+        return helper.getTransaction().getUsername();
     }
 
 }

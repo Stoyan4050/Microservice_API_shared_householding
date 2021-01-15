@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 public class HouseValidator extends BaseValidator {
     @Override
 	public ResponseEntity<String> handle(ValidatorHelper helper) {
-        //System.out.println("In house validator");
-
         if (helper.getProduct() == null) {
             return badRequest();
         }
@@ -18,9 +16,6 @@ public class HouseValidator extends BaseValidator {
             int houseNumberUser = getHouseNumber(helper.getTransaction().getUsername());
 
             int houseNumberProduct = getHouseNumber(helper.getProduct().getUsername());
-
-            //System.out.println(houseNumberProduct);
-            //System.out.println(houseNumberUser);
 
             if (houseNumberProduct == -1 || houseNumberUser == -1) {
                 return badRequest();

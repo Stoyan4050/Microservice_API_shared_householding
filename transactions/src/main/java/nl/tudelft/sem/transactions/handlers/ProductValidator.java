@@ -8,7 +8,7 @@ public class ProductValidator extends BaseValidator {
     public ResponseEntity<String> handle(ValidatorHelper helper) {
 
         if (helper.getProduct() == null) {
-            return badRequest();
+            return badRequestDoesNotExists();
         }
 
         int portionsLeft = calculatePortions(helper);
@@ -19,6 +19,11 @@ public class ProductValidator extends BaseValidator {
 
         return super.checkNext(helper);
 
+    }
+
+    public ResponseEntity<String> badRequestDoesNotExists() {
+        return ResponseEntity.badRequest().body(
+                "Product does not exists!");
     }
 
     public ResponseEntity<String> badRequest() {

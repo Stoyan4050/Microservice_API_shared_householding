@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 
 class TransactionControllerTest {
     private static final String BOB = "bob";
+
     @Mock
     private transient TransactionsRepository transactionsRepository;
     @Mock
@@ -124,7 +125,7 @@ class TransactionControllerTest {
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
         assertEquals(ResponseEntity.badRequest().body(
-                "Product is expired, does not exists or there are no portions left"),
+                "Product does not exists!"),
                 result);
     }
 
@@ -181,7 +182,7 @@ class TransactionControllerTest {
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
         assertEquals(ResponseEntity.badRequest().body(
-                "Product is expired, does not exists or there are no portions left"), result);
+                "Product does not exists!"), result);
     }
 
     @Test
@@ -211,7 +212,7 @@ class TransactionControllerTest {
     @Test
     void addNewTransactionSplittingCreditsNoPortionsLeft() {
         transaction.getProductFk().setPortionsLeft(-1);
-        System.out.println(productRepository.hashCode());
+
         doReturn(Optional.of(product)).when(productRepository).findById(4L);
 
         // mock TransactionsSplitCredits

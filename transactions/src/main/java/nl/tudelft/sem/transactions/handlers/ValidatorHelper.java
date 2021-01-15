@@ -8,9 +8,9 @@ import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 
 public class ValidatorHelper {
-    private Transactions transaction;
-    private ProductRepository productRepository;
-    private TransactionsRepository transactionsRepository;
+    private transient Transactions transaction;
+    private transient ProductRepository productRepository;
+    private transient TransactionsRepository transactionsRepository;
 
     /**Constructor for the ValidatorHelper.
      *
@@ -80,5 +80,10 @@ public class ValidatorHelper {
     public boolean equals(Object o) {
         return ((ValidatorHelper) o).getTransaction()
                 .getTransactionId() == getTransaction().getTransactionId();
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

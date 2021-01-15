@@ -27,10 +27,10 @@ public class TransactionController {
     private TransactionsRepository transactionsRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private transient ProductRepository productRepository;
 
     @Autowired
-    private Validator handler;
+    private transient Validator handler;
 
     public TransactionsRepository getTransactionsRepository() {
         return transactionsRepository;
