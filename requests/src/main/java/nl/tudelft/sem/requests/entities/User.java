@@ -124,14 +124,15 @@ public class User implements java.io.Serializable {
         User user = (User) o;
 
         return Float.compare(user.totalCredits, totalCredits) == 0
-            && Objects.equals(username, user.username)
-            && Objects.equals(house, user.house)
-            && Objects.equals(email, user.email)
-            && Objects.equals(requests, user.requests);
+                && Objects.equals(username, user.username)
+                && Objects.equals(house, user.house)
+                && Objects.equals(email, user.email)
+                && Objects.equals(requests, user.requests);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(username, totalCredits, email);
     }
+
 }
