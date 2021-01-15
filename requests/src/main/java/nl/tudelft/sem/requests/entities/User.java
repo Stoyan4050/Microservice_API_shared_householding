@@ -3,15 +3,9 @@ package nl.tudelft.sem.requests.entities;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
@@ -110,6 +104,29 @@ public class User implements java.io.Serializable {
 
     public void setRequests(Set<Request> requests) {
         this.requests = requests;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        User user = (User) o;
+
+        return Float.compare(user.totalCredits, totalCredits) == 0
+                && Objects.equals(username, user.username)
+                && Objects.equals(house, user.house)
+                && Objects.equals(email, user.email)
+                && Objects.equals(requests, user.requests);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, totalCredits, email);
     }
 
 }

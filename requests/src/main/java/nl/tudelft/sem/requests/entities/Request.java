@@ -1,6 +1,7 @@
 package nl.tudelft.sem.requests.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.Objects;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
@@ -92,4 +93,27 @@ public class Request implements java.io.Serializable {
     public void setApproved(boolean approved) {
         this.approved = approved;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Request request = (Request) o;
+
+        return approved == request.approved
+                && Objects.equals(id, request.id)
+                && Objects.equals(user, request.user)
+                && Objects.equals(house, request.house);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, approved);
+    }
 }
+
