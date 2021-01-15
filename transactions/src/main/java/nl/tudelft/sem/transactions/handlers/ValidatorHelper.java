@@ -7,6 +7,12 @@ import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 
+/**
+ * The idea of this class is to be a central
+ * service class for the whole Validator structure.
+ * It contains some methods that are used throughout the whole
+ * handlers package and they decrease the complexity a lot.
+ */
 public class ValidatorHelper {
     private transient Transactions transaction;
     private transient ProductRepository productRepository;
