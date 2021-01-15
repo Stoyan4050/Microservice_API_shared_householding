@@ -23,22 +23,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class TransactionController {
     @Autowired
-    private TransactionsRepository transactionsRepository;
+    private transient TransactionsRepository transactionsRepository;
 
     @Autowired
     private transient ProductRepository productRepository;
 
     @Autowired
     private transient Validator handler;
-
-    public TransactionsRepository getTransactionsRepository() {
-        return transactionsRepository;
-    }
-
-    public void setTransactionsRepository(
-        TransactionsRepository transactionsRepository) {
-        this.transactionsRepository = transactionsRepository;
-    }
 
     @GetMapping("/allTransactions")
     public @ResponseBody

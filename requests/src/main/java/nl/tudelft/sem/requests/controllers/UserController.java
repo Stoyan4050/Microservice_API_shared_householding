@@ -161,21 +161,17 @@ public class UserController {
     ResponseEntity<?> editUserCredits(@RequestParam String username,
                                       @RequestParam float credits,
                                       @RequestParam boolean add) {
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
         if (!add) {
             credits = credits * (-1);
         }
 
         User currentUser = userRepository.findByUsername(username);
-        //System.out.println(currentUser.toString());
 
         try {
             if (userRepository.updateUserCredits(currentUser.getHouse().getHouseNr(),
                 currentUser.getEmail(),
                 currentUser.getTotalCredits() + credits,
-                currentUser.getUsername()) == 1) { //NOPMD
-                //return ResponseEntity.created(URI.create("/editUserCredits")).build();
+                currentUser.getUsername()) == 1) {
                 return ResponseEntity.created(URI.create("/editUserCredits")).build();
             }
 
@@ -208,12 +204,10 @@ public class UserController {
             user.setTotalCredits(currentCredits);
 
             try {
-                if (userRepository.updateUserCredits(user.getHouse().getHouseNr(),
+                userRepository.updateUserCredits(user.getHouse().getHouseNr(),
                     user.getEmail(),
                     currentCredits,
-                    user.getUsername()) == 1) { //NOPMD
-                    continue;
-                }
+                    user.getUsername());
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;

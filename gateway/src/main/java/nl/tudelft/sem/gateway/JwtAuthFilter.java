@@ -59,7 +59,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 @SuppressWarnings("unchecked")
                 List<String> authorities = (List<String>) claims.get("authorities");
 
-                // TODO don't need authorities
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     username, null,
                     authorities
