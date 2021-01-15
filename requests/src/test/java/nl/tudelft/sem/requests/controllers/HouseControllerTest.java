@@ -156,10 +156,11 @@ public class HouseControllerTest {
         when(houseRepository.findById(1)).thenReturn(house);
 
         // run the test
-        houseController.deleteHouse(1);
+        ResponseEntity<String> result = houseController.deleteHouse(1);
 
         // verify the results
         verify(houseRepository, times(1)).deleteById(1);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
 
     @Test
@@ -169,10 +170,11 @@ public class HouseControllerTest {
         when(houseRepository.findById(7)).thenReturn(house);
 
         // run the test
-        houseController.deleteHouse(7);
+        ResponseEntity<String> result = houseController.deleteHouse(7);
 
         // verify the results
         verify(houseRepository, times(0)).deleteById(1);
+        assertEquals(result.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -449,7 +451,7 @@ public class HouseControllerTest {
         final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.CREATED);
 
         // verify the results
-        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+        assertEquals(expected.getStatusCode(), result.getStatusCode());
     }
 
     @Test
@@ -477,7 +479,7 @@ public class HouseControllerTest {
         final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         // verify the results
-        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+        assertEquals(expected.getStatusCode(), result.getStatusCode());
     }
 
     @Test
@@ -505,6 +507,6 @@ public class HouseControllerTest {
         final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         // verify the results
-        assertEquals(expected.getStatusCode(), result.getStatusCode());;
+        assertEquals(expected.getStatusCode(), result.getStatusCode());
     }
 }

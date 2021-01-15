@@ -142,18 +142,25 @@ public class HouseController {
         Optional<House> house = houseRepository.findById(houseNumber);
         if (house.isPresent()) {
             ResponseEntity<List<User>> usersResponse = getAllUsersFromHouse(houseNumber);
-            if (usersResponse.getStatusCode() != HttpStatus.OK) {
-                return ResponseEntity.badRequest().body("Invalid house number.");
-            }
-            List<User> users = usersResponse.getBody();
-            for (User user : users) {
-                user.setHouse(null);
-                userRepository.save(user);
-            }
+            nullifyHousesForUsers(houseNumber);
             houseRepository.deleteById(houseNumber);
             return ResponseEntity.ok().body("House successfully deleted.");
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Sets house to null for all users in the house.
+     *
+     * @param houseNumber house number of the house
+     */
+    private void nullifyHousesForUsers(int houseNumber) {
+        ResponseEntity<List<User>> usersResponse = getAllUsersFromHouse(houseNumber);
+        List<User> users = usersResponse.getBody();
+        for (User user : users) {
+            user.setHouse(null);
+            userRepository.save(user);
         }
     }
 
