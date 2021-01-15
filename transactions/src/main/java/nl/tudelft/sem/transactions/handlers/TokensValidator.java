@@ -19,7 +19,7 @@ public class TokensValidator extends BaseValidator {
         return super.checkNext(helper);
     }
 
-    public ResponseEntity<String> badRequest(){
+    public ResponseEntity<String> badRequest() {
         return ResponseEntity.noContent().build();
     }
 }

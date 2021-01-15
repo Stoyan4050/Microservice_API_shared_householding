@@ -27,10 +27,10 @@ public class TransactionController {
     private TransactionsRepository transactionsRepository;
 
     @Autowired
-    private transient ProductRepository productRepository;
+    private ProductRepository productRepository;
 
     @Autowired
-    private transient Validator handler;
+    private Validator handler;
 
     public TransactionsRepository getTransactionsRepository() {
         return transactionsRepository;
@@ -58,7 +58,8 @@ public class TransactionController {
     public @ResponseBody
     ResponseEntity<String> addNewTransaction(@RequestBody Transactions transaction) {
 
-        return handler.handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
+        return handler.handle(new ValidatorHelper(transaction,
+                this.productRepository, transactionsRepository));
     }
 
     /**
@@ -73,7 +74,8 @@ public class TransactionController {
     ResponseEntity<String> addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
                                                                  transactionsSplitCredits) {
 
-        return handler.handle(new ValidatorHelper(transactionsSplitCredits, productRepository, transactionsRepository));
+        return handler.handle(new ValidatorHelper(transactionsSplitCredits,
+                this.productRepository, transactionsRepository));
     }
 
     /**

@@ -7,18 +7,21 @@ public class ProductValidator extends BaseValidator {
     @Override
     public ResponseEntity<String> handle(ValidatorHelper helper) {
 
-        if (helper.getProduct() == null) return badRequest();
+        if (helper.getProduct() == null) {
+            return badRequest();
+        }
 
         int portionsLeft = calculatePortions(helper);
         if (helper.getProduct().getExpired() == 1 || portionsLeft < 0) {
             return badRequest();
         }
 
+
         return super.checkNext(helper);
 
     }
 
-    public ResponseEntity<String> badRequest(){
+    public ResponseEntity<String> badRequest() {
         return ResponseEntity.badRequest().body(
                 "Product is expired, does not exists or there are no portions left");
     }

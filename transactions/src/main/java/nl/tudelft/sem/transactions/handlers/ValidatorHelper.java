@@ -8,9 +8,9 @@ import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 
 public class ValidatorHelper {
-    private final Transactions transaction;
-    private final ProductRepository productRepository;
-    private final TransactionsRepository transactionsRepository;
+    private Transactions transaction;
+    private ProductRepository productRepository;
+    private TransactionsRepository transactionsRepository;
 
     /**Constructor for the ValidatorHelper.
      *
@@ -39,6 +39,12 @@ public class ValidatorHelper {
         return productRepository;
     }
 
+    /**
+     * Calculate the credits for the product.
+     *
+     * @param product - the product for which we will calculate credits
+     * @return the credits
+     */
     public float calculateCredits(Product product) {
         float credits = product.getPrice()
                 / product.getTotalPortions();
@@ -62,19 +68,17 @@ public class ValidatorHelper {
      * @return the product from the helper repository
      */
     public Product getProduct() {
-        System.out.println("Trans id" + this
-                .getTransaction()
-                .getProductId());
-
         Optional<Product> transactionProduct = this.productRepository
                 .findById(this
                         .getTransaction()
                         .getProductId());
 
-        if (transactionProduct.isPresent()){
-            return transactionProduct.get();
-        } else {
-          return null;
-        }
+        return transactionProduct.orElse(null);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return ((ValidatorHelper) o).getTransaction()
+                .getTransactionId() == getTransaction().getTransactionId();
     }
 }

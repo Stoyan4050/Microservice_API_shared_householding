@@ -18,12 +18,11 @@ public class TransactionValidator extends BaseValidator {
     @Override
     public ResponseEntity<String> handle(ValidatorHelper helper) {
 
-        // we are sure the product is present, otherwise the product validator would have failed
         TransactionCommunicator communicator = new TransactionCommunicator(helper);
 
         communicator.requestForTransaction(helper.calculateCredits(getProduct(helper)));
-
         try {
+
             communicator.saveTransaction();
             communicator.updateProduct(getProduct(helper),
                     helper.calculatePortionsLeft());
@@ -46,20 +45,26 @@ public class TransactionValidator extends BaseValidator {
                             + username + ": "
                             + getCredits());
         }
+        System.out.println("AAAAAAAAA1");
         return next.handle(helper);
+
     }
-    public ResponseEntity<String> badRequest(){
+
+    public ResponseEntity<String> badRequest() {
         return ResponseEntity.badRequest().body("Adding the transaction failed");
     }
 
-    public float getCredits(){
+    public float getCredits() {
+        System.out.println("us" + username);
+        System.out.println(MicroserviceCommunicator.getCredits(username, discoveryClient));
         return MicroserviceCommunicator.getCredits(username, discoveryClient);
     }
-    public ResponseEntity<String> goodRequest(String body){
-        return ResponseEntity.badRequest().body(body);
+
+    public ResponseEntity<String> goodRequest(String body) {
+        return ResponseEntity.ok().body(body);
     }
 
-    public Product getProduct(ValidatorHelper helper){
+    public Product getProduct(ValidatorHelper helper) {
         return helper.getProduct();
     }
 

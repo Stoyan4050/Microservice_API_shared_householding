@@ -9,7 +9,9 @@ public class HouseValidator extends BaseValidator {
 	public ResponseEntity<String> handle(ValidatorHelper helper) {
         //System.out.println("In house validator");
 
-        if (helper.getProduct() == null) return badRequest();
+        if (helper.getProduct() == null) {
+            return badRequest();
+        }
 
 
         try {
@@ -39,7 +41,7 @@ public class HouseValidator extends BaseValidator {
     }
 
     public int getHouseNumber(String username) {
-       return MicroserviceCommunicator.sendRequestForHouseNumber(username);
+        return MicroserviceCommunicator.sendRequestForHouseNumber(username);
     }
 
     public Product getProduct(ValidatorHelper helper) {

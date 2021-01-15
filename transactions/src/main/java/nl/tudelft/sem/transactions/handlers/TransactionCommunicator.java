@@ -12,7 +12,6 @@ public class TransactionCommunicator {
         this.helper = helper;
     }
 
-
     /**
      * Saves the transaction in the provided repository.
      */
