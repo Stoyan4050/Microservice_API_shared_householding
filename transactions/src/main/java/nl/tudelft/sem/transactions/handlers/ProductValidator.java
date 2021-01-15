@@ -1,29 +1,29 @@
 package nl.tudelft.sem.transactions.handlers;
 
-import java.util.Optional;
-import nl.tudelft.sem.transactions.entities.Product;
 import org.springframework.http.ResponseEntity;
 
 public class ProductValidator extends BaseValidator {
 
     @Override
     public ResponseEntity<String> handle(ValidatorHelper helper) {
-        Optional<Product> optionalProduct = helper.getProductRepository().findByProductId(
-                helper.getTransaction().getProductId());
 
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            int portionsLeft = product.getPortionsLeft()
-                    - helper.getTransaction().getPortionsConsumed();
+        if (helper.getProduct() == null) return badRequest();
 
-            if (product.getExpired() == 1 || portionsLeft < 0) {
-                return ResponseEntity.badRequest().body(
-                        "Product is expired or there is no portions left");
-            }
-
-            return super.checkNext(helper);
-
+        int portionsLeft = calculatePortions(helper);
+        if (helper.getProduct().getExpired() == 1 || portionsLeft < 0) {
+            return badRequest();
         }
-        return ResponseEntity.notFound().build();
+
+        return super.checkNext(helper);
+
+    }
+
+    public ResponseEntity<String> badRequest(){
+        return ResponseEntity.badRequest().body(
+                "Product is expired, does not exists or there are no portions left");
+    }
+
+    public int calculatePortions(ValidatorHelper helper) {
+        return helper.calculatePortionsLeft();
     }
 }

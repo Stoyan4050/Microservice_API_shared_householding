@@ -2,10 +2,12 @@ package nl.tudelft.sem.transactions.handlers;
 
 import com.netflix.discovery.EurekaClient;
 import nl.tudelft.sem.transactions.MicroserviceCommunicator;
+import nl.tudelft.sem.transactions.entities.Product;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 
 public class TransactionValidator extends BaseValidator {
-    private transient EurekaClient discoveryClient;
+    private final transient EurekaClient discoveryClient;
     private transient String username;
 
     public TransactionValidator(EurekaClient discoveryClient) {
@@ -19,11 +21,17 @@ public class TransactionValidator extends BaseValidator {
         // we are sure the product is present, otherwise the product validator would have failed
         TransactionCommunicator communicator = new TransactionCommunicator(helper);
 
-        if (communicator.changeCredits()) {
-            return this.checkNext(helper);
-        } else {
-            return ResponseEntity.badRequest().body("Adding the transaction failed");
+        communicator.requestForTransaction(helper.calculateCredits(getProduct(helper)));
+
+        try {
+            communicator.saveTransaction();
+            communicator.updateProduct(getProduct(helper),
+                    helper.calculatePortionsLeft());
+
+        } catch (DataIntegrityViolationException e) {
+            return badRequest();
         }
+        return this.checkNext(helper);
     }
 
     @Override
@@ -32,13 +40,27 @@ public class TransactionValidator extends BaseValidator {
             // if the discovery client is not autowired properly,
             // don't bother trying to reach the requests microservice
             if (discoveryClient == null) {
-                return ResponseEntity.ok().body("Transaction was successfully added");
+                return goodRequest("Transaction was successfully added");
             }
-            return ResponseEntity.ok()
-                    .body("Transaction was successfully added. Remaining credits for "
+            return goodRequest("Transaction was successfully added. Remaining credits for "
                             + username + ": "
-                            + MicroserviceCommunicator.getCredits(username, discoveryClient));
+                            + getCredits());
         }
         return next.handle(helper);
     }
+    public ResponseEntity<String> badRequest(){
+        return ResponseEntity.badRequest().body("Adding the transaction failed");
+    }
+
+    public float getCredits(){
+        return MicroserviceCommunicator.getCredits(username, discoveryClient);
+    }
+    public ResponseEntity<String> goodRequest(String body){
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    public Product getProduct(ValidatorHelper helper){
+        return helper.getProduct();
+    }
+
 }

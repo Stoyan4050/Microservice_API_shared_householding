@@ -40,6 +40,7 @@ class TransactionControllerTest {
     private transient Transactions transaction;
     private transient Product product;
     private transient Validator validator;
+    private transient ValidatorHelper helper;
 
     @BeforeEach
     void setUp() {
@@ -63,6 +64,8 @@ class TransactionControllerTest {
                 new TransactionValidator(null);
         tokensValidator.setNext(transactionValidator);
         validator.setNext(tokensValidator);
+
+        helper = new ValidatorHelper(transaction, productRepository, transactionsRepository);
     }
 
     @Test
@@ -120,8 +123,8 @@ class TransactionControllerTest {
     @Test
     void addNewTransactionProductNotPresent() {
         doReturn(Optional.empty()).when(productRepository).findByProductId(4L);
-        doReturn(validator.handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
-                .when(handler).handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
+        doReturn(validator.handle(helper))
+                .when(handler).handle(helper);
 
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
