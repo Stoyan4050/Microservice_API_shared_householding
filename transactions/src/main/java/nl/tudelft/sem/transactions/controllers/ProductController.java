@@ -107,8 +107,9 @@ public class ProductController {
      *                 "price" - sorted by price in ascending order
      *                 "priceThenAmountThenName" - sorted primarily on price,
      *                 secondary on number of portions left, ternary on product name
+     *
      * @return All products in the database corresponding to specific user, sorted
-     * on given strategy
+     *         on given strategy
      */
     @GetMapping("/allProducts")
     public @ResponseBody

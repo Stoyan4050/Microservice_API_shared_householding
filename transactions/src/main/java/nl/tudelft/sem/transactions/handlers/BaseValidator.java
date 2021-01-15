@@ -1,5 +1,6 @@
 package nl.tudelft.sem.transactions.handlers;
 
+import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import org.springframework.http.ResponseEntity;
 
 public abstract class BaseValidator implements Validator {
@@ -19,7 +20,12 @@ public abstract class BaseValidator implements Validator {
 
     public int calculatePortionsLeft(ValidatorHelper helper) {
         return helper.getProduct().getPortionsLeft()
-                - helper.getTransaction().getPortionsConsumed();
+                - helper.getPortionsConsumed();
     }
+
+    public int getHouseNumber(String username) {
+        return MicroserviceCommunicator.sendRequestForHouseNumber(username);
+    }
+
 
 }
