@@ -284,13 +284,12 @@ public class RequestControllerTest {
         when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
         when(userRepository.findById("Ina")).thenReturn(newUser);
-        when(requestRepository.existsById(requestId)).thenReturn(true);
         when(requestRepository.findById(requestId)).thenReturn(request);
 
         // run the test and verify the results
         final ResponseEntity<String> result = requestController.membersAcceptingRequest("Ina",
             1, "Mocha");
-        verify(requestRepository).existsById(requestId);
+        verify(requestRepository, times(2)).findById(requestId);
 
         final ResponseEntity<String> expected = new ResponseEntity<>("You have successfully "
             + "accepted the user: " + request.get().getUser().getUsername(), HttpStatus.OK);
@@ -335,13 +334,12 @@ public class RequestControllerTest {
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
         when(userRepository.findById("Sleepy")).thenReturn(Optional.of(user3));
         when(userRepository.findById("Ina")).thenReturn(newUser);
-        when(requestRepository.existsById(requestId)).thenReturn(true);
         when(requestRepository.findById(requestId)).thenReturn(request);
 
         // run the test and verify the results
         final ResponseEntity<String> result = requestController.membersAcceptingRequest("Ina",
             1, "Sleepy");
-        verify(requestRepository).existsById(requestId);
+        verify(requestRepository).findById(requestId);
 
         final ResponseEntity<String> expected = new ResponseEntity<>("You can't accept a user"
             + " from other household!", HttpStatus.FORBIDDEN);
@@ -374,13 +372,12 @@ public class RequestControllerTest {
         when(userRepository.findById("Malwina")).thenReturn(Optional.of(user1));
         when(userRepository.findById("Mocha")).thenReturn(Optional.of(user2));
         when(userRepository.findById("Ina")).thenReturn(newUser);
-        when(requestRepository.existsById(requestId)).thenReturn(true);
         when(requestRepository.findById(requestId)).thenReturn(request);
 
         // run the test and verify the results
         final ResponseEntity<String> result = requestController.membersAcceptingRequest("Ina",
             1, "Sleepy");
-        verify(requestRepository).existsById(requestId);
+        verify(requestRepository).findById(requestId);
 
         final ResponseEntity<String> expected = new ResponseEntity<>("The user is not found!",
             HttpStatus.NOT_FOUND);

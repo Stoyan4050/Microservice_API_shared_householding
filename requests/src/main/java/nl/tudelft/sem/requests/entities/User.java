@@ -25,7 +25,6 @@ public class User implements java.io.Serializable {
 
     static final long serialVersionUID = 42L;
 
-    // Primary key in the database
     @Id
     @Column(name = "username", unique = true, nullable = false, length = 30)
     private String username;
@@ -125,14 +124,15 @@ public class User implements java.io.Serializable {
         User user = (User) o;
 
         return Float.compare(user.totalCredits, totalCredits) == 0
-            && Objects.equals(username, user.username)
-            && Objects.equals(house, user.house)
-            && Objects.equals(email, user.email)
-            && Objects.equals(requests, user.requests);
+                && Objects.equals(username, user.username)
+                && Objects.equals(house, user.house)
+                && Objects.equals(email, user.email)
+                && Objects.equals(requests, user.requests);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(username, totalCredits, email);
     }
+
 }

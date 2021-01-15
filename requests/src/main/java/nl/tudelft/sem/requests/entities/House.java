@@ -24,7 +24,6 @@ public class House implements java.io.Serializable {
 
     static final long serialVersionUID = 42L;
 
-    // Primary key in the database
     @Id
     @Column(name = "house_nr", unique = true, nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)

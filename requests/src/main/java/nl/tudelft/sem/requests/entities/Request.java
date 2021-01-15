@@ -94,7 +94,6 @@ public class Request implements java.io.Serializable {
         this.approved = approved;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -107,9 +106,9 @@ public class Request implements java.io.Serializable {
         Request request = (Request) o;
 
         return approved == request.approved
-            && Objects.equals(id, request.id)
-            && Objects.equals(user, request.user)
-            && Objects.equals(house, request.house);
+                && Objects.equals(id, request.id)
+                && Objects.equals(user, request.user)
+                && Objects.equals(house, request.house);
     }
 
     @Override
@@ -117,3 +116,4 @@ public class Request implements java.io.Serializable {
         return Objects.hash(id, approved);
     }
 }
+

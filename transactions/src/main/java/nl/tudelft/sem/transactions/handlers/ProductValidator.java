@@ -1,34 +1,37 @@
 package nl.tudelft.sem.transactions.handlers;
 
-import java.util.Optional;
-import nl.tudelft.sem.transactions.entities.Product;
-import nl.tudelft.sem.transactions.entities.Transactions;
-import nl.tudelft.sem.transactions.repositories.ProductRepository;
-import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.http.ResponseEntity;
 
 public class ProductValidator extends BaseValidator {
 
     @Override
-    public ResponseEntity<String> handle(Transactions transaction,
-                                         ProductRepository productRepository,
-                                         TransactionsRepository transactionsRepository) {
-        Optional<Product> optionalProduct = productRepository.findByProductId(
-                transaction.getProductId());
+    public ResponseEntity<String> handle(ValidatorHelper helper) {
 
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            int portionsLeft = product.getPortionsLeft()
-                    - transaction.getPortionsConsumed();
-
-            if (product.getExpired() == 1 || portionsLeft < 0) {
-                return ResponseEntity.badRequest().body(
-                        "Product is expired or there is no portions left");
-            }
-
-            return super.checkNext(transaction, productRepository, transactionsRepository);
-
+        if (helper.getProduct() == null) {
+            return badRequestDoesNotExists();
         }
-        return ResponseEntity.notFound().build();
+
+        int portionsLeft = calculatePortions(helper);
+        if (helper.getProduct().getExpired() == 1 || portionsLeft < 0) {
+            return badRequest();
+        }
+
+
+        return super.checkNext(helper);
+
+    }
+
+    public ResponseEntity<String> badRequestDoesNotExists() {
+        return ResponseEntity.badRequest().body(
+                "Product does not exists!");
+    }
+
+    public ResponseEntity<String> badRequest() {
+        return ResponseEntity.badRequest().body(
+                "Product is expired, does not exists or there are no portions left");
+    }
+
+    public int calculatePortions(ValidatorHelper helper) {
+        return calculatePortionsLeft(helper);
     }
 }

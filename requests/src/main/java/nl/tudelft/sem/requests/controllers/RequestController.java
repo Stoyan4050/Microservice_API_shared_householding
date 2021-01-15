@@ -6,7 +6,7 @@ import java.util.Optional;
 import nl.tudelft.sem.requests.config.Username;
 import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.RequestId;
-import nl.tudelft.sem.requests.entities.User;
+import nl.tudelft.sem.requests.helpers.AcceptUserHelper;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.RequestRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
@@ -128,40 +128,22 @@ public class RequestController {
 
         RequestId id = new RequestId(houseNumber, username);
 
-        UserController userController = new UserController(userRepository);
+        Optional<Request> currentRequest = requestRepository.findById(id);
 
-
-        if (!requestRepository.existsById(id)) {
+        if (!currentRequest.isPresent()) {
             return new ResponseEntity<>("The request is not found!", HttpStatus.NOT_FOUND);
         }
 
-        Optional<User> currentUser = userController.getUserByUsername(myUsername);
+        AcceptUserHelper helper = new AcceptUserHelper(userRepository, houseRepository);
+        // get the response entity indicating if the user was eligible
+        // for accepting another user to the house with that house number
+        ResponseEntity<String> response = helper.acceptUser(username, houseNumber, myUsername);
 
-        if (!currentUser.isPresent()) {
-            return new ResponseEntity<>("The user is not found!", HttpStatus.NOT_FOUND);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            //set the field of the request from false to true
+            currentRequest.get().setApproved(true);
+            updateRequest(currentRequest.get());
         }
-
-        if (currentUser.get().getHouse() == null
-                || currentUser.get().getHouse().getHouseNr() != houseNumber) {
-            return new ResponseEntity<>("You can't accept a user from other household!",
-                HttpStatus.FORBIDDEN);
-        }
-
-        Optional<Request> currentRequest = requestRepository.findById(id);
-
-        //set the field of the request from false to true
-        currentRequest.get().setApproved(true);
-
-        //create an instance of house controller - constructor defined in HouseController
-        HouseController houseController = new HouseController(houseRepository, userRepository);
-
-        //method userJoiningHouse of HouseController -> setting the house of the new user
-        houseController.userJoiningHouse(username, houseNumber);
-
-        updateRequest(currentRequest.get());
-
-        return new ResponseEntity<>("You have successfully accepted the user: "
-            + currentRequest.get().getUser().getUsername(), HttpStatus.OK);
+        return response;
     }
-
 }

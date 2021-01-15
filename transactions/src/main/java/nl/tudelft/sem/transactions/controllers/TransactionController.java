@@ -7,6 +7,7 @@ import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
 import nl.tudelft.sem.transactions.handlers.Validator;
+import nl.tudelft.sem.transactions.handlers.ValidatorHelper;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,22 +24,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class TransactionController {
     @Autowired
-    private TransactionsRepository transactionsRepository;
+    private transient TransactionsRepository transactionsRepository;
 
     @Autowired
     private transient ProductRepository productRepository;
 
     @Autowired
     private transient Validator handler;
-
-    public TransactionsRepository getTransactionsRepository() {
-        return transactionsRepository;
-    }
-
-    public void setTransactionsRepository(
-        TransactionsRepository transactionsRepository) {
-        this.transactionsRepository = transactionsRepository;
-    }
 
     @GetMapping("/allTransactions")
     public @ResponseBody
@@ -57,7 +49,8 @@ public class TransactionController {
     public @ResponseBody
     ResponseEntity<String> addNewTransaction(@RequestBody Transactions transaction) {
 
-        return handler.handle(transaction, productRepository, transactionsRepository);
+        return handler.handle(new ValidatorHelper(transaction,
+                this.productRepository, transactionsRepository));
     }
 
     /**
@@ -72,7 +65,8 @@ public class TransactionController {
     ResponseEntity<String> addNewTransactionSplittingCredits(@RequestBody TransactionsSplitCredits
                                                                  transactionsSplitCredits) {
 
-        return handler.handle(transactionsSplitCredits, productRepository, transactionsRepository);
+        return handler.handle(new ValidatorHelper(transactionsSplitCredits,
+                this.productRepository, transactionsRepository));
     }
 
     /**

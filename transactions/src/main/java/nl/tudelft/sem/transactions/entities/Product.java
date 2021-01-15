@@ -44,7 +44,7 @@ public class Product {
 
     @OneToMany(mappedBy = "productFk", cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<Transactions> transactionsList = new ArrayList<Transactions>();
+    private final List<Transactions> transactionsList = new ArrayList<>();
 
     /**
      * Constructor for the Product.
@@ -125,10 +125,6 @@ public class Product {
     @JsonIgnore
     public List<Transactions> getTransactionsList() {
         return transactionsList;
-    }
-
-    public void setTransactionsList(List<Transactions> transactionsList) {
-        this.transactionsList = transactionsList;
     }
 
     public void removeTransaction(Transactions transaction) {

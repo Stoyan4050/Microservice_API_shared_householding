@@ -16,7 +16,7 @@ gradle-app.setting
 
 # BlueJ files
 *.ctxt
-
+codemr/
 # Package Files #
 *.jar
 *.war
@@ -28,3 +28,6 @@ gradle-app.setting
 
 ### IDE ###
 .idea
+
+### Code MR ###
+codemr/
