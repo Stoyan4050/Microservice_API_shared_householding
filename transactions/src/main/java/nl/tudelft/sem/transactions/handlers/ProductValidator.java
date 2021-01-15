@@ -32,6 +32,6 @@ public class ProductValidator extends BaseValidator {
     }
 
     public int calculatePortions(ValidatorHelper helper) {
-        return helper.calculatePortionsLeft();
+        return calculatePortionsLeft(helper);
     }
 }

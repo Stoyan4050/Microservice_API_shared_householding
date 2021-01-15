@@ -7,15 +7,15 @@ import org.springframework.http.ResponseEntity;
 public class HouseValidator extends BaseValidator {
     @Override
 	public ResponseEntity<String> handle(ValidatorHelper helper) {
-        if (helper.getProduct() == null) {
+        if (getProduct(helper) == null) {
             return badRequest();
         }
 
 
         try {
-            int houseNumberUser = getHouseNumber(helper.getTransaction().getUsername());
+            int houseNumberUser = getHouseNumber(getProduct(helper).getUsername());
 
-            int houseNumberProduct = getHouseNumber(helper.getProduct().getUsername());
+            int houseNumberProduct = getHouseNumber(getProduct(helper).getUsername());
 
             if (houseNumberProduct == -1 || houseNumberUser == -1) {
                 return badRequest();
@@ -39,11 +39,11 @@ public class HouseValidator extends BaseValidator {
         return MicroserviceCommunicator.sendRequestForHouseNumber(username);
     }
 
-    public Product getProduct(ValidatorHelper helper) {
-        return helper.getProduct();
-    }
-
     public ResponseEntity<String> badRequest() {
         return ResponseEntity.notFound().build();
+    }
+
+    public Product getProduct(ValidatorHelper helper) {
+        return helper.getProduct();
     }
 }

@@ -36,31 +36,25 @@ public class ValidatorHelper {
     }
 
     public ProductRepository getProductRepository() {
-        return productRepository;
+        return this.productRepository;
     }
 
     /**
      * Calculate the credits for the product.
      *
-     * @param product - the product for which we will calculate credits
      * @return the credits
      */
-    public float calculateCredits(Product product) {
-        float credits = product.getPrice()
-                / product.getTotalPortions();
+    public float calculateCredits() {
+        float credits = getProduct().getPrice()
+                / getProduct().getTotalPortions();
 
-        credits = credits * transaction.getPortionsConsumed();
-        if (transaction instanceof TransactionsSplitCredits) {
-            credits = credits / ((TransactionsSplitCredits) transaction).getUsernames().size();
+        credits = credits * getTransaction().getPortionsConsumed();
+        if (getTransaction() instanceof TransactionsSplitCredits) {
+            credits = credits / ((TransactionsSplitCredits) getTransaction()).getUsernames().size();
         }
         credits = Math.round(credits * 100) / 100.f;
 
         return credits;
-    }
-
-    public int calculatePortionsLeft() {
-        return getProduct().getPortionsLeft()
-                - this.transaction.getPortionsConsumed();
     }
 
     /** Get the product from the repository.
@@ -68,7 +62,7 @@ public class ValidatorHelper {
      * @return the product from the helper repository
      */
     public Product getProduct() {
-        Optional<Product> transactionProduct = this.productRepository
+        Optional<Product> transactionProduct = getProductRepository()
                 .findById(this
                         .getTransaction()
                         .getProductId());

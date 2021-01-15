@@ -19,12 +19,12 @@ public class TransactionValidator extends BaseValidator {
 
         TransactionCommunicator communicator = new TransactionCommunicator(helper);
 
-        communicator.requestForTransaction(helper.calculateCredits(getProduct(helper)));
+        communicator.requestForTransaction(helper.calculateCredits());
         try {
 
             communicator.saveTransaction();
             communicator.updateProduct(getProduct(helper),
-                    helper.calculatePortionsLeft());
+                    calculatePortionsLeft(helper));
 
         } catch (DataIntegrityViolationException e) {
             return badRequest();
@@ -67,5 +67,4 @@ public class TransactionValidator extends BaseValidator {
     public String getUsername(ValidatorHelper helper) {
         return helper.getTransaction().getUsername();
     }
-
 }

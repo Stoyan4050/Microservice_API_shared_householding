@@ -9,10 +9,8 @@ public class TokensValidator extends BaseValidator {
 
         // we are sure the product is present, otherwise the product validator would have failed
 
-        float credits = helper.calculateCredits(helper.getProduct());
-
         // if the credits did not change, return a 204 NO CONTENT http response
-        if (credits == 0) {
+        if (helper.calculateCredits() == 0) {
             return badRequest();
         }
 

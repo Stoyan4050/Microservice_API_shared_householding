@@ -17,4 +17,9 @@ public abstract class BaseValidator implements Validator {
         return next.handle(helper);
     }
 
+    public int calculatePortionsLeft(ValidatorHelper helper) {
+        return helper.getProduct().getPortionsLeft()
+                - helper.getTransaction().getPortionsConsumed();
+    }
+
 }
