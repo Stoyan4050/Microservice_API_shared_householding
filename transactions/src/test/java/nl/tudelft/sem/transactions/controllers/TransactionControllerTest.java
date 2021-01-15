@@ -1,34 +1,31 @@
 package nl.tudelft.sem.transactions.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
-import nl.tudelft.sem.transactions.handlers.ProductValidator;
-import nl.tudelft.sem.transactions.handlers.TokensValidator;
-import nl.tudelft.sem.transactions.handlers.TransactionValidator;
-import nl.tudelft.sem.transactions.handlers.Validator;
+import nl.tudelft.sem.transactions.handlers.*;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 
 class TransactionControllerTest {
     private static final String BOB = "bob";
+
     @Mock
     private transient TransactionsRepository transactionsRepository;
     @Mock
@@ -43,6 +40,7 @@ class TransactionControllerTest {
     private transient Transactions transaction;
     private transient Product product;
     private transient Validator validator;
+    private transient ValidatorHelper helper;
 
     @BeforeEach
     void setUp() {
@@ -66,6 +64,8 @@ class TransactionControllerTest {
                 new TransactionValidator(null);
         tokensValidator.setNext(transactionValidator);
         validator.setNext(tokensValidator);
+
+        helper = new ValidatorHelper(transaction, productRepository, transactionsRepository);
     }
 
     @Test
@@ -108,9 +108,9 @@ class TransactionControllerTest {
 
     @Test
     void addNewTransaction() {
-        doReturn(Optional.of(product)).when(productRepository).findByProductId(4L);
-        doReturn(validator.handle(transaction, productRepository, transactionsRepository))
-                .when(handler).handle(transaction, productRepository, transactionsRepository);
+        doReturn(Optional.of(product)).when(productRepository).findById(4L);
+        doReturn(validator.handle(helper))
+                .when(handler).handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
@@ -122,24 +122,25 @@ class TransactionControllerTest {
 
     @Test
     void addNewTransactionProductNotPresent() {
-        doReturn(Optional.empty()).when(productRepository).findByProductId(4L);
-        doReturn(validator.handle(transaction, productRepository, transactionsRepository))
-                .when(handler).handle(transaction, productRepository, transactionsRepository);
+        doReturn(Optional.empty()).when(productRepository).findById(4L);
+        doReturn(validator.handle(helper))
+                .when(handler).handle(new ValidatorHelper(transaction, productRepository, this.transactionsRepository));
 
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
-        assertEquals(ResponseEntity.notFound().build(),
+        assertEquals(ResponseEntity.badRequest().body(
+                "Product does not exists!"),
                 result);
     }
 
     @Test
     void addNewTransactionFalse() {
-        doReturn(Optional.of(product)).when(productRepository).findByProductId(4L);
+        doReturn(Optional.of(product)).when(productRepository).findById(4L);
 
         doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
                 .save(transaction);
-        doReturn(validator.handle(transaction, productRepository, transactionsRepository))
-                .when(handler).handle(transaction, productRepository, transactionsRepository);
+        doReturn(validator.handle(helper))
+                .when(handler).handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController.addNewTransaction(transaction);
 
@@ -148,10 +149,10 @@ class TransactionControllerTest {
 
     @Test
     void addNewTransactionSplittingCredits() {
-        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
+        doReturn(Optional.of(product)).when(productRepository).findById(4L);
 
         // mock TransactionsSplitCredits
-        doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
+        doReturn(List.of(BOB)).when(this.transactionsSplitCredits).getUsernames();
         doReturn(transaction.getTransactionId()).when(transactionsSplitCredits).getTransactionId();
         doReturn(transaction.getProductId()).when(transactionsSplitCredits).getProductId();
         doReturn(transaction.getProductFk()).when(transactionsSplitCredits).getProductFk();
@@ -161,9 +162,9 @@ class TransactionControllerTest {
         doReturn(transaction).when(transactionsSplitCredits).asTransaction();
 
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(helper))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transactionsSplitCredits, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
@@ -176,21 +177,22 @@ class TransactionControllerTest {
 
     @Test
     void addNewTransactionSplittingCreditsNullProduct() {
-        doReturn(Optional.empty()).when(productRepository).findByProductId(4);
+        doReturn(Optional.empty()).when(this.productRepository).findById(4L);
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transactionsSplitCredits, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transactionsSplitCredits, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
-        assertEquals(ResponseEntity.notFound().build(), result);
+        assertEquals(ResponseEntity.badRequest().body(
+                "Product does not exists!"), result);
     }
 
     @Test
     void addNewTransactionSplittingCreditsExpiredProduct() {
         transaction.getProductFk().setExpired(1);
-        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
+        doReturn(Optional.of(product)).when(productRepository).findById(4L);
 
         // mock TransactionsSplitCredits
         doReturn(transaction.getTransactionId()).when(transactionsSplitCredits).getTransactionId();
@@ -201,20 +203,21 @@ class TransactionControllerTest {
                 .getPortionsConsumed();
         doReturn(transaction).when(transactionsSplitCredits).asTransaction();
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
         assertEquals(ResponseEntity.badRequest().body(
-                "Product is expired or there is no portions left"), result);
+                "Product is expired, does not exists or there are no portions left"), result);
     }
 
     @Test
     void addNewTransactionSplittingCreditsNoPortionsLeft() {
         transaction.getProductFk().setPortionsLeft(-1);
-        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
+
+        doReturn(Optional.of(product)).when(productRepository).findById(4L);
 
         // mock TransactionsSplitCredits
         doReturn(transaction.getTransactionId()).when(transactionsSplitCredits).getTransactionId();
@@ -225,19 +228,19 @@ class TransactionControllerTest {
                 .getPortionsConsumed();
         doReturn(transaction).when(transactionsSplitCredits).asTransaction();
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
         assertEquals(ResponseEntity.badRequest().body(
-                "Product is expired or there is no portions left"), result);
+                "Product is expired, does not exists or there are no portions left"), result);
     }
 
     @Test
     void addNewTransactionSplittingCreditsDataIntegrityViolation() {
-        doReturn(Optional.of(product)).when(productRepository).findByProductId(4);
+        doReturn(Optional.of(product)).when(productRepository).findById(4L);
         doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
 
         doThrow(DataIntegrityViolationException.class).when(transactionsRepository)
@@ -250,11 +253,12 @@ class TransactionControllerTest {
         doReturn(transaction.getUsername()).when(transactionsSplitCredits).getUsername();
         doReturn(transaction.getPortionsConsumed()).when(transactionsSplitCredits)
                 .getPortionsConsumed();
-        doReturn(transaction).when(transactionsSplitCredits).asTransaction();
         doReturn(validator
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository))
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository)))
                 .when(handler)
-                .handle(transactionsSplitCredits, productRepository, transactionsRepository);
+                .handle(new ValidatorHelper(transaction, productRepository, transactionsRepository));
+
+        doReturn(transaction).when(transactionsSplitCredits).asTransaction();
 
         ResponseEntity<String> result = transactionController
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);

@@ -1,55 +1,49 @@
 package nl.tudelft.sem.transactions.handlers;
 
-import java.util.Optional;
 import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
-import nl.tudelft.sem.transactions.entities.Transactions;
-import nl.tudelft.sem.transactions.repositories.ProductRepository;
-import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import org.springframework.http.ResponseEntity;
 
 public class HouseValidator extends BaseValidator {
     @Override
-	public ResponseEntity<String> handle(Transactions transaction,
-					ProductRepository productRepository,
-					TransactionsRepository transactionsRepository) {
-        System.out.println("In house validator");
-        Optional<Product> transactionProduct =  productRepository
-							.findById(transaction.getProductId());
-
-        Product product;
-        if (transactionProduct.isPresent()) {
-            product = transactionProduct.get();
-        } else {
-            return ResponseEntity.notFound().build();
+	public ResponseEntity<String> handle(ValidatorHelper helper) {
+        if (getProduct(helper) == null) {
+            return badRequest();
         }
-		
-		
+
+
         try {
-            int houseNumberUser = MicroserviceCommunicator.sendRequestForHouseNumber(
-					transaction.getUsername());
-			
-            int houseNumberProduct = MicroserviceCommunicator.sendRequestForHouseNumber(
-					product.getUsername());
-			
-            System.out.println(houseNumberProduct);
-            System.out.println(houseNumberUser);
+            int houseNumberUser = getHouseNumber(getProduct(helper).getUsername());
+
+            int houseNumberProduct = getHouseNumber(getProduct(helper).getUsername());
 
             if (houseNumberProduct == -1 || houseNumberUser == -1) {
-                return ResponseEntity.notFound().build();
+                return badRequest();
             }
 
             if (houseNumberProduct == houseNumberUser) {
-            	return super.checkNext(transaction, productRepository, transactionsRepository);
+            	return super.checkNext(helper);
             } else {
-                return ResponseEntity.notFound().build();
+                return badRequest();
             }
 			
         } catch (Exception e) {
-            e.printStackTrace();
+            badRequest();
         }
 		
-        return ResponseEntity.notFound().build();
+        return badRequest();
 		
+    }
+
+    public int getHouseNumber(String username) {
+        return MicroserviceCommunicator.sendRequestForHouseNumber(username);
+    }
+
+    public ResponseEntity<String> badRequest() {
+        return ResponseEntity.notFound().build();
+    }
+
+    public Product getProduct(ValidatorHelper helper) {
+        return helper.getProduct();
     }
 }

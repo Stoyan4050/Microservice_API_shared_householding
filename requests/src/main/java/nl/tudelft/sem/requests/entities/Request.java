@@ -115,5 +115,5 @@ public class Request implements java.io.Serializable {
     public int hashCode() {
         return Objects.hash(id, approved);
     }
-
 }
+
