@@ -76,14 +76,14 @@ public class ValidatorHelper {
         return transactionProduct.orElse(null);
     }
 
+    public int getPortionsConsumed() {
+        return this.getTransaction().getPortionsConsumed();
+    }
+
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o) { //NOPMD
         return ((ValidatorHelper) o).getTransaction()
                 .getTransactionId() == getTransaction().getTransactionId();
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
 }
