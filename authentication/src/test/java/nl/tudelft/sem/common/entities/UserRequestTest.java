@@ -13,7 +13,7 @@ class UserRequestTest {
     private static final String email = "pass";
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         userRequest = new UserRequest();
     }
 

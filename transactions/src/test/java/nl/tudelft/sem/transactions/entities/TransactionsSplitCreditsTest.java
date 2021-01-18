@@ -15,7 +15,7 @@ public class TransactionsSplitCreditsTest {
     private transient Transactions transactionsSplit;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         transactionsSplit = new Transactions();
         List<String> usernames = new ArrayList<>();
         usernames.add("Kendra");
