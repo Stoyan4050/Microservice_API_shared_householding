@@ -126,7 +126,7 @@ public class ProductController {
      * @param strategy name of the strategy to be created
      * @return Strategy created from given string
      */
-    private SortProductsStrategy createStrategy(String strategy) {
+    public SortProductsStrategy createStrategy(String strategy) {
         if (strategy == null) {
             return new RandomStrategy();
         } else {
@@ -165,7 +165,7 @@ public class ProductController {
                         HttpStatus.FORBIDDEN);
                 }
                 productRepository.save(productWithNewInfo);
-            } catch (Exception e) {
+            } catch (DataIntegrityViolationException e) {
                 return new ResponseEntity<>("Product couldn't be updated!",
                     HttpStatus.INTERNAL_SERVER_ERROR);
             }
