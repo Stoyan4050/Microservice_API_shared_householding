@@ -51,4 +51,41 @@ public class TransactionsSplitCreditsTest {
         Transactions transaction = t1.asTransaction();
         assertEquals(transaction.getClass(), Transactions.class);
     }
+
+    @Test
+    void asTransactionSetProductFk() {
+        Product product = new Product("cookies", 2.8f, 3, "stoyan");
+        t1.setProduct(product);
+
+        Transactions transaction = t1.asTransaction();
+
+        assertEquals(product, transaction.getProductFk());
+    }
+
+    @Test
+    void asTransactionGetPortionsConsumed() {
+        t1.setPortionsConsumed(3);
+
+        Transactions transaction = t1.asTransaction();
+
+        assertEquals(3, transaction.getPortionsConsumed());
+    }
+
+    @Test
+    void asTransactionGetTransactionId() {
+        t1.setTransactionId(1L);
+
+        Transactions transaction = t1.asTransaction();
+
+        assertEquals(1L, transaction.getTransactionId());
+    }
+
+    @Test
+    void asTransactionGetTransactionUsername() {
+        t1.setUsername("stoyan");
+
+        Transactions transaction = t1.asTransaction();
+
+        assertEquals("stoyan", transaction.getUsername());
+    }
 }
