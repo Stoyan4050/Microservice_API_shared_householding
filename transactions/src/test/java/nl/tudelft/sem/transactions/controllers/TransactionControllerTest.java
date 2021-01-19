@@ -2,6 +2,8 @@ package nl.tudelft.sem.transactions.controllers;
 
 import java.util.List;
 import java.util.Optional;
+
+import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
@@ -10,8 +12,10 @@ import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockserver.integration.ClientAndServer;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doNothing;
@@ -19,6 +23,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -81,6 +88,50 @@ class TransactionControllerTest {
         verify(transactionsRepository)
                 .updateExistingTransaction(4, BOB, 2, 1L);
         assertTrue(result);
+    }
+
+    @Test
+    void editTransactionNoneProduct() {
+        doReturn(transaction).when(transactionsRepository).getOne(1L);
+        doReturn(1).when(transactionsRepository)
+                .updateExistingTransaction(4, BOB, 2, 1L);
+
+        boolean result = transactionController.editTransactions(transaction);
+
+        verify(productRepository)
+                .findByProductId(transaction.getProductFk().getProductId());
+        assertFalse(result);
+    }
+
+    @Test
+    void editTransactionPricePerPortion() {
+        doReturn(transaction).when(transactionsRepository).getOne(1L);
+        doReturn(1).when(transactionsRepository)
+                .updateExistingTransaction(4, BOB, 2, 1L);
+        doReturn(Optional.of(product)).when(productRepository)
+                .findByProductId(product.getProductId());
+
+        ClientAndServer mockServer = startClientAndServer(9102);
+        boolean result = transactionController.editTransactions(transaction);
+
+        float pricePerPortion = product.getPrice() / product.getTotalPortions();
+        product.setPortionsLeft(product.getPortionsLeft() + transaction.getPortionsConsumed());
+
+        mockServer.verify(
+                request()
+                    .withMethod("POST")
+                    .withPath("/editUserCredits")
+                    .withPathParameter("username", transaction.getUsername())
+                    .withPathParameter("credits", Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
+                    .withPathParameter("add", Boolean.toString(false))
+        );
+
+        verify(productRepository)
+                .findByProductId(transaction.getProductFk().getProductId());
+        verify(transactionsRepository)
+                .updateExistingTransaction(4, BOB, 2, 1L);
+        assertTrue(result);
+        mockServer.stop();
     }
 
     @Test
