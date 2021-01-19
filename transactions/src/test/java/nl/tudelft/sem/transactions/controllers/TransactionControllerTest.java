@@ -105,33 +105,41 @@ class TransactionControllerTest {
 
     @Test
     void editTransactionPricePerPortion() {
-        doReturn(transaction).when(transactionsRepository).getOne(1L);
-        doReturn(1).when(transactionsRepository)
-                .updateExistingTransaction(4, BOB, 2, 1L);
-        doReturn(Optional.of(product)).when(productRepository)
-                .findByProductId(product.getProductId());
-
         ClientAndServer mockServer = startClientAndServer(9102);
-        boolean result = transactionController.editTransactions(transaction);
+        // for some reason PMD requires the mockServer.close(); to be in a
+        // try-finally block
+        try {
+            doReturn(transaction).when(transactionsRepository).getOne(1L);
+            doReturn(1).when(transactionsRepository)
+                    .updateExistingTransaction(4, BOB, 2, 1L);
+            doReturn(Optional.of(product)).when(productRepository)
+                    .findByProductId(product.getProductId());
 
-        float pricePerPortion = product.getPrice() / product.getTotalPortions();
-        product.setPortionsLeft(product.getPortionsLeft() + transaction.getPortionsConsumed());
+            boolean result = transactionController.editTransactions(transaction);
 
-        mockServer.verify(
-                request()
-                    .withMethod("POST")
-                    .withPath("/editUserCredits")
-                    .withPathParameter("username", transaction.getUsername())
-                    .withPathParameter("credits", Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
-                    .withPathParameter("add", Boolean.toString(false))
-        );
+            float pricePerPortion = product.getPrice() / product.getTotalPortions();
+            product.setPortionsLeft(product.getPortionsLeft() + transaction.getPortionsConsumed());
 
-        verify(productRepository)
-                .findByProductId(transaction.getProductFk().getProductId());
-        verify(transactionsRepository)
-                .updateExistingTransaction(4, BOB, 2, 1L);
-        assertTrue(result);
-        mockServer.stop();
+            mockServer.verify(
+                    request()
+                            .withMethod("POST")
+                            .withPath("/editUserCredits")
+                            .withPathParameter("username", transaction.getUsername())
+                            .withPathParameter("credits", Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
+                            .withPathParameter("add", Boolean.toString(false))
+            );
+
+
+            verify(productRepository)
+                    .findByProductId(transaction.getProductFk().getProductId());
+            verify(transactionsRepository)
+                    .updateExistingTransaction(4, BOB, 2, 1L);
+            assertTrue(result);
+        }
+        finally{
+            mockServer.close();
+            mockServer.stop();
+        }
     }
 
     @Test
