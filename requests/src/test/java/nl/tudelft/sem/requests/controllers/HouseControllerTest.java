@@ -1,11 +1,5 @@
 package nl.tudelft.sem.requests.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,11 +11,13 @@ import nl.tudelft.sem.requests.entities.Request;
 import nl.tudelft.sem.requests.entities.User;
 import nl.tudelft.sem.requests.repositories.HouseRepository;
 import nl.tudelft.sem.requests.repositories.UserRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import org.mockito.exceptions.base.MockitoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -286,6 +282,7 @@ public class HouseControllerTest {
 
         // verify the results
         assertEquals(expected, result);
+        assertEquals(houseRepository.findByHouseNr(1),null);
     }
 
     @Test
@@ -509,4 +506,46 @@ public class HouseControllerTest {
         // verify the results
         assertEquals(expected.getStatusCode(), result.getStatusCode());
     }
+
+    @Test
+    void getHouseByUsernameNoHouse() {
+        // set up house
+        House house = new House();
+        when(houseRepository.findByUsersUsername("kendra")).thenReturn(null);
+
+        // call the method under test
+        ResponseEntity<?> result = houseController.getHouseByUsername("kendra");
+
+        //verify results
+        assertEquals(ResponseEntity.badRequest().build(), result);
+    }
+
+    @Test
+    void getHouseByUsernameSuccessfull() {
+        // set up house and users
+        House house = new House();
+        User user = new User("kendra");
+        house.setUsers(new HashSet<>(Arrays.asList(user)));
+        house.setHouseNr(5);
+        when(houseRepository.findByUsersUsername("kendra")).thenReturn(house);
+
+        // call the method under test
+        ResponseEntity<?> result = houseController.getHouseByUsername("kendra");
+
+        int result2 = 5;
+
+        // verify results
+        assertEquals("201 CREATED", result.getStatusCode().toString());
+        assertEquals(result2, result.getBody());
+    }
+
+    @Test
+    public void addNewHouseFail(){
+       // doThrow(NoSuchElementException.class).when(userRepository.findByUsername("kendra"));
+        when(userRepository.findByUsername("kendra")).thenReturn(null);
+        House h = new House();
+        ResponseEntity<?> result = houseController.addNewHouse(h,"kendra");
+        assertEquals( ResponseEntity.badRequest().body("User is not present in the database."),result);
+    }
+
 }
