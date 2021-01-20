@@ -2,26 +2,44 @@ package nl.tudelft.sem.transactions.controllers;
 
 import java.util.List;
 import java.util.Optional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
-import nl.tudelft.sem.transactions.handlers.*;
+import nl.tudelft.sem.transactions.handlers.ProductValidator;
+import nl.tudelft.sem.transactions.handlers.TokensValidator;
+import nl.tudelft.sem.transactions.handlers.TransactionValidator;
+import nl.tudelft.sem.transactions.handlers.Validator;
+import nl.tudelft.sem.transactions.handlers.ValidatorHelper;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import org.mockito.MockitoAnnotations;
 import org.mockserver.integration.ClientAndServer;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.HttpResponse;
+import org.mockserver.verify.VerificationTimes;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 
-class TransactionControllerTest {
+public class TransactionControllerTest {
     private static final String BOB = "bob";
 
     @Mock
@@ -40,8 +58,11 @@ class TransactionControllerTest {
     private transient Validator validator;
     private transient ValidatorHelper helper;
 
+//    private static ClientAndServer mockServer;
+    private static transient ObjectMapper mapper;
+
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         transactionController = spy(TransactionController.class);
         MockitoAnnotations.initMocks(this);
         transaction = new Transactions();
@@ -49,10 +70,11 @@ class TransactionControllerTest {
         transaction.setPortionsConsumed(2);
         transaction.setUsername(BOB);
         product = new Product();
-        product.setProductId(4);
+        product.setProductId(4L);
         transaction.setProductFk(product);
         product.setExpired(0);
         product.setPortionsLeft(5);
+        product.setTotalPortions(5);
         product.setPrice(1);
         product.setTotalPortions(5);
 
@@ -65,6 +87,18 @@ class TransactionControllerTest {
         validator.setNext(tokensValidator);
 
         helper = new ValidatorHelper(transaction, productRepository, transactionsRepository);
+    }
+
+    @BeforeAll
+    public static void startServer() {
+//        mockServer = startClientAndServer(9102);
+        mapper = new ObjectMapper();
+    }
+    @AfterAll
+    public static void stopServer() {
+//        mockServer.stop();
+        // mockServer = null;
+//        mockServer.close();
     }
 
     @Test
@@ -96,10 +130,9 @@ class TransactionControllerTest {
     }
 
     @Test
-    void editTransactionPricePerPortion() {
+    void editTransactionPricePerPortion() throws JsonProcessingException {
+//        mockServer.reset();
         ClientAndServer mockServer = startClientAndServer(9102);
-        // for some reason PMD requires the mockServer.close(); to be in a
-        // try-finally block
         try {
             doReturn(transaction).when(transactionsRepository).getOne(1L);
             doReturn(1).when(transactionsRepository)
@@ -107,31 +140,55 @@ class TransactionControllerTest {
             doReturn(Optional.of(product)).when(productRepository)
                     .findByProductId(product.getProductId());
 
-            boolean result = transactionController.editTransactions(transaction);
-
             float pricePerPortion = product.getPrice() / product.getTotalPortions();
+
+            HttpRequest req = request()
+                    .withMethod("POST")
+                    .withPath("/editUserCredits")
+                    .withQueryStringParameter("username", transaction.getUsername())
+                    .withQueryStringParameter("credits", Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
+                    .withQueryStringParameter("add", Boolean.toString(false));
+
+            float creditsForOldTransaction = pricePerPortion * transaction.getPortionsConsumed();
+            HttpRequest req1 = request()
+                    .withMethod("POST")
+                    .withPath("/editUserCredits")
+                    .withQueryStringParameter("username", transaction.getUsername())
+                    .withQueryStringParameter("credits", Float.toString(creditsForOldTransaction))
+                    .withQueryStringParameter("add", Boolean.toString(true));
+
+
+            mockServer.when(req1).respond(HttpResponse.response().withHeaders().withBody(mapper.writeValueAsString(true)));
+            mockServer.when(req).respond(HttpResponse.response().withHeaders().withBody(mapper.writeValueAsString(true)));
+
+            boolean result = transactionController.editTransactions(transaction);
             product.setPortionsLeft(product.getPortionsLeft() + transaction.getPortionsConsumed());
 
             mockServer.verify(
-                    request()
-                            .withMethod("POST")
-                            .withPath("/editUserCredits")
-                            .withPathParameter("username", transaction.getUsername())
-                            .withPathParameter("credits", Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
-                            .withPathParameter("add", Boolean.toString(false))
+                    req1,
+                    VerificationTimes.exactly(1)
             );
 
+            mockServer.verify(
+                    req,
+                    VerificationTimes.exactly(1)
+            );
 
             verify(productRepository)
                     .findByProductId(transaction.getProductFk().getProductId());
             verify(transactionsRepository)
                     .updateExistingTransaction(4, BOB, 2, 1L);
+
+
             assertTrue(result);
         }
-        finally{
-            mockServer.close();
+        // ensures that the mockServer will be closed even if something fails
+        // required by PMD
+        finally {
             mockServer.stop();
+            mockServer.close();
         }
+
     }
 
     @Test

@@ -11,7 +11,7 @@ pitest {
 
     targetClasses = ['nl.tudelft.sem.transactions.*']  //by default "${project.group}.*"
 //    pitestVersion = '1.5.1' //not needed when a default PIT version should be used
-    threads = 4
+    threads = 8
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
     useClasspathFile = true
