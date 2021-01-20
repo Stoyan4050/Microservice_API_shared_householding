@@ -67,6 +67,7 @@ public class TransactionControllerTest {
     private transient final String username = "username";
     private transient final String credits = "credits";
     private transient final String add = "add";
+    private transient final String name = "stoyan";
 
     @BeforeEach
     public void setUp() {
@@ -502,7 +503,7 @@ public class TransactionControllerTest {
 
     @Test
     void editTransactionExceptionWhenUpdateProduct() {
-        product.setUsername("stoyan");
+        product.setUsername(name);
         product.setProductName("cookies");
 
         Transactions oldTransaction = new Transactions();
@@ -510,7 +511,7 @@ public class TransactionControllerTest {
         oldTransaction.setProduct(product);
         oldTransaction.setPortionsConsumed(2);
         oldTransaction.setTransactionId(1L);
-        oldTransaction.setUsername("stoyan");
+        oldTransaction.setUsername(name);
 
         doReturn(Optional.of(product)).when(productRepository)
                 .findByProductId(product.getProductId());
@@ -568,7 +569,7 @@ public class TransactionControllerTest {
         oldTransaction.setProduct(product);
         oldTransaction.setPortionsConsumed(2);
         oldTransaction.setTransactionId(1L);
-        oldTransaction.setUsername("stoyan");
+        oldTransaction.setUsername(name);
 
         doReturn(Optional.of(product)).when(productRepository)
                 .findByProductId(product.getProductId());
@@ -586,7 +587,7 @@ public class TransactionControllerTest {
         oldTransaction.setProduct(product);
         oldTransaction.setPortionsConsumed(2);
         oldTransaction.setTransactionId(1L);
-        oldTransaction.setUsername("stoyan");
+        oldTransaction.setUsername(name);
         transaction.setUsername(null);
 
         doReturn(oldTransaction).when(transactionsRepository).getOne(1L);
@@ -600,7 +601,6 @@ public class TransactionControllerTest {
 
     @Test
     void editTransactionExceptionWhenCommunicating() {
-        Transactions oldTransaction = new Transactions();
         transaction.setUsername(null);
 
         doReturn(transaction).when(transactionsRepository).getOne(1L);
