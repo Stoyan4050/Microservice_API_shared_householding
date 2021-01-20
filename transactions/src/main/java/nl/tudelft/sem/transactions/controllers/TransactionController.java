@@ -80,7 +80,6 @@ public class TransactionController {
     boolean editTransactions(@RequestBody Transactions transaction) {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
-
         Optional<Product> products = productRepository
                 .findByProductId(transaction.getProductFk().getProductId());
         Product product;
@@ -94,7 +93,6 @@ public class TransactionController {
 
         Transactions oldTransaction = transactionsRepository.getOne(transaction.getTransactionId());
         product.setPortionsLeft(product.getPortionsLeft() + oldTransaction.getPortionsConsumed());
-
         if (product.getExpired() == 1
             || (product.getPortionsLeft() - transaction.getPortionsConsumed() < 0)) {
             return false;
@@ -122,7 +120,6 @@ public class TransactionController {
                 product.getTotalPortions(),
                 product.getPortionsLeft() - transaction.getPortionsConsumed(),
                 product.getExpired(), product.getProductId());
-
             if (transactionsRepository.updateExistingTransaction(transaction.getProductId(),
                 transaction.getUsername(),
                 transaction.getPortionsConsumed(),
@@ -149,7 +146,7 @@ public class TransactionController {
             try {
                 Transactions transaction = optTransactions.get();
                 transaction.getProductFk().removeTransaction(transaction);
-                transaction.setProductFk(null);
+                //transaction.setProductFk(null);
                 transactionsRepository.delete(transaction);
                 return ResponseEntity.ok().body("Transaction successfully deleted.");
             } catch (Exception e) {
