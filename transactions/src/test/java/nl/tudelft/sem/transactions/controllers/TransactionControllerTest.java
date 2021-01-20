@@ -2,31 +2,22 @@ package nl.tudelft.sem.transactions.controllers;
 
 import java.util.List;
 import java.util.Optional;
-
-import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
 import nl.tudelft.sem.transactions.handlers.*;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockserver.integration.ClientAndServer;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
+import org.mockito.MockitoAnnotations;
+import org.mockserver.integration.ClientAndServer;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
-
-import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 
@@ -63,6 +54,7 @@ class TransactionControllerTest {
         product.setExpired(0);
         product.setPortionsLeft(5);
         product.setPrice(1);
+        product.setTotalPortions(5);
 
         validator = new ProductValidator();
         TokensValidator tokensValidator = new TokensValidator();
@@ -147,10 +139,12 @@ class TransactionControllerTest {
         doReturn(Optional.of(transaction)).when(transactionsRepository).findById(1L);
         doNothing().when(transactionsRepository).delete(transaction);
 
-        transactionController.deleteTransaction(1L);
+        ResponseEntity response = transactionController.deleteTransaction(1L);
 
         verify(transactionsRepository).findById(1L);
         verify(transactionsRepository).delete(transaction);
+
+        assertEquals(ResponseEntity.ok().body("Transaction successfully deleted."), response);
     }
 
     @Test
@@ -323,5 +317,109 @@ class TransactionControllerTest {
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
 
         assertEquals(ResponseEntity.badRequest().body("Adding the transaction failed"), result);
+    }
+
+    @Test
+    void deleteTransactionFromProduct() {
+        product.addTransaction(transaction);
+
+        doReturn(Optional.of(transaction)).when(transactionsRepository).findById(1L);
+
+        assertEquals(1, transaction.getProductFk().getTransactionsList().size());
+        ResponseEntity response = transactionController.deleteTransaction(1L);
+
+        verify(transactionsRepository).delete(transaction);
+        assertEquals(0, transaction.getProductFk().getTransactionsList().size());
+        assertEquals(ResponseEntity.ok().body("Transaction successfully deleted."), response);
+
+    }
+
+    @Test
+    void deleteTransactionProductNotPresent() {
+        doReturn(Optional.of(transaction)).when(transactionsRepository).findById(2L);
+
+        ResponseEntity response = transactionController.deleteTransaction(1L);
+
+        assertEquals(ResponseEntity.notFound().build(), response);
+
+    }
+
+    @Test
+    void editTransactionExceptionWhenUpdateProduct() {
+        product.setUsername("stoyan");
+        product.setProductName("cookies");
+
+        Transactions oldTransaction = new Transactions();
+        oldTransaction.setProductFk(product);
+        oldTransaction.setProduct(product);
+        oldTransaction.setPortionsConsumed(2);
+        oldTransaction.setTransactionId(1L);
+        oldTransaction.setUsername("stoyan");
+
+        doReturn(Optional.of(product)).when(productRepository)
+                .findByProductId(product.getProductId());
+        doReturn(oldTransaction).when(transactionsRepository).getOne(1L);
+        doReturn(1).when(transactionsRepository)
+                .updateExistingTransaction(4, BOB, 2, 1L);
+
+        int portionsLeft = product.getPortionsLeft() + oldTransaction.getPortionsConsumed();
+
+        doThrow(DataIntegrityViolationException.class).when(productRepository).updateExistingProduct(
+                product.getProductName(),
+                        product.getUsername(),
+                        product.getPrice(),
+                        product.getTotalPortions(),
+                        (portionsLeft - transaction.getPortionsConsumed()),
+                product.getExpired(),  product.getProductId());
+
+
+        boolean response = transactionController.editTransactions(transaction);
+
+        assertFalse(response);
+    }
+
+    @Test
+    void editTransactionExceptionWhenUpdateTransaction() {
+        doReturn(Optional.of(product)).when(productRepository)
+                .findByProductId(product.getProductId());
+        doReturn(0).when(transactionsRepository)
+                .updateExistingTransaction(4, BOB, 2, 1L);
+        doReturn(transaction).when(transactionsRepository).getOne(1L);
+
+
+        boolean response = transactionController.editTransactions(transaction);
+
+        assertFalse(response);
+    }
+
+    @Test
+    void editTransactionExpiredProduct() {
+        product.setExpired(1);
+        doReturn(Optional.of(product)).when(productRepository)
+                .findByProductId(product.getProductId());
+        doReturn(transaction).when(transactionsRepository).getOne(1L);
+
+        boolean response = transactionController.editTransactions(transaction);
+
+        assertFalse(response);
+    }
+
+    @Test
+    void editTransactionNotEnoughPortions() {
+        transaction.setPortionsConsumed(10);
+        Transactions oldTransaction = new Transactions();
+        oldTransaction.setProductFk(product);
+        oldTransaction.setProduct(product);
+        oldTransaction.setPortionsConsumed(2);
+        oldTransaction.setTransactionId(1L);
+        oldTransaction.setUsername("stoyan");
+
+        doReturn(Optional.of(product)).when(productRepository)
+                .findByProductId(product.getProductId());
+        doReturn(oldTransaction).when(transactionsRepository).getOne(1L);
+
+        boolean response = transactionController.editTransactions(transaction);
+
+        assertFalse(response);
     }
 }
