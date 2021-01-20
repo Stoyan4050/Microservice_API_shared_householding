@@ -132,54 +132,61 @@ public class TransactionControllerTest {
     void editTransactionPricePerPortion() throws JsonProcessingException {
 //        mockServer.reset();
         ClientAndServer mockServer = startClientAndServer(9102);
-        doReturn(transaction).when(transactionsRepository).getOne(1L);
-        doReturn(1).when(transactionsRepository)
-                .updateExistingTransaction(4, BOB, 2, 1L);
-        doReturn(Optional.of(product)).when(productRepository)
-                .findByProductId(product.getProductId());
+        try {
+            doReturn(transaction).when(transactionsRepository).getOne(1L);
+            doReturn(1).when(transactionsRepository)
+                    .updateExistingTransaction(4, BOB, 2, 1L);
+            doReturn(Optional.of(product)).when(productRepository)
+                    .findByProductId(product.getProductId());
 
-        float pricePerPortion = product.getPrice() / product.getTotalPortions();
+            float pricePerPortion = product.getPrice() / product.getTotalPortions();
 
-        HttpRequest req = request()
-                .withMethod("POST")
-                .withPath("/editUserCredits")
-                .withQueryStringParameter("username", transaction.getUsername())
-                .withQueryStringParameter("credits", Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
-                .withQueryStringParameter("add", Boolean.toString(false));
+            HttpRequest req = request()
+                    .withMethod("POST")
+                    .withPath("/editUserCredits")
+                    .withQueryStringParameter("username", transaction.getUsername())
+                    .withQueryStringParameter("credits", Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
+                    .withQueryStringParameter("add", Boolean.toString(false));
 
-        float creditsForOldTransaction = pricePerPortion * transaction.getPortionsConsumed();
-        HttpRequest req1 = request()
-                .withMethod("POST")
-                .withPath("/editUserCredits")
-                .withQueryStringParameter("username", transaction.getUsername())
-                .withQueryStringParameter("credits", Float.toString(creditsForOldTransaction))
-                .withQueryStringParameter("add", Boolean.toString(true));
-
-
-        mockServer.when(req1).respond(HttpResponse.response().withHeaders().withBody(mapper.writeValueAsString(true)));
-        mockServer.when(req).respond(HttpResponse.response().withHeaders().withBody(mapper.writeValueAsString(true)));
-
-        boolean result = transactionController.editTransactions(transaction);
-        product.setPortionsLeft(product.getPortionsLeft() + transaction.getPortionsConsumed());
-
-        mockServer.verify(
-                req1,
-                VerificationTimes.exactly(1)
-        );
-
-        mockServer.verify(
-                req,
-                VerificationTimes.exactly(1)
-        );
-
-        verify(productRepository)
-                .findByProductId(transaction.getProductFk().getProductId());
-        verify(transactionsRepository)
-                .updateExistingTransaction(4, BOB, 2, 1L);
+            float creditsForOldTransaction = pricePerPortion * transaction.getPortionsConsumed();
+            HttpRequest req1 = request()
+                    .withMethod("POST")
+                    .withPath("/editUserCredits")
+                    .withQueryStringParameter("username", transaction.getUsername())
+                    .withQueryStringParameter("credits", Float.toString(creditsForOldTransaction))
+                    .withQueryStringParameter("add", Boolean.toString(true));
 
 
-        assertTrue(result);
-        mockServer.stop();
+            mockServer.when(req1).respond(HttpResponse.response().withHeaders().withBody(mapper.writeValueAsString(true)));
+            mockServer.when(req).respond(HttpResponse.response().withHeaders().withBody(mapper.writeValueAsString(true)));
+
+            boolean result = transactionController.editTransactions(transaction);
+            product.setPortionsLeft(product.getPortionsLeft() + transaction.getPortionsConsumed());
+
+            mockServer.verify(
+                    req1,
+                    VerificationTimes.exactly(1)
+            );
+
+            mockServer.verify(
+                    req,
+                    VerificationTimes.exactly(1)
+            );
+
+            verify(productRepository)
+                    .findByProductId(transaction.getProductFk().getProductId());
+            verify(transactionsRepository)
+                    .updateExistingTransaction(4, BOB, 2, 1L);
+
+
+            assertTrue(result);
+        }
+        // ensures that the mockServer will be closed even if something fails
+        // required by PMD
+        finally {
+            mockServer.stop();
+            mockServer.close();
+        }
 
     }
 
@@ -273,7 +280,6 @@ public class TransactionControllerTest {
 
         assertEquals(ResponseEntity.ok().body("Transaction was successfully added"),
                 result);
-
     }
 
     @Test
@@ -312,12 +318,10 @@ public class TransactionControllerTest {
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
         assertEquals(ResponseEntity.badRequest().body(
                 "Product is expired, does not exists or there are no portions left"), result);
-
     }
 
     @Test
     void addNewTransactionSplittingCreditsNoPortionsLeft() {
-
         transaction.getProductFk().setPortionsLeft(-1);
 
         doReturn(Optional.of(product)).when(productRepository).findById(4L);
@@ -339,13 +343,10 @@ public class TransactionControllerTest {
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
         assertEquals(ResponseEntity.badRequest().body(
                 "Product is expired, does not exists or there are no portions left"), result);
-
-
     }
 
     @Test
     void addNewTransactionSplittingCreditsDataIntegrityViolation() {
-
         doReturn(Optional.of(product)).when(productRepository).findById(4L);
         doReturn(List.of(BOB)).when(transactionsSplitCredits).getUsernames();
 
@@ -370,6 +371,5 @@ public class TransactionControllerTest {
                 .addNewTransactionSplittingCredits(transactionsSplitCredits);
 
         assertEquals(ResponseEntity.badRequest().body("Adding the transaction failed"), result);
-
     }
 }
