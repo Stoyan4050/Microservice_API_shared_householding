@@ -8,17 +8,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.entities.Transactions;
 import nl.tudelft.sem.transactions.entities.TransactionsSplitCredits;
-import nl.tudelft.sem.transactions.handlers.*;
+import nl.tudelft.sem.transactions.handlers.ProductValidator;
+import nl.tudelft.sem.transactions.handlers.TokensValidator;
+import nl.tudelft.sem.transactions.handlers.TransactionValidator;
+import nl.tudelft.sem.transactions.handlers.Validator;
+import nl.tudelft.sem.transactions.handlers.ValidatorHelper;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import nl.tudelft.sem.transactions.repositories.TransactionsRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockito.InjectMocks;
@@ -30,9 +33,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
-
 import org.mockito.MockitoAnnotations;
-import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.verify.VerificationTimes;
@@ -59,7 +60,13 @@ public class TransactionControllerTest {
     private transient ValidatorHelper helper;
 
 //    private static ClientAndServer mockServer;
-    private static transient ObjectMapper mapper;
+    private static ObjectMapper mapper;
+
+    private transient final String post = "POST";
+    private transient final String path = "/editUserCredits";
+    private transient final String username = "username";
+    private transient final String credits = "credits";
+    private transient final String add = "add";
 
     @BeforeEach
     public void setUp() {
@@ -100,20 +107,6 @@ public class TransactionControllerTest {
 //        mockServer.close();
     }
 
-    @Test
-    void editTransaction() {
-        doReturn(transaction).when(transactionsRepository).getOne(1L);
-        doReturn(1).when(transactionsRepository)
-                .updateExistingTransaction(4, BOB, 2, 1L);
-        doReturn(Optional.of(product)).when(productRepository)
-                .findByProductId(product.getProductId());
-
-        boolean result = transactionController.editTransactions(transaction);
-
-        verify(transactionsRepository)
-                .updateExistingTransaction(4, BOB, 2, 1L);
-        assertTrue(result);
-    }
 
     @Test
     void editTransactionNoneProduct() {
@@ -129,10 +122,13 @@ public class TransactionControllerTest {
     }
 
     @Test
-    void editTransactionPricePerPortion() throws JsonProcessingException {
-//        mockServer.reset();
+    @Order(1)
+    void editTransactionTooMuchConsumed() throws JsonProcessingException {
         ClientAndServer mockServer = startClientAndServer(9102);
+
         try {
+            product.setPortionsLeft(-1);
+            transaction.setPortionsConsumed(100);
             doReturn(transaction).when(transactionsRepository).getOne(1L);
             doReturn(1).when(transactionsRepository)
                     .updateExistingTransaction(4, BOB, 2, 1L);
@@ -142,19 +138,70 @@ public class TransactionControllerTest {
             float pricePerPortion = product.getPrice() / product.getTotalPortions();
 
             HttpRequest req = request()
-                    .withMethod("POST")
-                    .withPath("/editUserCredits")
-                    .withQueryStringParameter("username", transaction.getUsername())
-                    .withQueryStringParameter("credits", Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
-                    .withQueryStringParameter("add", Boolean.toString(false));
+                    .withMethod(post)
+                    .withPath(path)
+                    .withQueryStringParameter(username, transaction.getUsername())
+                    .withQueryStringParameter(credits, Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
+                    .withQueryStringParameter(add, Boolean.toString(false));
 
             float creditsForOldTransaction = pricePerPortion * transaction.getPortionsConsumed();
             HttpRequest req1 = request()
-                    .withMethod("POST")
-                    .withPath("/editUserCredits")
-                    .withQueryStringParameter("username", transaction.getUsername())
-                    .withQueryStringParameter("credits", Float.toString(creditsForOldTransaction))
-                    .withQueryStringParameter("add", Boolean.toString(true));
+                    .withMethod(post)
+                    .withPath(path)
+                    .withQueryStringParameter(username, transaction.getUsername())
+                    .withQueryStringParameter(credits, Float.toString(creditsForOldTransaction))
+                    .withQueryStringParameter(add, Boolean.toString(true));
+
+            boolean result = transactionController.editTransactions(transaction);
+
+            mockServer.verify(
+                    req1,
+                    VerificationTimes.exactly(0)
+            );
+
+            mockServer.verify(
+                    req,
+                    VerificationTimes.exactly(0)
+            );
+            verify(productRepository)
+                    .findByProductId(transaction.getProductFk().getProductId());
+            assertFalse(result);
+        }
+        finally {
+            mockServer.stop();
+            mockServer.close();
+        }
+    }
+
+    @Test
+    @Order(2)
+    void editTransactionPricePerPortion() throws JsonProcessingException {
+//        mockServer.reset();
+        ClientAndServer mockServer = startClientAndServer(9102);
+        try {
+            mockServer.reset();
+            doReturn(transaction).when(transactionsRepository).getOne(1L);
+            doReturn(1).when(transactionsRepository)
+                    .updateExistingTransaction(4, BOB, 2, 1L);
+            doReturn(Optional.of(product)).when(productRepository)
+                    .findByProductId(product.getProductId());
+
+            float pricePerPortion = product.getPrice() / product.getTotalPortions();
+
+            HttpRequest req = request()
+                    .withMethod(post)
+                    .withPath(path)
+                    .withQueryStringParameter(username, transaction.getUsername())
+                    .withQueryStringParameter(credits, Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
+                    .withQueryStringParameter(add, Boolean.toString(false));
+
+            float creditsForOldTransaction = pricePerPortion * transaction.getPortionsConsumed();
+            HttpRequest req1 = request()
+                    .withMethod(post)
+                    .withPath(path)
+                    .withQueryStringParameter(username, transaction.getUsername())
+                    .withQueryStringParameter(credits, Float.toString(creditsForOldTransaction))
+                    .withQueryStringParameter(add, Boolean.toString(true));
 
 
             mockServer.when(req1).respond(HttpResponse.response().withHeaders().withBody(mapper.writeValueAsString(true)));
@@ -188,6 +235,58 @@ public class TransactionControllerTest {
             mockServer.close();
         }
 
+    }
+
+    @Test
+    @Order(3)
+    void editTransaction() {
+        ClientAndServer mockServer = startClientAndServer(9102);
+
+        try {
+            product.setPortionsLeft(0);
+            transaction.setPortionsConsumed(100);
+            doReturn(transaction).when(transactionsRepository).getOne(1L);
+            doReturn(1).when(transactionsRepository)
+                    .updateExistingTransaction(4, BOB, 100, 1L);
+            doReturn(Optional.of(product)).when(productRepository)
+                    .findByProductId(product.getProductId());
+            float pricePerPortion = product.getPrice() / product.getTotalPortions();
+
+            HttpRequest req = request()
+                    .withMethod(post)
+                    .withPath(path)
+                    .withQueryStringParameter(username, transaction.getUsername())
+                    .withQueryStringParameter(credits, Float.toString(pricePerPortion * transaction.getPortionsConsumed()))
+                    .withQueryStringParameter(add, Boolean.toString(false));
+
+            float creditsForOldTransaction = pricePerPortion * transaction.getPortionsConsumed();
+            HttpRequest req1 = request()
+                    .withMethod(post)
+                    .withPath(path)
+                    .withQueryStringParameter(username, transaction.getUsername())
+                    .withQueryStringParameter(credits, Float.toString(creditsForOldTransaction))
+                    .withQueryStringParameter(add, Boolean.toString(true));
+
+            mockServer.verify(
+                    req1,
+                    VerificationTimes.exactly(0)
+            );
+
+            mockServer.verify(
+                    req,
+                    VerificationTimes.exactly(0)
+            );
+
+            boolean result = transactionController.editTransactions(transaction);
+
+            verify(transactionsRepository)
+                    .updateExistingTransaction(4, BOB, 100, 1L);
+            assertTrue(result);
+        }
+        finally {
+            mockServer.stop();
+            mockServer.close();
+        }
     }
 
     @Test
