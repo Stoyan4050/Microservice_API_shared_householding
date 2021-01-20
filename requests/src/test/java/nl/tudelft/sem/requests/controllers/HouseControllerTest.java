@@ -633,6 +633,20 @@ public class HouseControllerTest {
         assertEquals(result2, result.getBody());
     }
 
+    @Test
+    public void splitCreditsException(){
+        House house = new House();
+        house.setHouseNr(1);
+
+        final User user1 = new User("Sleepy", house,
+                5.0f, "email1", Set.of(new Request()));
+        house.setUsers(new HashSet<>(Arrays.asList(user1)));
+
+        when(userRepository.findByUsername("Sleepy")).thenReturn(user1);
+        doThrow(NullPointerException.class).when(userRepository).updateUserCredits(1, "email1", 0, "Sleepy");
+        final ResponseEntity<?> result = houseController.splitCreditsWhenExpired("Sleepy", 5);
+        assertEquals(ResponseEntity.badRequest().build(), result);
+    }
 
 
 }
