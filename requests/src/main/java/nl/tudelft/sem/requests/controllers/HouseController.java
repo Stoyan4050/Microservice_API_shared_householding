@@ -154,7 +154,7 @@ public class HouseController {
      *
      * @param houseNumber house number of the house
      */
-    private void nullifyHousesForUsers(int houseNumber) {
+    public void nullifyHousesForUsers(int houseNumber) {
         ResponseEntity<List<User>> usersResponse = getAllUsersFromHouse(houseNumber);
         List<User> users = usersResponse.getBody();
         for (User user : users) {
