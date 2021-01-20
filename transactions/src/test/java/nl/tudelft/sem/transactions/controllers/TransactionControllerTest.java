@@ -578,4 +578,37 @@ public class TransactionControllerTest {
 
         assertFalse(response);
     }
+
+    @Test
+    void editTransactionExceptionWhenCommunicatingSecondTime() {
+        Transactions oldTransaction = new Transactions();
+        oldTransaction.setProductFk(product);
+        oldTransaction.setProduct(product);
+        oldTransaction.setPortionsConsumed(2);
+        oldTransaction.setTransactionId(1L);
+        oldTransaction.setUsername("stoyan");
+        transaction.setUsername(null);
+
+        doReturn(oldTransaction).when(transactionsRepository).getOne(1L);
+        doReturn(Optional.of(product)).when(productRepository)
+                .findByProductId(product.getProductId());
+
+        boolean response = transactionController.editTransactions(transaction);
+
+        assertFalse(response);
+    }
+
+    @Test
+    void editTransactionExceptionWhenCommunicating() {
+        Transactions oldTransaction = new Transactions();
+        transaction.setUsername(null);
+
+        doReturn(transaction).when(transactionsRepository).getOne(1L);
+        doReturn(Optional.of(product)).when(productRepository)
+                .findByProductId(product.getProductId());
+
+        boolean response = transactionController.editTransactions(transaction);
+
+        assertFalse(response);
+    }
 }
