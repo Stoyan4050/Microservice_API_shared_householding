@@ -39,3 +39,12 @@ implemented are some checks in the methods that will allow a user to get product
 user without a house should not be able to get or add any products. Also checks for other corner cases will be developed
 with future optimizations. The last thing is to always get automatically the username of the user making request using
 the @Username annotation.
+
+## PIT mutation testing
+When using PIT mutation testing, some tests time out, because PIT splits the unit tests into smaller, independent units (http://pitest.org/faq/).
+Since we use MockServer to mock the microservice communication functionality, and not all tests mock the server, there are some timeout issues.
+
+We also had a lot of problems when mocking the server, because PIT did not properly execute the `@BeforeAll`
+annotation to properly mock the server. So we had to mock the server separately in the unit tests and ordered them.
+
+Otherwise, we managed to fix all mutants in the `TransactionControllerTest` and `TransactionSplitCreditsTest` and achieved 100% mutation coverage.

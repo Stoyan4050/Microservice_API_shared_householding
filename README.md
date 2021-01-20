@@ -47,6 +47,12 @@ gradle pmdMain
 gradle pmdTest
 ```
 
+### PIT mutation testing
+```
+gradle pitest --parallel -Dpitest.timeoutConst=130000
+```
+The generated tests are in `transactions/build/reports/pitest` and `requests/build/reports/pitest`.
+
 ### Notes
 
 - If we change the name of the repo to something other than template, we should also edit the build.gradle file.
