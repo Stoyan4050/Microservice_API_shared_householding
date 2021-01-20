@@ -233,6 +233,8 @@ public class HouseControllerTest {
         houseController.nullifyHousesForUsers(1);
 
         // verify the results
+        verify(userRepository, times(1)).save(user1);
+        verify(userRepository, times(1)).save(user2);
         assertNull(user1.getHouse());
         assertNull(user2.getHouse());
     }
@@ -367,7 +369,7 @@ public class HouseControllerTest {
 
         // verify the results
         assertEquals(expected, result);
-        assertEquals(houseRepository.findByHouseNr(1),null);
+        assertNull(houseRepository.findByHouseNr(1));
     }
 
     @Test
@@ -480,7 +482,7 @@ public class HouseControllerTest {
         ResponseEntity<?> result = houseController.getUsernamesByHouse(5);
 
         //verify results
-        assertEquals(ResponseEntity.badRequest().build(), result);
+        assertEquals(ResponseEntity.notFound().build(), result);
     }
 
     @Test
@@ -558,7 +560,7 @@ public class HouseControllerTest {
         // run the test
         final ResponseEntity<?> result = houseController.splitCreditsWhenExpired("Sleepy", 15);
 
-        final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        final ResponseEntity<?> expected = new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         // verify the results
         assertEquals(expected.getStatusCode(), result.getStatusCode());
@@ -574,6 +576,13 @@ public class HouseControllerTest {
             15.0f, "email2", Set.of(new Request()));
         final User user3 = new User("Mocha", house.get(),
             10.0f, "email3", Set.of(new Request()));
+
+        // add the users
+        Set<User> users = new HashSet<>();
+        users.add(user1);
+        users.add(user2);
+        users.add(user3);
+        house.get().setUsers(users);
 
         when(houseRepository.findByHouseNr(1)).thenReturn(house.get());
         when(userRepository.findByUsername("Sleepy")).thenReturn(user1);

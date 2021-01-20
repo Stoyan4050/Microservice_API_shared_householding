@@ -198,7 +198,7 @@ public class HouseController {
         Set<User> users = house.getUsers();
 
         if (users == null || users.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
 
         credits = credits / users.size();
@@ -235,7 +235,7 @@ public class HouseController {
 
 
         if (users == null || users.isEmpty() || house == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
 
         List<String> usernames = new ArrayList<>();
