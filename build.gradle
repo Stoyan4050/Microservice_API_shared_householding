@@ -1,5 +1,5 @@
 plugins {
-    id "info.solidsoft.pitest" version "1.5.1" apply false
+    id "info.solidsoft.pitest" version "1.5.2" apply false
     id "com.github.ManifestClasspath" version "0.1.0-RELEASE" apply false
 }
 
@@ -12,16 +12,16 @@ allprojects {
     version = '0.0.1-SNAPSHOT'
 }
 subprojects {
-    buildscript {
-        repositories {
-            mavenCentral()
-            //Needed only for SNAPSHOT versions
-            //maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-        }
-        dependencies {
-//            classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
-        }
-    }
+    //buildscript {
+    //    repositories {
+    //        mavenCentral()
+    //        //Needed only for SNAPSHOT versions
+    //        //maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    //    }
+        //dependencies {
+        //    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
+        //}
+    //}
 
     apply plugin: 'java'
     // Test coverage
