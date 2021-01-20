@@ -15,6 +15,10 @@ pitest {
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
     useClasspathFile = true
+    // add -Dpitest.timeoutConst=130000 as a gradle argument,
+    // because MockServer's timeout is 120000
+    // so if pitest removes an HTTP request
+    // mockserver will need 120000 to timeout and fail the test
 }
 
 mainClassName = 'nl.tudelft.sem.transactions.Application'
