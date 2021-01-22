@@ -154,7 +154,7 @@ public class HouseController {
      *
      * @param houseNumber house number of the house
      */
-    private void nullifyHousesForUsers(int houseNumber) {
+    public void nullifyHousesForUsers(int houseNumber) {
         ResponseEntity<List<User>> usersResponse = getAllUsersFromHouse(houseNumber);
         List<User> users = usersResponse.getBody();
         for (User user : users) {
@@ -198,7 +198,7 @@ public class HouseController {
         Set<User> users = house.getUsers();
 
         if (users == null || users.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
 
         credits = credits / users.size();
@@ -235,7 +235,7 @@ public class HouseController {
 
 
         if (users == null || users.isEmpty() || house == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
 
         List<String> usernames = new ArrayList<>();
