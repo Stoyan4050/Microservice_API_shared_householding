@@ -35,8 +35,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ProductController {
-    @Autowired
-    private MicroserviceCommunicator microserviceCommunicator;
 
     @Autowired
     private ProductRepository productRepository;
@@ -64,7 +62,7 @@ public class ProductController {
 
         try {
             productRepository.save(product);
-            microserviceCommunicator.sendRequestForChangingCredits(product.getUsername(),
+            MicroserviceCommunicator.sendRequestForChangingCredits(product.getUsername(),
                 credits, true);
 
             return ResponseEntity.created(URI.create("/addProduct")).build();
@@ -223,7 +221,7 @@ public class ProductController {
                 float pricePerPortion = price / product.getTotalPortions();
                 price = pricePerPortion * product.getPortionsLeft();
 
-                microserviceCommunicator.subtractCreditsWhenExpired(username, price);
+                MicroserviceCommunicator.subtractCreditsWhenExpired(username, price);
 
                 productRepository.updateExistingProduct(product.getProductName(),
                     product.getUsername(), product.getPrice(),
@@ -275,7 +273,7 @@ public class ProductController {
     @ResponseBody
     public List<Product> getProductsByHouse(@PathVariable int houseNr) {
         //List<Product> allProducts = productRepository.findAll();
-        List<String> usernames = microserviceCommunicator.sendRequestForUsersOfHouse(houseNr);
+        List<String> usernames = MicroserviceCommunicator.sendRequestForUsersOfHouse(houseNr);
 
         if (usernames == null) {
             return null;
