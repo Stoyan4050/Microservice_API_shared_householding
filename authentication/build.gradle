@@ -1,20 +1,8 @@
 plugins {
     id 'org.springframework.boot' version '2.3.5.RELEASE'
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-    id 'info.solidsoft.pitest' version '1.5.2'
 }
 
-apply plugin: 'info.solidsoft.pitest'
-pitest {
-    //adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
-    junit5PluginVersion = '0.12'
-
-    targetClasses = ['nl.tudelft.sem.*']  //by default "${project.group}.*"
-    pitestVersion = '1.5.1' //not needed when a default PIT version should be used
-    threads = 4
-    outputFormats = ['XML', 'HTML']
-    timestampedReports = false
-}
 
 mainClassName = 'nl.tudelft.sem.auth.Application'
 

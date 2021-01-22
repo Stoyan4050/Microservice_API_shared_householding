@@ -1,19 +1,24 @@
 plugins {
     id 'org.springframework.boot' version '2.3.5.RELEASE'
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-    id 'info.solidsoft.pitest' version '1.5.2'
+    id 'info.solidsoft.pitest'
+//    id "com.github.ManifestClasspath"
 }
 
-apply plugin: 'info.solidsoft.pitest'
 pitest {
     //adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
     junit5PluginVersion = '0.12'
 
-    targetClasses = ['nl.tudelft.sem.*']  //by default "${project.group}.*"
-    pitestVersion = '1.5.1' //not needed when a default PIT version should be used
-    threads = 4
+    targetClasses = ['nl.tudelft.sem.transactions.*']  //by default "${project.group}.*"
+//    pitestVersion = '1.5.1' //not needed when a default PIT version should be used
+    threads = 8
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
+    useClasspathFile = true
+    // add -Dpitest.timeoutConst=130000 as a gradle argument,
+    // because MockServer's timeout is 120000
+    // so if pitest removes an HTTP request
+    // mockserver will need 120000 to timeout and fail the test
 }
 
 mainClassName = 'nl.tudelft.sem.transactions.Application'
@@ -49,5 +54,6 @@ dependencies {
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.2'
     compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-server', version: '2.2.6.RELEASE'
 
+    testImplementation("org.mock-server:mockserver-netty:5.11.2")
 }
 

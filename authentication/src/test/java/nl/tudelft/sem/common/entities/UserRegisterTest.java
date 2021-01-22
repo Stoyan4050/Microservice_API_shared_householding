@@ -14,7 +14,7 @@ class UserRegisterTest {
     private static final String email = "asdf@asdf.com";
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         userRegister = new UserRegister();
     }
 

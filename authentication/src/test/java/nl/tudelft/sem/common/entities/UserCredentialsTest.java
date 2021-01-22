@@ -13,7 +13,7 @@ class UserCredentialsTest {
     private static final String password = "pass";
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         userCredentials = new UserCredentials();
     }
 
