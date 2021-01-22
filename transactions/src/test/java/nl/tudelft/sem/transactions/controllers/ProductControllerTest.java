@@ -2,7 +2,7 @@ package nl.tudelft.sem.transactions.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -14,12 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
-import nl.tudelft.sem.transactions.strategy.AmountStrategy;
-import nl.tudelft.sem.transactions.strategy.SortProductsStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,6 +29,9 @@ import org.springframework.http.ResponseEntity;
 @SuppressWarnings("PMD")
 class ProductControllerTest {
     private Product product;
+
+    @Mock
+    private transient MicroserviceCommunicator microserviceCommunicator;
 
     @Mock
     private transient ProductRepository productRepository;
@@ -50,7 +50,7 @@ class ProductControllerTest {
     public void testGetAllProducts() {
         final List<Product> products = Arrays.asList(new Product("Butter", 5, 5, "kendra"));
         when(productRepository.findAll()).thenReturn(products);
-        final List<Product> result = productController.getAllProducts( null);
+        final List<Product> result = productController.getAllProducts(null);
         verify(productRepository).findAll();
         verify(productController).createStrategy(null);
 
@@ -60,12 +60,12 @@ class ProductControllerTest {
 
     @Test
     public void testGetAllProductsAmount() {
-        Product p1 =  new Product("Milk", 14.0f, 12, "kendra");
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
         Product p2 = new Product("Butter", 5.f, 5, "kendra");
         final List<Product> products = Arrays.asList(p1, p2);
         when(productRepository.findAll()).thenReturn(products);
-        final List<Product> result = productController.getAllProducts( "amount");
-        final List<Product> expected = Arrays.asList(p2,p1);
+        final List<Product> result = productController.getAllProducts("amount");
+        final List<Product> expected = Arrays.asList(p2, p1);
         verify(productRepository).findAll();
         verify(productController).createStrategy("amount");
         assertEquals(expected.size(), result.size());
@@ -74,12 +74,12 @@ class ProductControllerTest {
 
     @Test
     public void testGetAllProductsName() {
-        Product p1 =  new Product("Milk", 14.0f, 12, "kendra");
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
         Product p2 = new Product("Butter", 5.f, 5, "kendra");
         final List<Product> products = Arrays.asList(p1, p2);
         when(productRepository.findAll()).thenReturn(products);
-        final List<Product> result = productController.getAllProducts( "name");
-        final List<Product> expected = Arrays.asList(p2,p1);
+        final List<Product> result = productController.getAllProducts("name");
+        final List<Product> expected = Arrays.asList(p2, p1);
         verify(productRepository).findAll();
         verify(productController).createStrategy("name");
         assertEquals(expected.size(), result.size());
@@ -88,12 +88,12 @@ class ProductControllerTest {
 
     @Test
     public void testGetAllProductsPrice() {
-        Product p1 =  new Product("Milk", 14.0f, 12, "kendra");
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
         Product p2 = new Product("Butter", 5.f, 5, "kendra");
         final List<Product> products = Arrays.asList(p1, p2);
         when(productRepository.findAll()).thenReturn(products);
-        final List<Product> result = productController.getAllProducts( "price");
-        final List<Product> expected = Arrays.asList(p2,p1);
+        final List<Product> result = productController.getAllProducts("price");
+        final List<Product> expected = Arrays.asList(p2, p1);
         verify(productRepository).findAll();
         verify(productController).createStrategy("price");
         assertEquals(expected.size(), result.size());
@@ -102,12 +102,12 @@ class ProductControllerTest {
 
     @Test
     public void testGetAllProductsPriceThenAmountThenNames() {
-        Product p1 =  new Product("Milk", 14.0f, 12, "kendra");
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
         Product p2 = new Product("Butter", 5.f, 5, "kendra");
         final List<Product> products = Arrays.asList(p1, p2);
         when(productRepository.findAll()).thenReturn(products);
-        final List<Product> result = productController.getAllProducts( "priceThenAmountThenName");
-        final List<Product> expected = Arrays.asList(p2,p1);
+        final List<Product> result = productController.getAllProducts("priceThenAmountThenName");
+        final List<Product> expected = Arrays.asList(p2, p1);
         verify(productRepository).findAll();
         verify(productController).createStrategy("priceThenAmountThenName");
         assertEquals(expected.size(), result.size());
@@ -116,11 +116,11 @@ class ProductControllerTest {
 
     @Test
     public void testGetAllProductsRandom() {
-        Product p1 =  new Product("Milk", 14.0f, 12, "kendra");
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
         Product p2 = new Product("Butter", 5.f, 5, "kendra");
         final List<Product> products = Arrays.asList(p1, p2);
         when(productRepository.findAll()).thenReturn(products);
-        final List<Product> result = productController.getAllProducts( "willBeDefault");
+        final List<Product> result = productController.getAllProducts("willBeDefault");
         verify(productRepository).findAll();
         verify(productController).createStrategy("willBeDefault");
         assertEquals(2, result.size());
@@ -199,7 +199,7 @@ class ProductControllerTest {
         doThrow(DataIntegrityViolationException.class).when(productRepository).delete(product);
         ResponseEntity result = productController.deleteProduct("kendra", 7);
         ResponseEntity expected = ResponseEntity.badRequest()
-                .body("The product couldn't be deleted");
+            .body("The product couldn't be deleted");
         assertEquals(expected.getStatusCode(), result.getStatusCode());
     }
 
@@ -251,7 +251,7 @@ class ProductControllerTest {
         product.setProductId(7L);
         when(productRepository.findById(7L)).thenReturn(Optional.of(product));
         doThrow(DataIntegrityViolationException.class).when(productRepository)
-                .save(product);
+            .save(product);
         ResponseEntity result = productController.updateProduct("kendra", product);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
     }
@@ -291,7 +291,7 @@ class ProductControllerTest {
         doThrow(DataIntegrityViolationException.class).when(productRepository).delete(product);
         ResponseEntity result = productController.deleteExpired(7);
         ResponseEntity expected = ResponseEntity
-                .badRequest().body("The product couldn't be deleted");
+            .badRequest().body("The product couldn't be deleted");
         verify(productController).deleteExpired(7);
         assertEquals(expected, result);
     }
@@ -318,11 +318,28 @@ class ProductControllerTest {
     @Test
     public void setExpired2() {
         when(productRepository.updateExistingProduct("milk",
-                "kendra", 7, 5, 5, 0, 7))
-                .thenThrow(DataIntegrityViolationException.class);
+            "kendra", 7, 5, 5, 0, 7))
+            .thenThrow(DataIntegrityViolationException.class);
         product.setProductId(7);
         ResponseEntity result = productController.setExpired("kendra", 7);
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    public void setExpiredIsPresent() {
+        when(productRepository.findByProductId(7L)).thenReturn(Optional.of(new Product()));
+        when(productRepository.updateExistingProduct("milk",
+            "kendra", 7, 5, 5, 0, 7))
+            .thenThrow(DataIntegrityViolationException.class);
+        ResponseEntity result = productController.setExpired("kendra", 7);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    public void setExpiredIsPresentNoException() {
+        when(productRepository.findByProductId(7L)).thenReturn(Optional.of(new Product()));
+        ResponseEntity result = productController.setExpired("kendra", 7);
+        assertNotNull(result);
     }
 
     @Test
@@ -331,6 +348,10 @@ class ProductControllerTest {
         assertNotNull(rep);
     }
 
+    @Test
+    public void getUserNamesTest() {
+        assertNull(productController.getProductsByHouse(-3214));
+    }
 
 
 }
