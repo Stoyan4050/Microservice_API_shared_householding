@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ProductController {
+    @Autowired
+    private MicroserviceCommunicator microserviceCommunicator;
 
     @Autowired
     private ProductRepository productRepository;
@@ -62,7 +64,7 @@ public class ProductController {
 
         try {
             productRepository.save(product);
-            MicroserviceCommunicator.sendRequestForChangingCredits(product.getUsername(),
+            microserviceCommunicator.sendRequestForChangingCredits(product.getUsername(),
                 credits, true);
 
             return ResponseEntity.created(URI.create("/addProduct")).build();
@@ -107,9 +109,8 @@ public class ProductController {
      *                 "price" - sorted by price in ascending order
      *                 "priceThenAmountThenName" - sorted primarily on price,
      *                 secondary on number of portions left, ternary on product name
-     *
      * @return All products in the database corresponding to specific user, sorted
-     *         on given strategy
+     * on given strategy
      */
     @GetMapping("/allProducts")
     public @ResponseBody
@@ -222,7 +223,7 @@ public class ProductController {
                 float pricePerPortion = price / product.getTotalPortions();
                 price = pricePerPortion * product.getPortionsLeft();
 
-                MicroserviceCommunicator.subtractCreditsWhenExpired(username, price);
+                microserviceCommunicator.subtractCreditsWhenExpired(username, price);
 
                 productRepository.updateExistingProduct(product.getProductName(),
                     product.getUsername(), product.getPrice(),
@@ -274,7 +275,7 @@ public class ProductController {
     @ResponseBody
     public List<Product> getProductsByHouse(@PathVariable int houseNr) {
         //List<Product> allProducts = productRepository.findAll();
-        List<String> usernames = MicroserviceCommunicator.sendRequestForUsersOfHouse(houseNr);
+        List<String> usernames = microserviceCommunicator.sendRequestForUsersOfHouse(houseNr);
 
         if (usernames == null) {
             return null;
