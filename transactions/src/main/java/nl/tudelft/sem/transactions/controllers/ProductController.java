@@ -107,9 +107,8 @@ public class ProductController {
      *                 "price" - sorted by price in ascending order
      *                 "priceThenAmountThenName" - sorted primarily on price,
      *                 secondary on number of portions left, ternary on product name
-     *
      * @return All products in the database corresponding to specific user, sorted
-     *         on given strategy
+     * on given strategy
      */
     @GetMapping("/allProducts")
     public @ResponseBody
@@ -126,7 +125,7 @@ public class ProductController {
      * @param strategy name of the strategy to be created
      * @return Strategy created from given string
      */
-    private SortProductsStrategy createStrategy(String strategy) {
+    public SortProductsStrategy createStrategy(String strategy) {
         if (strategy == null) {
             return new RandomStrategy();
         } else {
@@ -165,7 +164,7 @@ public class ProductController {
                         HttpStatus.FORBIDDEN);
                 }
                 productRepository.save(productWithNewInfo);
-            } catch (Exception e) {
+            } catch (DataIntegrityViolationException e) {
                 return new ResponseEntity<>("Product couldn't be updated!",
                     HttpStatus.INTERNAL_SERVER_ERROR);
             }

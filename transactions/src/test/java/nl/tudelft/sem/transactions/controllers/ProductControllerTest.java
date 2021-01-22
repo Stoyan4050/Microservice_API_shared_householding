@@ -1,6 +1,8 @@
 package nl.tudelft.sem.transactions.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import nl.tudelft.sem.transactions.MicroserviceCommunicator;
 import nl.tudelft.sem.transactions.entities.Product;
 import nl.tudelft.sem.transactions.repositories.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +29,9 @@ import org.springframework.http.ResponseEntity;
 @SuppressWarnings("PMD")
 class ProductControllerTest {
     private Product product;
-    // private ProductController productController;
+
+    @Mock
+    private transient MicroserviceCommunicator microserviceCommunicator;
 
     @Mock
     private transient ProductRepository productRepository;
@@ -45,13 +50,80 @@ class ProductControllerTest {
     public void testGetAllProducts() {
         final List<Product> products = Arrays.asList(new Product("Butter", 5, 5, "kendra"));
         when(productRepository.findAll()).thenReturn(products);
-        final List<Product> result = productController.getAllProducts( null);
-
+        final List<Product> result = productController.getAllProducts(null);
         verify(productRepository).findAll();
-        verify(productController).getAllProducts(null);
+        verify(productController).createStrategy(null);
 
         assertEquals(products.size(), result.size());
         assertEquals(products.get(0), result.get(0));
+    }
+
+    @Test
+    public void testGetAllProductsAmount() {
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
+        Product p2 = new Product("Butter", 5.f, 5, "kendra");
+        final List<Product> products = Arrays.asList(p1, p2);
+        when(productRepository.findAll()).thenReturn(products);
+        final List<Product> result = productController.getAllProducts("amount");
+        final List<Product> expected = Arrays.asList(p2, p1);
+        verify(productRepository).findAll();
+        verify(productController).createStrategy("amount");
+        assertEquals(expected.size(), result.size());
+        assertEquals(expected.get(0), result.get(0));
+    }
+
+    @Test
+    public void testGetAllProductsName() {
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
+        Product p2 = new Product("Butter", 5.f, 5, "kendra");
+        final List<Product> products = Arrays.asList(p1, p2);
+        when(productRepository.findAll()).thenReturn(products);
+        final List<Product> result = productController.getAllProducts("name");
+        final List<Product> expected = Arrays.asList(p2, p1);
+        verify(productRepository).findAll();
+        verify(productController).createStrategy("name");
+        assertEquals(expected.size(), result.size());
+        assertEquals(expected.get(0), result.get(0));
+    }
+
+    @Test
+    public void testGetAllProductsPrice() {
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
+        Product p2 = new Product("Butter", 5.f, 5, "kendra");
+        final List<Product> products = Arrays.asList(p1, p2);
+        when(productRepository.findAll()).thenReturn(products);
+        final List<Product> result = productController.getAllProducts("price");
+        final List<Product> expected = Arrays.asList(p2, p1);
+        verify(productRepository).findAll();
+        verify(productController).createStrategy("price");
+        assertEquals(expected.size(), result.size());
+        assertEquals(expected.get(0), result.get(0));
+    }
+
+    @Test
+    public void testGetAllProductsPriceThenAmountThenNames() {
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
+        Product p2 = new Product("Butter", 5.f, 5, "kendra");
+        final List<Product> products = Arrays.asList(p1, p2);
+        when(productRepository.findAll()).thenReturn(products);
+        final List<Product> result = productController.getAllProducts("priceThenAmountThenName");
+        final List<Product> expected = Arrays.asList(p2, p1);
+        verify(productRepository).findAll();
+        verify(productController).createStrategy("priceThenAmountThenName");
+        assertEquals(expected.size(), result.size());
+        assertEquals(expected.get(0), result.get(0));
+    }
+
+    @Test
+    public void testGetAllProductsRandom() {
+        Product p1 = new Product("Milk", 14.0f, 12, "kendra");
+        Product p2 = new Product("Butter", 5.f, 5, "kendra");
+        final List<Product> products = Arrays.asList(p1, p2);
+        when(productRepository.findAll()).thenReturn(products);
+        final List<Product> result = productController.getAllProducts("willBeDefault");
+        verify(productRepository).findAll();
+        verify(productController).createStrategy("willBeDefault");
+        assertEquals(2, result.size());
     }
 
     @Test
@@ -116,7 +188,6 @@ class ProductControllerTest {
         product.setProductId(7);
         when(productRepository.findById(7L)).thenReturn(Optional.empty());
         ResponseEntity result = productController.deleteProduct("kendra", 7);
-        //verify(productController).deleteProduct("kendra",7);
         assertEquals(result.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
@@ -128,18 +199,18 @@ class ProductControllerTest {
         doThrow(DataIntegrityViolationException.class).when(productRepository).delete(product);
         ResponseEntity result = productController.deleteProduct("kendra", 7);
         ResponseEntity expected = ResponseEntity.badRequest()
-                .body("The product couldn't be deleted");
+            .body("The product couldn't be deleted");
         assertEquals(expected.getStatusCode(), result.getStatusCode());
     }
 
     @Test
     public void testAddProduct() {
-        final Product newProduct = new Product("Butter", 5, 10, "kendra");
+        final Product newProduct = new Product("Butter", 5.123f, 10, "kendra");
 
         ResponseEntity<?> result = productController.addNewProduct(newProduct);
 
         verify(productRepository).save(newProduct);
-
+//        verify(microserviceCommunicator).sendRequestForChangingCredits("kendra", 5.12f, true );
         final ResponseEntity<?> expected = ResponseEntity.created(URI.create("/addProduct"))
             .build();
 
@@ -154,22 +225,44 @@ class ProductControllerTest {
             .save(product);
 
         ResponseEntity<?> result = productController.addNewProduct(product);
-
-        verify(productRepository).save(product);
-
-        final ResponseEntity<?> expected = new ResponseEntity("Product not added!",
-            HttpStatus.OK);
-        verify(productRepository).save(product);
+        final ResponseEntity<?> expected = ResponseEntity.badRequest().build();
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testUpdateProduct() {
+    public void testUpdateProductNotFound() {
         when(productRepository.findById(7L)).thenReturn(Optional.ofNullable(product));
         ResponseEntity result = productController.updateProduct("kendra", product);
 
-        verify(productController)
-               .updateProduct("kendra", product);
-        assertEquals(result.getStatusCode(), HttpStatus.NOT_FOUND);
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+    }
+
+    @Test
+    public void testUpdateProductNotYourProduct() {
+        product.setProductId(7L);
+        when(productRepository.findById(7L)).thenReturn(Optional.of(product));
+        ResponseEntity result = productController.updateProduct("fabian", product);
+
+        assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
+    }
+
+    @Test
+    public void testUpdateProductCouldntUpdate() {
+        product.setProductId(7L);
+        when(productRepository.findById(7L)).thenReturn(Optional.of(product));
+        doThrow(DataIntegrityViolationException.class).when(productRepository)
+            .save(product);
+        ResponseEntity result = productController.updateProduct("kendra", product);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+    }
+
+    @Test
+    public void testUpdateProductAllGood() {
+        product.setProductId(7L);
+        when(productRepository.findById(7L)).thenReturn(Optional.of(product));
+        ResponseEntity result = productController.updateProduct("kendra", product);
+        verify(productRepository).save(product);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
     @Test
@@ -198,7 +291,7 @@ class ProductControllerTest {
         doThrow(DataIntegrityViolationException.class).when(productRepository).delete(product);
         ResponseEntity result = productController.deleteExpired(7);
         ResponseEntity expected = ResponseEntity
-                .badRequest().body("The product couldn't be deleted");
+            .badRequest().body("The product couldn't be deleted");
         verify(productController).deleteExpired(7);
         assertEquals(expected, result);
     }
@@ -225,14 +318,40 @@ class ProductControllerTest {
     @Test
     public void setExpired2() {
         when(productRepository.updateExistingProduct("milk",
-                "kendra", 7, 5, 5, 0, 7))
-                .thenThrow(DataIntegrityViolationException.class);
+            "kendra", 7, 5, 5, 0, 7))
+            .thenThrow(DataIntegrityViolationException.class);
         product.setProductId(7);
         ResponseEntity result = productController.setExpired("kendra", 7);
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
     }
 
+    @Test
+    public void setExpiredIsPresent() {
+        when(productRepository.findByProductId(7L)).thenReturn(Optional.of(new Product()));
+        when(productRepository.updateExistingProduct("milk",
+            "kendra", 7, 5, 5, 0, 7))
+            .thenThrow(DataIntegrityViolationException.class);
+        ResponseEntity result = productController.setExpired("kendra", 7);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
 
+    @Test
+    public void setExpiredIsPresentNoException() {
+        when(productRepository.findByProductId(7L)).thenReturn(Optional.of(new Product()));
+        ResponseEntity result = productController.setExpired("kendra", 7);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void getProductRepositoryTest() {
+        ProductRepository rep = productController.getProductRepository();
+        assertNotNull(rep);
+    }
+
+    @Test
+    public void getUserNamesTest() {
+        assertNull(productController.getProductsByHouse(-3214));
+    }
 
 
 }
